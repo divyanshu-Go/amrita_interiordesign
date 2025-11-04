@@ -118,7 +118,7 @@ export const LoginForm = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Email Input */}
         <FormInput
           label="Email"
@@ -140,6 +140,8 @@ export const LoginForm = () => {
           }
           error={errors.password}
         />
+
+        <Link href="/forgot-password" className="text-xs hover:underline text-orange-700 hover:cursor-pointer">Forgot Password ?</Link>
 
         {/* ❌ Error */}
         {errors.submit && (

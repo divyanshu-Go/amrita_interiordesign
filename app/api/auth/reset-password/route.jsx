@@ -10,8 +10,6 @@ export async function POST(req) {
   try {
     const { token, email, newPassword } = await req.json();
     
-    console.log("[VALIDATE] token param:", token);
-
 
     if (!token || !newPassword) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -20,16 +18,12 @@ export async function POST(req) {
 
     const hashed = hashToken(token);
 
-    console.log("[VALIDATE] hashed from param:", hashed);
-
     const tokenDoc = await Token.findOne({
       token: hashed,
       type: "reset",
       used: false,
       expiresAt: { $gt: new Date() },
     });
-
-    console.log("[VALIDATE] token found:", !!tokenDoc, tokenDoc?.expiresAt);
 
 
     if (!tokenDoc) {

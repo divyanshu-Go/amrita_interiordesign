@@ -11,7 +11,7 @@ export default function EnterpriseNoticePage() {
     "Your enterprise account is pending admin verification.";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className=" flex items-center justify-center p-12">
       <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-6 text-center border border-gray-200">
         <div className="flex justify-center mb-4">
           <AlertCircle className="w-12 h-12 text-yellow-500" />

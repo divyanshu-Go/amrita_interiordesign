@@ -4,6 +4,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { AuthButton, FormInput } from "@/components/AuthUtils/AuthFunctions";
 
 export default function ResetPasswordPage() {
   const params = useSearchParams();
@@ -20,7 +21,7 @@ export default function ResetPasswordPage() {
 
   console.log("token : ", token);
   console.log("email : ", email);
-  
+
 
 
   useEffect(() => {
@@ -42,7 +43,6 @@ export default function ResetPasswordPage() {
     })();
   }, [token, email]);
 
-    console.log("vaild : ", valid);
 
 
   const handleSubmit = async (e) => {
@@ -76,7 +76,7 @@ export default function ResetPasswordPage() {
 
   if (valid === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-12">
         <div className="bg-white p-6 rounded shadow">Validating link...</div>
       </div>
     );
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
 
   if (!valid) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="flex items-center justify-center p-12">
         <div className="bg-white p-6 rounded shadow text-center">
           <p className="mb-4">This reset link is invalid or has expired.</p>
           <Link href="/forgot-password" className="text-blue-600 hover:underline">
@@ -96,7 +96,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-12">
       <div className="w-full max-w-md bg-white p-6 rounded shadow">
         <h2 className="text-lg font-semibold mb-4">Set a new password</h2>
 
@@ -104,31 +104,33 @@ export default function ResetPasswordPage() {
           <div className="bg-green-50 text-green-700 p-3 rounded">{successMsg}</div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-sm block mb-1">New password</label>
-              <input
-                type="password"
-                className="w-full border px-3 py-2 rounded"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
+            <FormInput
+              label="New Password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              error={error && error.toLowerCase().includes("password") ? error : ""}
+            />
 
-            <div>
-              <label className="text-sm block mb-1">Confirm password</label>
-              <input
-                type="password"
-                className="w-full border px-3 py-2 rounded"
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-              />
-            </div>
+            <FormInput
+              label="Confirm Password"
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              error={error && error.toLowerCase().includes("match") ? error : ""}
+            />
 
-            {error && <div className="text-red-600 text-sm">{error}</div>}
+            <p className="text-xs text-gray-500">
+              Password must be at least 8 characters.
+            </p>
 
-            <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded" disabled={loading}>
-              {loading ? "Saving..." : "Save new password"}
-            </button>
+
+            {error && !error.toLowerCase().includes("password") && (
+              <div className="text-sm text-red-600 bg-red-100 px-3 py-2 rounded">{error}</div>
+            )}
+
+            <AuthButton isLoading={loading}>Save new password</AuthButton>
+
 
             <div className="text-sm text-center">
               <Link href="/login" className="text-blue-600 hover:underline">
