@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import CreateAndProfile from "./CreateAndProfile";
 import HamburgerIcon from "./HamburgerIcon";
 import AnimatedSearchBar from "./AnimatedSearchBar";
+import { useState } from "react";
 
 export default function Header({ user, open, setOpen, toggleRef }) {
   const pathname = usePathname();
+  const [searchQuery, setSearchQuery] = useState("");
+    const router = useRouter();
+  
+    const handleSearch = (e) => {
+      e.preventDefault();
+      if (searchQuery.trim()) {
+        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      }
+    };
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -52,7 +62,22 @@ export default function Header({ user, open, setOpen, toggleRef }) {
           110086
         </div>
 
-        <AnimatedSearchBar/>
+        {/* Search Bar */}
+          <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for products..."
+                className="w-full px-4 py-2 pl-10 pr-4 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                🔍
+              </span>
+            </div>
+          </form>
+
 
         {/* Actions */}
         <CreateAndProfile user={user} />
