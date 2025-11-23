@@ -8,8 +8,8 @@ export default function ProductImageGallery({ images, productName }) {
 
   if (!images || images.length === 0) {
     return (
-      <div className="w-full aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-        <span className="text-8xl">📦</span>
+      <div className="w-full aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center">
+        <span className="text-7xl">📦</span>
       </div>
     );
   }
@@ -23,36 +23,54 @@ export default function ProductImageGallery({ images, productName }) {
   };
 
   return (
-    <div className="space-y-3">
-      {/* Main Image with Navigation */}
-      <div className="relative w-full aspect-[3/4] bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+    <div className="space-y-4">
+      {/* Main Image */}
+      <div className="relative w-full aspect-square rounded-sm border border-gray-100 overflow-hidden
+                      bg-white pattern-dots-sm text-gray-300 flex flex-col justify-center">
         <img
           src={images[selectedImage]}
-          alt={`${productName} - Image ${selectedImage + 1}`}
-          className="w-full h-full object-contain"
+          alt={`${productName} image ${selectedImage + 1}`}
+          className="w-full object-contain rounded-xs"
         />
-        
-        {/* Navigation Arrows - Only show if multiple images */}
+
+        {/* Prev Button */}
         {images.length > 1 && (
           <>
             <button
               onClick={handlePrevious}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all hover:scale-110"
+              className="absolute left-2 top-1/2 -translate-y-1/2 
+                       bg-black/20 hover:bg-black/40 text-white 
+                       p-2 rounded-full backdrop-blur-sm transition-all 
+                       hover:scale-105"
               aria-label="Previous image"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-700" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all hover:scale-110"
-              aria-label="Next image"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-700" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
 
-            {/* Image Counter */}
-            <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2.5 py-1 rounded-full text-xs font-medium">
-              {selectedImage + 1} / {images.length}
+            {/* Next Button */}
+            <button
+              onClick={handleNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 
+                       bg-black/20 hover:bg-black/40 text-white 
+                       p-2 rounded-full backdrop-blur-sm transition-all 
+                       hover:scale-105"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            {/* Dot Indicators */}
+            <div className="absolute bottom-3 w-full flex justify-center gap-2 ">
+              {images.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-2 rounded-full transition-all ${
+                    idx === selectedImage
+                      ? "w-6 bg-gray-800"
+                      : "w-2 bg-gray-400"
+                  }`}
+                />
+              ))}
             </div>
           </>
         )}
@@ -60,16 +78,14 @@ export default function ProductImageGallery({ images, productName }) {
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-3">
           {images.map((image, index) => (
             <button
               key={index}
               onClick={() => setSelectedImage(index)}
-              className={`relative aspect-square rounded-md overflow-hidden border-2 transition-all ${
-                selectedImage === index
-                  ? "border-orange-500 ring-2 ring-orange-200"
-                  : "border-gray-200 hover:border-orange-300"
-              }`}
+              className={`relative aspect-[4/3] rounded-sm overflow-hidden 
+                          border border-gray-200 transition-all 
+                          hover:scale-[1.02] ${selectedImage === index ? "ring-2 ring-gray-400/40" : ""}`}
             >
               <img
                 src={image}
@@ -83,3 +99,4 @@ export default function ProductImageGallery({ images, productName }) {
     </div>
   );
 }
+

@@ -65,27 +65,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section - Clean & Minimal */}
-      {/* <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <p className="text-4xl font-bold text-orange-600 mb-2">{categories.length}+</p>
-            <p className="text-gray-600 text-sm">Categories</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-orange-600 mb-2">100+</p>
-            <p className="text-gray-600 text-sm">Brands</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-orange-600 mb-2">5000+</p>
-            <p className="text-gray-600 text-sm">Products</p>
-          </div>
-          <div>
-            <p className="text-4xl font-bold text-orange-600 mb-2">10k+</p>
-            <p className="text-gray-600 text-sm">Happy Customers</p>
-          </div>
-        </div>
-      </section> */}
+      
     </div>
   );
 }

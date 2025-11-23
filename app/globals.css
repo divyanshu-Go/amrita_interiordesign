@@ -75,3 +75,13 @@ body {
   }
 }
 
+
+
+@layer ProductGallery{
+  .pattern-dots-sm {
+  background-image: radial-gradient(currentColor 0.7px, transparent 0.7px);
+  background-size: 12px 12px;
+  }
+
+}
+

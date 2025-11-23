@@ -10,7 +10,7 @@ export default function ProductPageClient({ product, variants, userRole }) {
   const [showNumberCopied, setShowNumberCopied] = useState(false);
   
   const isEnterprise = userRole === "enterprise";
-  const phoneNumber = "+919876543210";
+  const phoneNumber = "+916299811965";
 
   const displayPrice = isEnterprise
     ? product.enterpriseDiscountPrice || product.enterprisePrice
@@ -61,7 +61,7 @@ export default function ProductPageClient({ product, variants, userRole }) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         {/* Left: Image Gallery - Smaller */}
         <div className="max-w-md mx-auto w-full">
           <ProductImageGallery images={product.images} productName={product.name} />
@@ -72,7 +72,7 @@ export default function ProductPageClient({ product, variants, userRole }) {
           {/* Brand & Share */}
           <div className="flex items-center justify-between">
             {product.brand && (
-              <p className="text-orange-600 font-semibold text-xs uppercase tracking-wide">
+              <p className="text-neutral-500 font-semibold text-xs uppercase tracking-wide">
                 {product.brand}
               </p>
             )}
@@ -95,13 +95,11 @@ export default function ProductPageClient({ product, variants, userRole }) {
           </div>
 
           {/* Product Name */}
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">
+          <h1 className="text-xl md:text-xl font-semibold text-gray-900 leading-tight">
             {product.name}
           </h1>
 
-          {/* SKU */}
-          <p className="text-xs text-gray-600">SKU: {product.sku}</p>
-
+          
           {/* Price Section */}
           <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
             <div className="flex items-center gap-2.5">
