@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import ProductPageClient from "@/components/customer/ProductPageClient";
 
+
+// app/(customer)/product/[slug]/page.js
 export default async function ProductPage({ params }) {
   const data = await getProductBySlug(params.slug);
   const user = await getUserProfile();

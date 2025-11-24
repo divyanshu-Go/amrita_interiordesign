@@ -25,7 +25,7 @@ export default function ProductImageGallery({ images, productName }) {
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative w-full aspect-square rounded-sm border border-gray-100 overflow-hidden
+      <div className="relative w-full aspect-square rounded-sm border border-gray-100 
                       bg-white pattern-dots-sm text-gray-300 flex flex-col justify-center">
         <img
           src={images[selectedImage]}

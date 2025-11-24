@@ -37,7 +37,7 @@ const ProductSchema = new Schema(
     size: String, // e.g., "48x8 inch" or "1217x196 mm"
 
     // 🔗 Variant Group
-    variantGroupId: { type: String, index: true }, 
+    : { type: String, index: true }, 
     /**
      * All variants that belong to the same product family share this ID.
      * Example:

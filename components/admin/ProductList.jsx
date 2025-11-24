@@ -1,3 +1,4 @@
+// components/admin/ProductList.jsx
 "use client";
 
 import { useState } from "react";
