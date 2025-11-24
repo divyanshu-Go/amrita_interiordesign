@@ -6,13 +6,18 @@ import FilterAccordionItem from "./FilterAccordionItem";
 
 export default function FilterSidebar({ products, onFilterChange }) {
   const [filters, setFilters] = useState({
-    priceRange: [0, 100000],
-    colors: [],
-    sizes: [],
-    thicknesses: [],
-    brands: [],
-    inStockOnly: false,
-  });
+  priceRange: [0, 100000],
+  colors: [],
+  sizes: [],
+  thicknesses: [],
+  brands: [],
+  materials: [],      // 🔥 ADDED
+  patterns: [],       // 🔥 ADDED
+  finishes: [],       // 🔥 ADDED
+  applications: [],   // 🔥 ADDED
+  inStockOnly: false,
+});
+
 
   const [sortBy, setSortBy] = useState("newest");
 
@@ -21,6 +26,11 @@ export default function FilterSidebar({ products, onFilterChange }) {
   const uniqueSizes = [...new Set(products.map(p => p.size).filter(Boolean))];
   const uniqueThicknesses = [...new Set(products.map(p => p.thickness).filter(Boolean))];
   const uniqueBrands = [...new Set(products.map(p => p.brand).filter(Boolean))];
+  const uniqueMaterials = [...new Set(products.flatMap(p => p.material || []))];
+const uniquePatterns  = [...new Set(products.flatMap(p => p.pattern || []))];
+const uniqueFinishes  = [...new Set(products.flatMap(p => p.finish || []))];
+const uniqueApplications = [...new Set(products.flatMap(p => p.application || []))];
+
 
   const maxPrice = Math.max(...products.map(p => p.retailPrice || 0), 100000);
 
@@ -45,23 +55,33 @@ export default function FilterSidebar({ products, onFilterChange }) {
 
   const handleClearFilters = () => {
     setFilters({
-      priceRange: [0, maxPrice],
-      colors: [],
-      sizes: [],
-      thicknesses: [],
-      brands: [],
-      inStockOnly: false,
-    });
+  priceRange: [0, maxPrice],
+  colors: [],
+  sizes: [],
+  thicknesses: [],
+  brands: [],
+  materials: [],      // 🔥 ADDED
+  patterns: [],       // 🔥 ADDED
+  finishes: [],       // 🔥 ADDED
+  applications: [],   // 🔥 ADDED
+  inStockOnly: false,
+});
+
     setSortBy("newest");
   };
 
-  const activeFilterCount = 
-    filters.colors.length + 
-    filters.sizes.length + 
-    filters.thicknesses.length + 
-    filters.brands.length +
-    (filters.inStockOnly ? 1 : 0) +
-    (filters.priceRange[1] < maxPrice ? 1 : 0);
+  const activeFilterCount =
+  filters.colors.length +
+  filters.sizes.length +
+  filters.thicknesses.length +
+  filters.brands.length +
+  filters.materials.length +     // 🔥 FIXED
+  filters.patterns.length +      // 🔥 FIXED
+  filters.finishes.length +      // 🔥 FIXED
+  filters.applications.length +  // 🔥 FIXED
+  (filters.inStockOnly ? 1 : 0) +
+  (filters.priceRange[1] < maxPrice ? 1 : 0);
+
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-20">
@@ -117,6 +137,87 @@ export default function FilterSidebar({ products, onFilterChange }) {
             </div>
           </div>
         </FilterAccordionItem>
+
+        {uniqueMaterials.length > 0 && (
+  <FilterAccordionItem title="Material">
+    <div className="space-y-2 max-h-40 overflow-y-auto">
+      {uniqueMaterials.map(mat => (
+        <label key={mat} className="flex items-center cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={filters.materials.includes(mat)}
+            onChange={() => handleCheckboxChange('materials', mat)}
+            className="w-3.5 h-3.5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+          />
+          <span className="ml-2 text-sm text-gray-700 group-hover:text-orange-600">
+            {mat}
+          </span>
+        </label>
+      ))}
+    </div>
+  </FilterAccordionItem>
+)}
+
+{uniquePatterns.length > 0 && (
+  <FilterAccordionItem title="Pattern">
+    <div className="space-y-2 max-h-40 overflow-y-auto">
+      {uniquePatterns.map(pat => (
+        <label key={pat} className="flex items-center cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={filters.patterns.includes(pat)}
+            onChange={() => handleCheckboxChange('patterns', pat)}
+            className="w-3.5 h-3.5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+          />
+          <span className="ml-2 text-sm text-gray-700 group-hover:text-orange-600">
+            {pat}
+          </span>
+        </label>
+      ))}
+    </div>
+  </FilterAccordionItem>
+)}
+
+{uniqueFinishes.length > 0 && (
+  <FilterAccordionItem title="Finish">
+    <div className="space-y-2 max-h-40 overflow-y-auto">
+      {uniqueFinishes.map(fin => (
+        <label key={fin} className="flex items-center cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={filters.finishes.includes(fin)}
+            onChange={() => handleCheckboxChange('finishes', fin)}
+            className="w-3.5 h-3.5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+          />
+          <span className="ml-2 text-sm text-gray-700 group-hover:text-orange-600">
+            {fin}
+          </span>
+        </label>
+      ))}
+    </div>
+  </FilterAccordionItem>
+)}
+
+{uniqueApplications.length > 0 && (
+  <FilterAccordionItem title="Application">
+    <div className="space-y-2 max-h-40 overflow-y-auto">
+      {uniqueApplications.map(app => (
+        <label key={app} className="flex items-center cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={filters.applications.includes(app)}
+            onChange={() => handleCheckboxChange('applications', app)}
+            className="w-3.5 h-3.5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+          />
+          <span className="ml-2 text-sm text-gray-700 group-hover:text-orange-600">
+            {app}
+          </span>
+        </label>
+      ))}
+    </div>
+  </FilterAccordionItem>
+)}
+
 
         {/* Colors */}
         {uniqueColors.length > 0 && (

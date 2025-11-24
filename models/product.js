@@ -1,57 +1,72 @@
 import mongoose, { Schema } from "mongoose";
-
+import Category from "./category.js";
 /**
  * Product Schema
  * Represents each sellable item or variant.
- * Each variant (e.g., different color or size) is its own product document.
- * All variants of the same product family share the same `variantGroupId`.
  */
 
 const ProductSchema = new Schema(
   {
     // 🏷️ Basic Info
-    name: { type: String, required: true }, // e.g., "HDF RealWood Floor - Oak Brown"
-    slug: { type: String, unique: true, required: true }, // URL identifier, e.g. "realwood-oak-brown-8mm"
-    sku: { type: String, unique: true }, // Stock Keeping Unit (unique inventory code)
+    name: { type: String, required: true },
+    slug: { type: String, unique: true, required: true },
+    sku: { type: String, unique: true },
 
-    // 📦 Category Reference
-    category: { type: Schema.Types.ObjectId, ref: "Category", required: true }, // e.g., "Wooden Flooring"
+    // 📦 Category (keep as-is)
+    category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
 
     // 🧾 Description & Brand
     description: String,
     brand: String,
 
     // 🖼️ Media
-    images: [String], // Array of image URLs
+    images: [String],
 
     // 💰 Pricing
     retailPrice: { type: Number, required: true },
-    retailDiscountPrice: Number, // Optional discounted price
+    retailDiscountPrice: Number,
     enterprisePrice: { type: Number, required: true },
-    enterpriseDiscountPrice: Number, // Optional discounted price
-    stock: { type: Number, default: 0 }, // Available stock count
+    enterpriseDiscountPrice: Number,
+    stock: { type: Number, default: 0 },
 
-    // 🎨 Attributes (for filters)
-    color: String, // e.g., "Brown", "Grey"
-    thickness: Number, // e.g., 8 (in mm)
-    size: String, // e.g., "48x8 inch" or "1217x196 mm"
+    // 🎨 Existing Attributes
+    color: String,
+    thickness: Number,
+    size: String,
 
     // 🔗 Variant Group
-    variantGroupId: { type: String, index: true }, 
-    /**
-     * All variants that belong to the same product family share this ID.
-     * Example:
-     * - "realwood-oak-brown-8mm"
-     * - "realwood-oak-grey-8mm"
-     * Both will have variantGroupId: "RW12345"
-     * 
-     * This allows fetching all variants on a product page easily:
-     * Product.find({ variantGroupId: currentProduct.variantGroupId })
-     */
+    variantGroupId: { type: String, index: true },
 
-    // 🏷️ Tags & Highlights
-    tags: [String], // Used for filters, search keywords (e.g., "laminate", "AC4 grade")
-    isFeatured: { type: Boolean, default: false }, // For homepage or promotions
+    // 🏷️ Tags
+    tags: [String],
+    isFeatured: { type: Boolean, default: false },
+
+    // -----------------------------------------------------
+    // 🆕 NEW FIELDS REQUESTED
+    // -----------------------------------------------------
+
+    // 1. Sell unit
+    sellBy: {
+      type: String,
+      enum: ["piece", "box", "roll"],
+      default: "piece",
+    },
+
+    // 2. Whether to show Per Sq Ft Price
+    showPerSqFtPrice: { type: Boolean, default: false },
+
+    // 3. Per Sq Ft Price (manual value)
+    perSqFtPrice: { type: Number, default: null },
+
+    material: [String],     // array of strings
+    pattern: [String],      // array of strings
+    finish: [String],       // array of strings
+    application: [String],  // already array – keep same
+
+
+    // 7. Coverage Area
+    coverageArea: String,
+
   },
   { timestamps: true }
 );

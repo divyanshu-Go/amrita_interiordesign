@@ -12,9 +12,17 @@ export default function ProductPageClient({ product, variants, userRole }) {
   const isEnterprise = userRole === "enterprise";
   const phoneNumber = "+916299811965";
 
-  const displayPrice = isEnterprise
-    ? product.enterpriseDiscountPrice || product.enterprisePrice
-    : product.retailDiscountPrice || product.retailPrice;
+ // 🔥 New logic
+let displayPrice;
+
+if (product.showPerSqFtPrice) {
+  displayPrice = product.perSqFtPrice;
+} else {
+  displayPrice = isEnterprise
+    ? (product.enterpriseDiscountPrice || product.enterprisePrice)
+    : (product.retailDiscountPrice || product.retailPrice);
+}
+
 
   const originalPrice = isEnterprise
     ? product.enterprisePrice
@@ -103,24 +111,40 @@ export default function ProductPageClient({ product, variants, userRole }) {
           {/* Price Section */}
           <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
             <div className="flex items-center gap-2.5">
-              {hasDiscount ? (
-                <>
-                  <span className="text-2xl font-bold text-gray-900">
-                    ₹{displayPrice?.toLocaleString('en-IN')}
-                  </span>
-                  <span className="text-base text-gray-400 line-through">
-                    ₹{originalPrice?.toLocaleString('en-IN')}
-                  </span>
-                  <span className="bg-orange-500 text-white px-2 py-0.5 rounded text-xs font-bold">
-                    {discountPercentage}% OFF
-                  </span>
-                </>
-              ) : (
-                <span className="text-2xl font-bold text-gray-900">
-                  ₹{displayPrice?.toLocaleString('en-IN')}
-                </span>
-              )}
-            </div>
+
+  {product.showPerSqFtPrice ? (
+    <>
+      {/* MAIN PRICE PER SQ FT */}
+      <span className="text-2xl font-bold text-gray-900">
+        ₹{product.perSqFtPrice} / SqFt
+      </span>
+
+      {/* OLD PRICE RIGHT SIDE */}
+      <span className="text-sm text-gray-400 ml-auto">
+        ₹{originalPrice} / {product.sellBy}
+      </span>
+    </>
+  ) : (
+    // OLD LOGIC
+    <>
+      {hasDiscount ? (
+        <>
+          <span className="text-2xl font-bold text-gray-900">
+            ₹{displayPrice}
+          </span>
+          <span className="text-base text-gray-400 line-through">
+            ₹{originalPrice}
+          </span>
+        </>
+      ) : (
+        <span className="text-2xl font-bold text-gray-900">
+          ₹{displayPrice}
+        </span>
+      )}
+    </>
+  )}
+</div>
+
             {isEnterprise && (
               <p className="text-xs text-orange-600 mt-1.5 font-medium">
                 ✓ Enterprise Price Applied
@@ -186,6 +210,51 @@ export default function ProductPageClient({ product, variants, userRole }) {
                 <p className="font-semibold text-gray-900 text-xs">{product.thickness}mm</p>
               </div>
             )}
+            {product.material?.length > 0 && (
+  <div>
+    <p className="text-xs text-gray-600 mb-0.5">Material</p>
+    <p className="font-semibold text-gray-900 text-xs">
+      {product.material.join(", ")}
+    </p>
+  </div>
+)}
+
+{product.pattern?.length > 0 && (
+  <div>
+    <p className="text-xs text-gray-600 mb-0.5">Pattern</p>
+    <p className="font-semibold text-gray-900 text-xs">
+      {product.pattern.join(", ")}
+    </p>
+  </div>
+)}
+
+{product.finish?.length > 0 && (
+  <div>
+    <p className="text-xs text-gray-600 mb-0.5">Finish</p>
+    <p className="font-semibold text-gray-900 text-xs">
+      {product.finish.join(", ")}
+    </p>
+  </div>
+)}
+
+{product.coverageArea && (
+  <div>
+    <p className="text-xs text-gray-600 mb-0.5">Coverage Area</p>
+    <p className="font-semibold text-gray-900 text-xs">
+      {product.coverageArea}
+    </p>
+  </div>
+)}
+
+{product.application?.length > 0 && (
+  <div>
+    <p className="text-xs text-gray-600 mb-0.5">Application</p>
+    <p className="font-semibold text-gray-900 text-xs">
+      {product.application.join(", ")}
+    </p>
+  </div>
+)}
+
             {product.stock !== undefined && (
               <div>
                 <p className="text-xs text-gray-600 mb-0.5">Stock</p>

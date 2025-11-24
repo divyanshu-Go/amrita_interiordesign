@@ -27,6 +27,15 @@ export async function GET(req) {
     if (searchParams.get("color")) query.color = searchParams.get("color");
     if (searchParams.get("size")) query.size = searchParams.get("size");
     if (searchParams.get("thickness")) query.Thickness = searchParams.get("thickness");
+    // New Filters
+    if (searchParams.get("material")) {query.material = searchParams.get("material")};
+    if (searchParams.get("pattern")) {query.pattern = searchParams.get("pattern")};
+    if (searchParams.get("finish")) {query.finish = searchParams.get("finish")};
+
+    // Filter products if application includes given value
+    if (searchParams.get("application")) {
+      query.application = searchParams.get("application"); // simple "contains"
+    }
 
     // Optional price range
     const minPrice = searchParams.get("minPrice");

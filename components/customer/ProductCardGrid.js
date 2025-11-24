@@ -3,9 +3,17 @@ import Link from "next/link";
 export default function ProductCardGrid({ product, userRole }) {
   const isEnterprise = userRole === "enterprise";
   
-  const displayPrice = isEnterprise
-    ? product.enterpriseDiscountPrice || product.enterprisePrice
-    : product.retailDiscountPrice || product.retailPrice;
+  // 🔥 NEW LOGIC: Override if per sq ft price should be shown
+let displayPrice;
+
+if (product.showPerSqFtPrice) {
+  displayPrice = product.perSqFtPrice;
+} else {
+  displayPrice = isEnterprise
+    ? (product.enterpriseDiscountPrice || product.enterprisePrice)
+    : (product.retailDiscountPrice || product.retailPrice);
+}
+
 
   const originalPrice = isEnterprise
     ? product.enterprisePrice
@@ -71,22 +79,43 @@ export default function ProductCardGrid({ product, userRole }) {
 
           {/* Pricing - Pushed to bottom */}
           <div className="mt-auto">
-            <div className="flex items-baseline gap-2">
-              {hasDiscount ? (
-                <>
-                  <span className="text-lg font-bold text-gray-900">
-                    ₹{displayPrice?.toLocaleString('en-IN')}
-                  </span>
-                  <span className="text-xs text-gray-400 line-through">
-                    ₹{originalPrice?.toLocaleString('en-IN')}
-                  </span>
-                </>
-              ) : (
-                <span className="text-lg font-bold text-gray-900">
-                  ₹{displayPrice?.toLocaleString('en-IN')}
-                </span>
-              )}
-            </div>
+           <div className="flex items-baseline gap-2">
+
+  {/* 🔥 SHOW PER SQ FT PRICE AS PRIMARY */}
+  {product.showPerSqFtPrice ? (
+    <>
+      <span className="text-lg font-bold text-gray-900">
+        ₹{product.perSqFtPrice} / SqFt
+      </span>
+
+      {/* old price on right, lighter */}
+      <span className="text-xs text-gray-400">
+        ₹{originalPrice?.toLocaleString('en-IN')} / {product.sellBy}
+      </span>
+    </>
+  ) : (
+    // 🔥 OLD LOGIC FOR NORMAL PRICE
+    <>
+      {hasDiscount ? (
+        <>
+          <span className="text-lg font-bold text-gray-900">
+            ₹{displayPrice?.toLocaleString('en-IN')}
+          </span>
+          <span className="text-xs text-gray-400 line-through">
+            ₹{originalPrice?.toLocaleString('en-IN')}
+            
+          </span>
+        </>
+      ) : (
+        <span className="text-lg font-bold text-gray-900">
+          ₹{displayPrice?.toLocaleString('en-IN')}
+        </span>
+      )}
+    </>
+  )}
+
+</div>
+
 
             {isEnterprise && (
               <p className="text-xs text-orange-600 font-medium mt-1">

@@ -44,6 +44,35 @@ export default function CategoryPageClient({ products, userRole }) {
     if (filters.inStockOnly) {
       result = result.filter(p => p.stock > 0);
     }
+    // Material
+if (filters.materials?.length > 0) {
+  result = result.filter(p =>
+    p.material?.some(m => filters.materials.includes(m))
+  );
+}
+
+// Pattern
+if (filters.patterns?.length > 0) {
+  result = result.filter(p =>
+    p.pattern?.some(m => filters.patterns.includes(m))
+  );
+}
+
+// Finish
+if (filters.finishes?.length > 0) {
+  result = result.filter(p =>
+    p.finish?.some(f => filters.finishes.includes(f))
+  );
+}
+
+// Application
+if (filters.applications?.length > 0) {
+  result = result.filter(p =>
+    p.application?.some(a => filters.applications.includes(a))
+  );
+}
+
+
 
     // Apply sorting
     result.sort((a, b) => {

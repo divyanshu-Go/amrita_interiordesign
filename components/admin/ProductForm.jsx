@@ -27,6 +27,18 @@ export default function ProductForm({ product = null, categories = [] }) {
     variantGroupId: product?.variantGroupId || "",
     tags: product?.tags?.join(", ") || "",
     isFeatured: product?.isFeatured || false,
+    // 🔥 NEW FIELDS ADDED HERE
+    // ---------------------------------------------------------
+    sellBy: product?.sellBy || "box", // box | roll | piece
+    showPerSqFtPrice: product?.showPerSqFtPrice || false,
+    perSqFtPrice: product?.perSqFtPrice || "",
+    material: Array.isArray(product?.material) ? product.material.join(", ") : (product?.material || ""),
+    pattern: Array.isArray(product?.pattern) ? product.pattern.join(", ") : (product?.pattern || ""),
+    finish: Array.isArray(product?.finish) ? product.finish.join(", ") : (product?.finish || ""),
+    application: Array.isArray(product?.application) ? product.application.join(", ") : (product?.application || ""),
+
+
+    coverageArea: product?.coverageArea || "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +87,21 @@ export default function ProductForm({ product = null, categories = [] }) {
           : undefined,
         stock: Number(formData.stock),
         thickness: formData.thickness ? Number(formData.thickness) : undefined,
+        // 🔥 NEW FIELDS PROPERLY ADDED HERE
+        // ---------------------------------------------------------
+        sellBy: formData.sellBy,
+        showPerSqFtPrice: formData.showPerSqFtPrice,
+        perSqFtPrice: formData.perSqFtPrice
+          ? Number(formData.perSqFtPrice)
+          : undefined,
+        material: formData.material.split(",").map(x => x.trim()).filter(Boolean),
+        pattern: formData.pattern.split(",").map(x => x.trim()).filter(Boolean),
+        finish: formData.finish.split(",").map(x => x.trim()).filter(Boolean),
+
+        coverageArea: formData.coverageArea,
+
+        application: formData.application.split(",").map(x => x.trim()).filter(Boolean),
+
       };
 
       if (isEdit) {
@@ -101,8 +128,10 @@ export default function ProductForm({ product = null, categories = [] }) {
       <div className="space-y-6">
         {/* Basic Information */}
         <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-          
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Basic Information
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
               <label className="block text-gray-700 font-medium mb-2">
@@ -170,6 +199,146 @@ export default function ProductForm({ product = null, categories = [] }) {
               </select>
             </div>
 
+            <div className="border-b pb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Sell & Pricing Options
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* SELL BY */}
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Sell By *
+                  </label>
+                  <select
+                    name="sellBy"
+                    value={formData.sellBy}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 rounded-lg"
+                  >
+                    <option value="box">Price / Box</option>
+                    <option value="roll">Price / Roll</option>
+                    <option value="piece">Price / Piece</option>
+                  </select>
+                </div>
+
+                {/* SHOW PER SQFT PRICE */}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="showPerSqFtPrice"
+                    checked={formData.showPerSqFtPrice}
+                    onChange={handleChange}
+                    className="w-5 h-5"
+                  />
+                  <label className="ml-2 text-gray-700 font-medium">
+                    Show Per SqFt Price
+                  </label>
+                </div>
+
+                {/* PER SQFT PRICE */}
+                {formData.showPerSqFtPrice && (
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Per SqFt Price
+                    </label>
+                    <input
+                      type="number"
+                      name="perSqFtPrice"
+                      value={formData.perSqFtPrice}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.01"
+                      className="w-full px-4 py-3 border-2 rounded-lg"
+                      placeholder="e.g., 22.5"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* -------------------------------------------- */}
+            {/* 🔥 ADD MATERIAL + PATTERN + FINISH + COVERAGE */}
+            {/* -------------------------------------------- */}
+
+            <div className="border-b pb-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Product Specifications
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Material
+                  </label>
+                  <input
+                    type="text"
+                    name="material"
+                    value={formData.material}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 rounded-lg"
+                    placeholder="HDF, PVC, Bamboo"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Pattern
+                  </label>
+                  <input
+                    type="text"
+                    name="pattern"
+                    value={formData.pattern}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 rounded-lg"
+                    placeholder="Oak, Marble, Granite"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Finish
+                  </label>
+                  <input
+                    type="text"
+                    name="finish"
+                    value={formData.finish}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 rounded-lg"
+                    placeholder="Matte, Glossy"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Coverage Area
+                  </label>
+                  <input
+                    type="text"
+                    name="coverageArea"
+                    value={formData.coverageArea}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 rounded-lg"
+                    placeholder="20 sq ft"
+                  />
+                </div>
+
+                <div className="md:col-span-3">
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Application (comma-separated)
+                  </label>
+                  <input
+                    type="text"
+                    name="application"
+                    value={formData.application}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 rounded-lg"
+                    placeholder="bedroom, hall, kitchen"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Brand
@@ -221,8 +390,10 @@ export default function ProductForm({ product = null, categories = [] }) {
 
         {/* Pricing */}
         <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing & Stock</h3>
-          
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Pricing & Stock
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -310,8 +481,10 @@ export default function ProductForm({ product = null, categories = [] }) {
 
         {/* Attributes */}
         <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Attributes</h3>
-          
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Product Attributes
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -361,8 +534,10 @@ export default function ProductForm({ product = null, categories = [] }) {
 
         {/* Variants & Tags */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Variants & Tags</h3>
-          
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Variants & Tags
+          </h3>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -417,7 +592,11 @@ export default function ProductForm({ product = null, categories = [] }) {
           disabled={isSubmitting}
           className="flex-1 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
+          {isSubmitting
+            ? "Saving..."
+            : isEdit
+            ? "Update Product"
+            : "Create Product"}
         </button>
         <button
           type="button"

@@ -9,15 +9,18 @@ import Product from "@/models/product";
 export async function GET(req) {
   try {
     await DbConnect();
-    
+
     const { searchParams } = new URL(req.url);
     const query = await searchParams.get("q");
 
     if (!query || query.trim().length < 2) {
-      return NextResponse.json({
-        success: false,
-        error: "Search query must be at least 2 characters",
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Search query must be at least 2 characters",
+        },
+        { status: 400 }
+      );
     }
 
     // Create case-insensitive regex pattern
@@ -31,6 +34,13 @@ export async function GET(req) {
         { brand: searchPattern },
         { sku: searchPattern },
         { tags: searchPattern },
+
+        // 🔥 NEW SEARCHABLE FIELDS
+        { material: searchPattern },
+        { pattern: searchPattern },
+        { finish: searchPattern },
+        { coverageArea: searchPattern },
+        { application: searchPattern }, // array match supported by Mongo
       ],
     }).populate("category");
 
@@ -40,9 +50,12 @@ export async function GET(req) {
       count: products.length,
     });
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error.message,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

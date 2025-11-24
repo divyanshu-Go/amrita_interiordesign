@@ -83,6 +83,49 @@ export default function ProductCard({ product }) {
           </p>
         )}
 
+        {/* 🔥 SELL BY */}
+        {product.sellBy && (
+          <p className="text-gray-700 text-sm mb-1">
+            <span className="font-medium">Sell By:</span> {product.sellBy}
+          </p>
+        )}
+
+        {/* 🔥 PER SQFT PRICE */}
+        {product.showPerSqFtPrice && (
+          <p className="text-gray-700 text-sm mb-1">
+            <span className="font-medium">Per SqFt Price:</span> ₹{product.perSqFtPrice}
+          </p>
+        )}
+
+        {/* 🔥 MATERIAL */}
+        {product.material?.length > 0 && (
+          <p className="text-gray-700 text-sm mb-1">
+            <span className="font-medium">Material:</span> {product.material.join(", ")}
+          </p>
+        )}
+
+        {/* 🔥 PATTERN */}
+        {product.pattern?.length > 0 && (
+          <p className="text-gray-700 text-sm mb-1">
+            <span className="font-medium">Pattern:</span> {product.pattern.join(", ")}
+          </p>
+        )}
+
+        {/* 🔥 FINISH */}
+        {product.finish?.length > 0 && (
+          <p className="text-gray-700 text-sm mb-1">
+            <span className="font-medium">Finish:</span> {product.finish.join(", ")}
+          </p>
+        )}
+
+        {/* 🔥 APPLICATION */}
+        {product.application?.length > 0 && (
+          <p className="text-gray-700 text-sm mb-1">
+            <span className="font-medium">Application:</span> {product.application.join(", ")}
+          </p>
+        )}
+
+
         <div className="flex gap-2 mt-4">
           <Link
             href={`/admin/products/${product.slug}`}
