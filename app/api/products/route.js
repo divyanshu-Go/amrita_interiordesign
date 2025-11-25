@@ -21,7 +21,7 @@ export async function GET(req) {
   try {
     await DbConnect();
     const { searchParams } = new URL(req.url);
-
+    
     const query = {};
     if (searchParams.get("category")) query.category = searchParams.get("category");
     if (searchParams.get("color")) query.color = searchParams.get("color");

@@ -17,7 +17,10 @@ export default function ProductList({ initialProducts, categories }) {
       product.brand?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory =
-      !selectedCategory || product.category === selectedCategory;
+  !selectedCategory ||
+  (Array.isArray(product.category) &&
+    product.category.some((c) => c._id === selectedCategory));
+
 
     const matchesStock =
       stockFilter === "all" ||

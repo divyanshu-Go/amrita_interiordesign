@@ -1,3 +1,5 @@
+// admin/layout.js
+
 import Sidebar from "@/components/admin/Sidebar";
 
 export const metadata = {

@@ -1,3 +1,5 @@
+// app/admin/products/page.js
+
 import Link from "next/link";
 import { getAllProducts } from "@/lib/fetchers/products";
 import { getAllCategories } from "@/lib/fetchers/categories";

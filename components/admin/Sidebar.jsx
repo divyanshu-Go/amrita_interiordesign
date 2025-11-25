@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderOpen, Package, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderOpen, Package, LogOut ,Palette, Layers } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -11,6 +11,9 @@ export default function Sidebar() {
     { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
     { name: "Categories", path: "/admin/categories", icon: FolderOpen },
     { name: "Products", path: "/admin/products", icon: Package },
+    { name: "Color Variants", path: "/admin/color-variants", icon: Palette },
+    { name: "Pattern Variants", path: "/admin/pattern-variants", icon: Layers },
+
   ];
 
   return (

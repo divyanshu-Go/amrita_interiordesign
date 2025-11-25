@@ -1,5 +1,7 @@
 import { getProductBySlug } from "@/lib/fetchers/products";
 import { getAllCategories } from "@/lib/fetchers/categories";
+import { getAllColorVariants } from "@/lib/fetchers/colorVariants";
+import { getAllPatternVariants } from "@/lib/fetchers/patternVariants";
 import ProductForm from "@/components/admin/ProductForm";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,6 +9,8 @@ import Link from "next/link";
 export default async function EditProductPage({ params }) {
   const data = await getProductBySlug(params.slug);
   const categories = await getAllCategories();
+  const colorVariants = await getAllColorVariants();
+  const patternVariants = await getAllPatternVariants();
 
   if (!data) {
     notFound();
@@ -18,10 +22,17 @@ export default async function EditProductPage({ params }) {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Edit Product</h1>
-        <p className="text-gray-600 mt-2">Update product details and manage variants</p>
+        <p className="text-gray-600 mt-2">
+          Update product details and manage variants
+        </p>
       </div>
 
-      <ProductForm product={product} categories={categories} />
+      <ProductForm
+        product={product}
+        categories={categories}
+        colorVariants={colorVariants}
+        patternVariants={patternVariants}
+      />
 
       {variants && variants.length > 0 && (
         <div className="mt-8 bg-white rounded-lg shadow p-6">
@@ -29,9 +40,12 @@ export default async function EditProductPage({ params }) {
             Product Variants ({variants.length})
           </h2>
           <p className="text-gray-600 mb-4">
-            All variants in the same group: <span className="font-semibold text-orange-600">{product.variantGroupId}</span>
+            All variants in the same group:{" "}
+            <span className="font-semibold text-orange-600">
+              {product.variantGroupId}
+            </span>
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {variants.map((variant) => (
               <Link
@@ -79,7 +93,9 @@ export default async function EditProductPage({ params }) {
                   <p className="font-bold text-orange-600">
                     ₹{variant.retailDiscountPrice || variant.retailPrice}
                   </p>
-                  <p className="text-sm text-gray-600">Stock: {variant.stock}</p>
+                  <p className="text-sm text-gray-600">
+                    Stock: {variant.stock}
+                  </p>
                 </div>
               </Link>
             ))}

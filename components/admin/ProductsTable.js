@@ -21,7 +21,9 @@ export default function ProductsTable({ products, categories }) {
       product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory =
-      !selectedCategory || product.category._id === selectedCategory;
+      !selectedCategory ||
+      (Array.isArray(product.category) &&
+        product.category.some((c) => c._id === selectedCategory));
 
     const matchesStock =
       stockFilter === "all" ||
@@ -48,7 +50,6 @@ export default function ProductsTable({ products, categories }) {
       setDeleting(null);
     }
   };
-
 
   return (
     <>
@@ -121,7 +122,7 @@ export default function ProductsTable({ products, categories }) {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Product
                 </th>
-                
+
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   SKU
                 </th>
@@ -172,6 +173,17 @@ export default function ProductsTable({ products, categories }) {
                               {product.brand}
                             </p>
                           )}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {Array.isArray(product.category) &&
+                            product.category.map((cat) => (
+                              <span
+                                key={cat._id}
+                                className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+                              >
+                                {cat.name}
+                              </span>
+                            ))}
                         </div>
                       </div>
                     </td>

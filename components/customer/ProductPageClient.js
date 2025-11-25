@@ -5,7 +5,7 @@ import { Share2, Phone, MessageCircle, Check, Copy, ShoppingCart } from "lucide-
 import ProductImageGallery from "./ProductImageGallery";
 import ProductVariants from "./ProductVariants";
 
-export default function ProductPageClient({ product, variants, userRole }) {
+export default function ProductPageClient({ product, variants, colorVariants, patternVariants, userRole }) {
   const [showCopied, setShowCopied] = useState(false);
   const [showNumberCopied, setShowNumberCopied] = useState(false);
   
@@ -152,6 +152,55 @@ if (product.showPerSqFtPrice) {
             )}
             <p className="text-xs text-gray-600 mt-1">Inclusive of all taxes</p>
           </div>
+
+{colorVariants?.length > 0 && (
+  <div className="mt-4">
+    <p className="text-xs font-medium text-gray-600 mb-1">Color Variants</p>
+
+    <div className="flex gap-2">
+      {colorVariants.map((c) => (
+        <a
+          key={c._id}
+          href={`/product/${c.slug}`}
+          className="w-12 h-12 border rounded overflow-hidden hover:shadow transition-all"
+        >
+          <img
+            src={c.images?.[0]}
+            alt={c.name}
+            className="w-full h-full object-cover"
+          />
+        </a>
+      ))}
+    </div>
+  </div>
+)}
+
+
+{patternVariants?.length > 0 && (
+  <div className="mt-4">
+    <p className="text-xs font-medium text-gray-600 mb-1">Pattern Variants</p>
+
+    <div className="flex gap-2">
+      {patternVariants.map((p) => (
+        <a
+          key={p._id}
+          href={`/product/${p.slug}`}
+          className="w-12 h-12 border rounded overflow-hidden hover:shadow transition-all"
+        >
+          <img
+            src={p.images?.[0]}
+            alt={p.name}
+            className="w-full h-full object-cover"
+          />
+        </a>
+      ))}
+    </div>
+  </div>
+)}
+
+
+
+
 
           {/* Add to Cart Button */}
           <button

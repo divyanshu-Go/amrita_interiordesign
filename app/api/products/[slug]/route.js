@@ -21,8 +21,26 @@ export async function GET(req, { params }) {
         _id: { $ne: product._id },
       });
     }
+    // fetch all products with same colorVariant
+let colorVariants = [];
+if (product.colorVariant) {
+  colorVariants = await Product.find({
+    colorVariant: product.colorVariant,
+    _id: { $ne: product._id },
+  });
+}
+// fetch all products with same patternVariant
+let patternVariants = [];
+if (product.patternVariant) {
+  patternVariants = await Product.find({
+    patternVariant: product.patternVariant,
+    _id: { $ne: product._id },
+  });
+}
 
-    return NextResponse.json({ success: true, data: { product, variants } });
+
+
+    return NextResponse.json({ success: true, data: { product, variants, colorVariants, patternVariants } });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

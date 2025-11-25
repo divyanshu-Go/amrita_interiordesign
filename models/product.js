@@ -1,5 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import Category from "./category.js";
+import ColorVariant from "./colorVariant.js";
+import PatternVariant from "./patternVariant.js";
 /**
  * Product Schema
  * Represents each sellable item or variant.
@@ -13,7 +15,9 @@ const ProductSchema = new Schema(
     sku: { type: String, unique: true },
 
     // 📦 Category (keep as-is)
-    category: { type: Schema.Types.ObjectId, ref: "Category", required: true },
+    category: [
+      { type: Schema.Types.ObjectId, ref: "Category", required: true }
+    ],
 
     // 🧾 Description & Brand
     description: String,
@@ -37,6 +41,18 @@ const ProductSchema = new Schema(
 
     // 🔗 Variant Group
     variantGroupId: { type: String, index: true },
+    // 🆕 NEW FIELDS REQUESTED (variants)
+    // -----------------------------------------------------
+    colorVariant: {
+      type: Schema.Types.ObjectId,
+      ref: "ColorVariant",
+      default: null,
+    },
+    patternVariant: {
+      type: Schema.Types.ObjectId,
+      ref: "PatternVariant",
+      default: null,
+    },
 
     // 🏷️ Tags
     tags: [String],

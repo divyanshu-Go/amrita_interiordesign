@@ -4,15 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProduct, updateProduct } from "@/lib/fetchers/products";
 
-export default function ProductForm({ product = null, categories = [] }) {
+export default function ProductForm({
+  product = null,
+  categories = [],
+  colorVariants = [],
+  patternVariants = [],
+}) {
   const router = useRouter();
   const isEdit = !!product;
+
+  const [showCategorySelect, setShowCategorySelect] = useState(false);
 
   const [formData, setFormData] = useState({
     name: product?.name || "",
     slug: product?.slug || "",
     sku: product?.sku || "",
-    category: product?.category?._id || product?.category || "",
+    category: Array.isArray(product?.category)
+      ? product.category.map((c) => c._id || c)
+      : product?.category?._id
+      ? [product.category._id]
+      : [],
     description: product?.description || "",
     brand: product?.brand || "",
     images: product?.images?.join(", ") || "",
@@ -27,16 +38,26 @@ export default function ProductForm({ product = null, categories = [] }) {
     variantGroupId: product?.variantGroupId || "",
     tags: product?.tags?.join(", ") || "",
     isFeatured: product?.isFeatured || false,
+    colorVariant: product?.colorVariant || "",
+    patternVariant: product?.patternVariant || "",
+
     // 🔥 NEW FIELDS ADDED HERE
     // ---------------------------------------------------------
     sellBy: product?.sellBy || "box", // box | roll | piece
     showPerSqFtPrice: product?.showPerSqFtPrice || false,
     perSqFtPrice: product?.perSqFtPrice || "",
-    material: Array.isArray(product?.material) ? product.material.join(", ") : (product?.material || ""),
-    pattern: Array.isArray(product?.pattern) ? product.pattern.join(", ") : (product?.pattern || ""),
-    finish: Array.isArray(product?.finish) ? product.finish.join(", ") : (product?.finish || ""),
-    application: Array.isArray(product?.application) ? product.application.join(", ") : (product?.application || ""),
-
+    material: Array.isArray(product?.material)
+      ? product.material.join(", ")
+      : product?.material || "",
+    pattern: Array.isArray(product?.pattern)
+      ? product.pattern.join(", ")
+      : product?.pattern || "",
+    finish: Array.isArray(product?.finish)
+      ? product.finish.join(", ")
+      : product?.finish || "",
+    application: Array.isArray(product?.application)
+      ? product.application.join(", ")
+      : product?.application || "",
 
     coverageArea: product?.coverageArea || "",
   });
@@ -87,6 +108,9 @@ export default function ProductForm({ product = null, categories = [] }) {
           : undefined,
         stock: Number(formData.stock),
         thickness: formData.thickness ? Number(formData.thickness) : undefined,
+        colorVariant: formData.colorVariant || null,
+        patternVariant: formData.patternVariant || null,
+
         // 🔥 NEW FIELDS PROPERLY ADDED HERE
         // ---------------------------------------------------------
         sellBy: formData.sellBy,
@@ -94,14 +118,28 @@ export default function ProductForm({ product = null, categories = [] }) {
         perSqFtPrice: formData.perSqFtPrice
           ? Number(formData.perSqFtPrice)
           : undefined,
-        material: formData.material.split(",").map(x => x.trim()).filter(Boolean),
-        pattern: formData.pattern.split(",").map(x => x.trim()).filter(Boolean),
-        finish: formData.finish.split(",").map(x => x.trim()).filter(Boolean),
+        material: formData.material
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        pattern: formData.pattern
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        finish: formData.finish
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
 
         coverageArea: formData.coverageArea,
 
-        application: formData.application.split(",").map(x => x.trim()).filter(Boolean),
-
+        application: formData.application
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean),
+        category: Array.isArray(formData.category)
+          ? formData.category
+          : [formData.category],
       };
 
       if (isEdit) {
@@ -181,22 +219,73 @@ export default function ProductForm({ product = null, categories = [] }) {
 
             <div>
               <label className="block text-gray-700 font-medium mb-2">
-                Category <span className="text-red-500">*</span>
+                Categories <span className="text-red-500">*</span>
               </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+
+              {/* Selected category pills */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.category.map((catId) => {
+                  const cat = categories.find((c) => c._id === catId);
+                  return (
+                    <div
+                      key={catId}
+                      className="flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm"
+                    >
+                      {cat?.name || "Unknown"}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            category: prev.category.filter(
+                              (id) => id !== catId
+                            ),
+                          }))
+                        }
+                        className="ml-2 text-orange-700 hover:text-orange-900"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* Add Category Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowCategorySelect(!showCategorySelect)}
+                  className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
+                >
+                  Add Category
+                </button>
+              </div>
+
+              {/* Dropdown visible only when button is clicked */}
+              {showCategorySelect && (
+                <select
+                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (!selected) return;
+
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: [...new Set([...prev.category, selected])], // avoid duplicates
+                    }));
+                    setShowCategorySelect(false); // hide select after choosing
+                  }}
+                >
+                  <option value="">Select a category</option>
+
+                  {categories
+                    .filter((cat) => !formData.category.includes(cat._id))
+                    .map((cat) => (
+                      <option key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                </select>
+              )}
             </div>
 
             <div className="border-b pb-6">
@@ -255,6 +344,46 @@ export default function ProductForm({ product = null, categories = [] }) {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Color Variant */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Color Variant
+              </label>
+              <select
+                name="colorVariant"
+                value={formData.colorVariant}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 rounded-lg"
+              >
+                <option value="">None</option>
+                {colorVariants?.map((cv) => (
+                  <option key={cv._id} value={cv._id}>
+                    {cv.name} ({cv.hexCode})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Pattern Variant */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">
+                Pattern Variant
+              </label>
+              <select
+                name="patternVariant"
+                value={formData.patternVariant}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 rounded-lg"
+              >
+                <option value="">None</option>
+                {patternVariants?.map((pv) => (
+                  <option key={pv._id} value={pv._id}>
+                    {pv.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* -------------------------------------------- */}

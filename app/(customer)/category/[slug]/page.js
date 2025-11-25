@@ -19,7 +19,7 @@ export default async function CategoryPage({ params }) {
     <div className="bg-gray-50 min-h-screen ">
       <Breadcrumb
         items={[
-          { label: category.name }
+          { label: category[0]?.name }
         ]}
       />
 

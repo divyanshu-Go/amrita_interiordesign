@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import DbConnect from "@/lib/Db/DbConnect";
 import Product from "@/models/product";
+import Category from "@/models/category";
 
 /**
  * Search products by query
@@ -23,8 +24,15 @@ export async function GET(req) {
       );
     }
 
-    // Create case-insensitive regex pattern
     const searchPattern = new RegExp(query.trim(), "i");
+
+    // 🔥 Step 1 — Find categories matching search
+    const matchingCategories = await Category.find(
+      { name: searchPattern },
+      { _id: 1 }
+    );
+
+    const categoryIds = matchingCategories.map((c) => c._id);
 
     // Search in multiple fields
     const products = await Product.find({
@@ -41,7 +49,8 @@ export async function GET(req) {
         { finish: searchPattern },
         { coverageArea: searchPattern },
         { application: searchPattern }, // array match supported by Mongo
-      ],
+        categoryIds.length > 0 ? { category: { $in: categoryIds } } : null,
+      ].filter(Boolean),
     }).populate("category");
 
     return NextResponse.json({
