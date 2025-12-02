@@ -4,6 +4,125 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProduct, updateProduct } from "@/lib/fetchers/products";
 
+// Section Header Component
+const SectionHeader = ({ number, title }) => (
+  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
+    <span className="w-6 h-6 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center text-xs font-bold">
+      {number}
+    </span>
+    {title}
+  </h2>
+);
+
+// Input Field Component
+const InputField = ({
+  label,
+  required,
+  helperText,
+  type = "text",
+  ...props
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <input
+      type={type}
+      {...props}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition text-sm"
+    />
+    {helperText && <p className="text-xs text-gray-500 mt-1">{helperText}</p>}
+  </div>
+);
+
+// Select Field Component
+const SelectField = ({ label, required, options, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      {label}
+      {required && <span className="text-red-500 ml-1">*</span>}
+    </label>
+    <select
+      {...props}
+      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition text-sm"
+    >
+      {options?.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
+  </div>
+);
+
+// Tag Input Component
+const TagInput = ({ label, required, selectedIds, items, onAdd, onRemove, addButtonLabel }) => {
+  const [showSelect, setShowSelect] = useState(false);
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+      <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md bg-gray-50 min-h-10 mb-2">
+        {selectedIds.length === 0 ? (
+          <span className="text-gray-400 text-xs self-center">None selected</span>
+        ) : (
+          selectedIds.map((id) => {
+            const item = items.find((i) => i._id === id);
+            return (
+              <div
+                key={id}
+                className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full text-xs font-medium"
+              >
+                {item?.name || "Unknown"}
+                <button
+                  type="button"
+                  onClick={() => onRemove(id)}
+                  className="ml-0.5 hover:text-orange-900 font-bold cursor-pointer"
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
+      {showSelect && (
+        <select
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 mb-2 text-sm"
+          onChange={(e) => {
+            if (e.target.value) {
+              onAdd(e.target.value);
+              setShowSelect(false);
+            }
+          }}
+          autoFocus
+        >
+          <option value="">Select option</option>
+          {items
+            .filter((item) => !selectedIds.includes(item._id))
+            .map((item) => (
+              <option key={item._id} value={item._id}>
+                {item.name}
+              </option>
+            ))}
+        </select>
+      )}
+      <button
+        type="button"
+        onClick={() => setShowSelect(!showSelect)}
+        className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-md transition font-medium"
+      >
+        {showSelect ? "Hide" : addButtonLabel}
+      </button>
+    </div>
+  );
+};
+
+// Main Product Form Component
 export default function ProductForm({
   product = null,
   categories = [],
@@ -11,14 +130,8 @@ export default function ProductForm({
   patternVariants = [],
   applications = [],
 }) {
-
-
   const router = useRouter();
   const isEdit = !!product;
-
-  const [showCategorySelect, setShowCategorySelect] = useState(false);
-  const [showApplicationSelect, setShowApplicationSelect] = useState(false);
-
 
   const [formData, setFormData] = useState({
     name: product?.name || "",
@@ -45,10 +158,7 @@ export default function ProductForm({
     isFeatured: product?.isFeatured || false,
     colorVariant: product?.colorVariant || "",
     patternVariant: product?.patternVariant || "",
-
-    // 🔥 NEW FIELDS ADDED HERE
-    // ---------------------------------------------------------
-    sellBy: product?.sellBy || "box", // box | roll | piece
+    sellBy: product?.sellBy || "box",
     showPerSqFtPrice: product?.showPerSqFtPrice || false,
     perSqFtPriceRetail: product?.perSqFtPriceRetail || "",
     perSqFtPriceEnterprise: product?.perSqFtPriceEnterprise || "",
@@ -62,9 +172,8 @@ export default function ProductForm({
       ? product.finish.join(", ")
       : product?.finish || "",
     application: Array.isArray(product?.application)
-  ? product.application.map((a) => a._id || a)
-  : [],
-
+      ? product.application.map((a) => a._id || a)
+      : [],
     coverageArea: product?.coverageArea || "",
   });
 
@@ -78,7 +187,6 @@ export default function ProductForm({
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Auto-generate slug from name if creating new product
     if (name === "name" && !isEdit) {
       const slug = value
         .toLowerCase()
@@ -116,9 +224,6 @@ export default function ProductForm({
         thickness: formData.thickness ? Number(formData.thickness) : undefined,
         colorVariant: formData.colorVariant || null,
         patternVariant: formData.patternVariant || null,
-
-        // 🔥 NEW FIELDS PROPERLY ADDED HERE
-        // ---------------------------------------------------------
         sellBy: formData.sellBy,
         showPerSqFtPrice: formData.showPerSqFtPrice,
         perSqFtPriceRetail: formData.perSqFtPriceRetail
@@ -139,13 +244,10 @@ export default function ProductForm({
           .split(",")
           .map((x) => x.trim())
           .filter(Boolean),
-
         coverageArea: formData.coverageArea,
-
         application: Array.isArray(formData.application)
-  ? formData.application
-  : [],
-
+          ? formData.application
+          : [],
         category: Array.isArray(formData.category)
           ? formData.category
           : [formData.category],
@@ -165,661 +267,415 @@ export default function ProductForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6">
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
+    <div className="w-full">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Error Alert */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700 font-medium text-sm">Error</p>
+            <p className="text-red-600 text-xs mt-1">{error}</p>
+          </div>
+        )}
+
+        {/* SECTION 1: BASIC INFORMATION */}
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+          <SectionHeader number="1" title="Basic Information" />
+
+          <InputField
+            label="Product Name"
+            required
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            helperText="Use descriptive names for better SEO"
+            placeholder="Premium Oak Wood Flooring - 8mm"
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField
+              label="Slug"
+              required
+              name="slug"
+              value={formData.slug}
+              onChange={handleChange}
+              disabled={isEdit}
+              placeholder="auto-generated-from-name"
+              helperText="Auto-generated from product name"
+            />
+            <InputField
+              label="SKU"
+              required
+              name="sku"
+              value={formData.sku}
+              onChange={handleChange}
+              placeholder="SKU-001234"
+              helperText="Unique identifier for inventory"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField
+              label="Brand"
+              name="brand"
+              value={formData.brand}
+              onChange={handleChange}
+              placeholder="e.g., LuxeInteriors"
+            />
+            <TagInput
+              label="Categories"
+              required
+              selectedIds={formData.category}
+              items={categories}
+              onAdd={(id) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  category: [...new Set([...prev.category, id])],
+                }))
+              }
+              onRemove={(id) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  category: prev.category.filter((cid) => cid !== id),
+                }))
+              }
+              addButtonLabel="Add Category"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition text-sm resize-none"
+              placeholder="Describe features, dimensions, and benefits..."
+            />
+          </div>
         </div>
-      )}
 
-      <div className="space-y-6">
-        {/* Basic Information */}
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Basic Information
-          </h3>
+        {/* SECTION 2: SPECIFICATIONS */}
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+          <SectionHeader number="2" title="Specifications" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-gray-700 font-medium mb-2">
-                Product Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <InputField
+              label="Material"
+              name="material"
+              value={formData.material}
+              onChange={handleChange}
+              placeholder="HDF, PVC, Bamboo"
+            />
+            <InputField
+              label="Pattern"
+              name="pattern"
+              value={formData.pattern}
+              onChange={handleChange}
+              placeholder="Oak, Marble, Granite"
+            />
+            <InputField
+              label="Finish"
+              name="finish"
+              value={formData.finish}
+              onChange={handleChange}
+              placeholder="Matte, Glossy, Textured"
+            />
+            <InputField
+              label="Color"
+              name="color"
+              value={formData.color}
+              onChange={handleChange}
+              placeholder="Brown, Grey"
+            />
+            <InputField
+              label="Thickness (mm)"
+              type="number"
+              name="thickness"
+              value={formData.thickness}
+              onChange={handleChange}
+              placeholder="8"
+            />
+            <InputField
+              label="Size"
+              name="size"
+              value={formData.size}
+              onChange={handleChange}
+              placeholder="48 × 8 inch"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+            <InputField
+              label="Coverage Area"
+              name="coverageArea"
+              value={formData.coverageArea}
+              onChange={handleChange}
+              placeholder="20 sq ft"
+            />
+            <SelectField
+              label="Color Variant"
+              name="colorVariant"
+              value={formData.colorVariant}
+              onChange={handleChange}
+              options={[
+                { value: "", label: "None" },
+                ...(colorVariants?.map((cv) => ({
+                  value: cv._id,
+                  label: `${cv.name} (${cv.hexCode})`,
+                })) || []),
+              ]}
+            />
+            <SelectField
+              label="Pattern Variant"
+              name="patternVariant"
+              value={formData.patternVariant}
+              onChange={handleChange}
+              options={[
+                { value: "", label: "None" },
+                ...(patternVariants?.map((pv) => ({
+                  value: pv._id,
+                  label: pv.name,
+                })) || []),
+              ]}
+            />
+          </div>
+
+          <div className="pt-4 border-t border-gray-200">
+            <TagInput
+              label="Applications"
+              selectedIds={formData.application}
+              items={applications}
+              onAdd={(id) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  application: [...new Set([...prev.application, id])],
+                }))
+              }
+              onRemove={(id) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  application: prev.application.filter((aid) => aid !== id),
+                }))
+              }
+              addButtonLabel="Add Application"
+            />
+          </div>
+        </div>
+
+        {/* SECTION 3: PRICING & INVENTORY */}
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+          <SectionHeader number="3" title="Pricing & Inventory" />
+
+          {/* Sell By & SqFt */}
+          <div className="pb-4 border-b border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <SelectField
+                label="Sell By"
                 required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., HDF RealWood Floor - Oak Brown"
+                name="sellBy"
+                value={formData.sellBy}
+                onChange={handleChange}
+                options={[
+                  { value: "box", label: "Price / Box" },
+                  { value: "roll", label: "Price / Roll" },
+                  { value: "piece", label: "Price / Piece" },
+                ]}
               />
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="showPerSqFtPrice"
+                  checked={formData.showPerSqFtPrice}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-orange-500 rounded cursor-pointer"
+                />
+                <span className="text-sm font-medium text-gray-700">Show Per SqFt Price</span>
+              </label>
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Slug <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="slug"
-                value={formData.slug}
-                onChange={handleChange}
-                required
-                disabled={isEdit}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none disabled:bg-gray-100"
-                placeholder="e.g., realwood-oak-brown-8mm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                SKU <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="sku"
-                value={formData.sku}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., RW-OB-8MM-001"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Categories <span className="text-red-500">*</span>
-              </label>
-
-              {/* Selected category pills */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                {formData.category.map((catId) => {
-                  const cat = categories.find((c) => c._id === catId);
-                  return (
-                    <div
-                      key={catId}
-                      className="flex items-center bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-sm"
-                    >
-                      {cat?.name || "Unknown"}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            category: prev.category.filter(
-                              (id) => id !== catId
-                            ),
-                          }))
-                        }
-                        className="ml-2 text-orange-700 hover:text-orange-900"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {/* Add Category Button */}
-                <button
-                  type="button"
-                  onClick={() => setShowCategorySelect(!showCategorySelect)}
-                  className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600"
-                >
-                  Add Category
-                </button>
+            {formData.showPerSqFtPrice && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200">
+                <InputField
+                  label="Per SqFt Price (Retail)"
+                  type="number"
+                  name="perSqFtPriceRetail"
+                  value={formData.perSqFtPriceRetail}
+                  onChange={handleChange}
+                  step="0.01"
+                  placeholder="22.50"
+                />
+                <InputField
+                  label="Per SqFt Price (Enterprise)"
+                  type="number"
+                  name="perSqFtPriceEnterprise"
+                  value={formData.perSqFtPriceEnterprise}
+                  onChange={handleChange}
+                  step="0.01"
+                  placeholder="18.50"
+                />
               </div>
+            )}
+          </div>
 
-              {/* Dropdown visible only when button is clicked */}
-              {showCategorySelect && (
-                <select
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
-                  onChange={(e) => {
-                    const selected = e.target.value;
-                    if (!selected) return;
-
-                    setFormData((prev) => ({
-                      ...prev,
-                      category: [...new Set([...prev.category, selected])], // avoid duplicates
-                    }));
-                    setShowCategorySelect(false); // hide select after choosing
-                  }}
-                >
-                  <option value="">Select a category</option>
-
-                  {categories
-                    .filter((cat) => !formData.category.includes(cat._id))
-                    .map((cat) => (
-                      <option key={cat._id} value={cat._id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                </select>
-              )}
-            </div>
-
-            <div className="border-b pb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Sell & Pricing Options
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* SELL BY */}
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Sell By *
-                  </label>
-                  <select
-                    name="sellBy"
-                    value={formData.sellBy}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 rounded-lg"
-                  >
-                    <option value="box">Price / Box</option>
-                    <option value="roll">Price / Roll</option>
-                    <option value="piece">Price / Piece</option>
-                  </select>
-                </div>
-
-                {/* SHOW PER SQFT PRICE */}
-                <div className="flex items-center">
+          {/* Retail Pricing */}
+          <div className="pb-4 border-b border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-800 mb-4">Retail Pricing</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Regular Price <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">$</span>
                   <input
-                    type="checkbox"
-                    name="showPerSqFtPrice"
-                    checked={formData.showPerSqFtPrice}
+                    type="number"
+                    name="retailPrice"
+                    value={formData.retailPrice}
                     onChange={handleChange}
-                    className="w-5 h-5"
+                    required
+                    step="0.01"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
+                    placeholder="0.00"
                   />
-                  <label className="ml-2 text-gray-700 font-medium">
-                    Show Per SqFt Price
-                  </label>
                 </div>
-
-                {/* PER SQFT PRICE */}
-                {formData.showPerSqFtPrice && (
-                  <div>
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Per SqFt Price (Retail)
-                    </label>
-                    <input
-                      type="number"
-                      name="perSqFtPriceRetail"
-                      value={formData.perSqFtPriceRetail}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      className="w-full px-4 py-3 border-2 rounded-lg"
-                      placeholder="e.g., 22.5"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Per SqFt Price (Enterprise)
-                    </label>
-                    <input
-                      type="number"
-                      name="perSqFtPriceEnterprise"
-                      value={formData.perSqFtPriceEnterprise}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      className="w-full px-4 py-3 border-2 rounded-lg"
-                      placeholder="e.g., 22.5"
-                    />
-                  </div>
-                  </div>
-                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Discount Price</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    name="retailDiscountPrice"
+                    value={formData.retailDiscountPrice}
+                    onChange={handleChange}
+                    step="0.01"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Color Variant */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Color Variant
-              </label>
-              <select
-                name="colorVariant"
-                value={formData.colorVariant}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 rounded-lg"
-              >
-                <option value="">None</option>
-                {colorVariants?.map((cv) => (
-                  <option key={cv._id} value={cv._id}>
-                    {cv.name} ({cv.hexCode})
-                  </option>
-                ))}
-              </select>
+          {/* Enterprise Pricing */}
+          <div className="pb-4 border-b border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-800 mb-4">Enterprise Pricing</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Regular Price <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    name="enterprisePrice"
+                    value={formData.enterprisePrice}
+                    onChange={handleChange}
+                    required
+                    step="0.01"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Discount Price</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-500">$</span>
+                  <input
+                    type="number"
+                    name="enterpriseDiscountPrice"
+                    value={formData.enterpriseDiscountPrice}
+                    onChange={handleChange}
+                    step="0.01"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
             </div>
+          </div>
 
-            {/* Pattern Variant */}
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Pattern Variant
-              </label>
-              <select
-                name="patternVariant"
-                value={formData.patternVariant}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 rounded-lg"
-              >
-                <option value="">None</option>
-                {patternVariants?.map((pv) => (
-                  <option key={pv._id} value={pv._id}>
-                    {pv.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Stock */}
+          <InputField
+            label="Stock Quantity"
+            required
+            type="number"
+            name="stock"
+            value={formData.stock}
+            onChange={handleChange}
+            helperText="Update when inventory changes"
+            placeholder="0"
+          />
+        </div>
 
-            {/* -------------------------------------------- */}
-            {/* 🔥 ADD MATERIAL + PATTERN + FINISH + COVERAGE */}
-            {/* -------------------------------------------- */}
+        {/* SECTION 4: MEDIA & SEO */}
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
+          <SectionHeader number="4" title="Media & SEO" />
 
-            <div className="border-b pb-6 mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Product Specifications
-              </h3>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Product Images</label>
+            <textarea
+              name="images"
+              value={formData.images}
+              onChange={handleChange}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm resize-none"
+              placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+            />
+            <p className="text-xs text-gray-500 mt-1">Comma-separated URLs</p>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Material
-                  </label>
-                  <input
-                    type="text"
-                    name="material"
-                    value={formData.material}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 rounded-lg"
-                    placeholder="HDF, PVC, Bamboo"
-                  />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputField
+              label="Variant Group ID"
+              name="variantGroupId"
+              value={formData.variantGroupId}
+              onChange={handleChange}
+              placeholder="GROUP-12345"
+            />
+            <InputField
+              label="Tags"
+              name="tags"
+              value={formData.tags}
+              onChange={handleChange}
+              helperText="Comma-separated for searchability"
+              placeholder="premium, eco-friendly, modern"
+            />
+          </div>
 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Pattern
-                  </label>
-                  <input
-                    type="text"
-                    name="pattern"
-                    value={formData.pattern}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 rounded-lg"
-                    placeholder="Oak, Marble, Granite"
-                  />
-                </div>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="isFeatured"
+              checked={formData.isFeatured}
+              onChange={handleChange}
+              className="w-4 h-4 text-orange-500 rounded cursor-pointer"
+            />
+            <span className="text-sm font-medium text-gray-700">Mark as Featured Product</span>
+          </label>
+        </div>
 
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Finish
-                  </label>
-                  <input
-                    type="text"
-                    name="finish"
-                    value={formData.finish}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 rounded-lg"
-                    placeholder="Matte, Glossy"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Coverage Area
-                  </label>
-                  <input
-                    type="text"
-                    name="coverageArea"
-                    value={formData.coverageArea}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 rounded-lg"
-                    placeholder="20 sq ft"
-                  />
-                </div>
-
-                {/* APPLICATIONS */}
-<div className="md:col-span-3 mt-6">
-  <label className="block text-gray-700 font-medium mb-2">
-    Applications
-  </label>
-
-  {/* Selected Application Pills */}
-  <div className="flex flex-wrap gap-2 mb-3">
-    {formData.application.map((appId) => {
-      const app = applications.find((a) => a._id === appId);
-      return (
-        <div
-          key={appId}
-          className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
-        >
-          {app?.name || "Unknown"}
+        {/* Submit Buttons */}
+        <div className="flex gap-3 sticky bottom-0 bg-white p-4 rounded-lg shadow border-t border-gray-200">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-md font-semibold transition-colors disabled:opacity-50 text-sm"
+          >
+            {isSubmitting ? "Saving..." : isEdit ? "Update Product" : "Create Product"}
+          </button>
           <button
             type="button"
-            onClick={() =>
-              setFormData((prev) => ({
-                ...prev,
-                application: prev.application.filter((id) => id !== appId),
-              }))
-            }
-            className="ml-2 text-blue-700 hover:text-blue-900"
+            onClick={() => router.back()}
+            className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition text-sm font-medium"
           >
-            ✕
+            Cancel
           </button>
         </div>
-      );
-    })}
-
-    {/* Add Application Button */}
-    <button
-      type="button"
-      onClick={() => setShowApplicationSelect(!showApplicationSelect)}
-      className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-    >
-      Add Application
-    </button>
-  </div>
-
-  {/* Dropdown visible only when button is clicked */}
-  {showApplicationSelect && (
-    <select
-      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
-      onChange={(e) => {
-        const selected = e.target.value;
-        if (!selected) return;
-
-        setFormData((prev) => ({
-          ...prev,
-          application: [...new Set([...prev.application, selected])],
-        }));
-
-        setShowApplicationSelect(false);
-      }}
-    >
-      <option value="">Select an application</option>
-
-      {applications
-        .filter((app) => !formData.application.includes(app._id))
-        .map((app) => (
-          <option key={app._id} value={app._id}>
-            {app.name}
-          </option>
-        ))}
-    </select>
-  )}
-</div>
-
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Brand
-              </label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., RealWood"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-gray-700 font-medium mb-2">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none resize-none"
-                placeholder="Detailed product description"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Images */}
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Images</h3>
-          <label className="block text-gray-700 font-medium mb-2">
-            Image URLs (comma-separated)
-          </label>
-          <textarea
-            name="images"
-            value={formData.images}
-            onChange={handleChange}
-            rows={3}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none resize-none"
-            placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Enter multiple image URLs separated by commas
-          </p>
-        </div>
-
-        {/* Pricing */}
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Pricing & Stock
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Retail Price <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="retailPrice"
-                value={formData.retailPrice}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="0.00"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Retail Discount Price
-              </label>
-              <input
-                type="number"
-                name="retailDiscountPrice"
-                value={formData.retailDiscountPrice}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="0.00"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Enterprise Price <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="enterprisePrice"
-                value={formData.enterprisePrice}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="0.00"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Enterprise Discount Price
-              </label>
-              <input
-                type="number"
-                name="enterpriseDiscountPrice"
-                value={formData.enterpriseDiscountPrice}
-                onChange={handleChange}
-                min="0"
-                step="0.01"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="0.00"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Stock Quantity <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                required
-                min="0"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="0"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Attributes */}
-        <div className="border-b pb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Product Attributes
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Color
-              </label>
-              <input
-                type="text"
-                name="color"
-                value={formData.color}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., Brown, Grey"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Thickness (mm)
-              </label>
-              <input
-                type="number"
-                name="thickness"
-                value={formData.thickness}
-                onChange={handleChange}
-                min="0"
-                step="0.1"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., 8"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Size
-              </label>
-              <input
-                type="text"
-                name="size"
-                value={formData.size}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., 48x8 inch"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Variants & Tags */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Variants & Tags
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Variant Group ID
-              </label>
-              <input
-                type="text"
-                name="variantGroupId"
-                value={formData.variantGroupId}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., RW12345"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Group ID to link product variants together
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                name="tags"
-                value={formData.tags}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
-                placeholder="e.g., laminate, AC4 grade"
-              />
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                name="isFeatured"
-                checked={formData.isFeatured}
-                onChange={handleChange}
-                className="w-5 h-5 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-              />
-              <label className="ml-2 text-gray-700 font-medium">
-                Featured Product
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-4 mt-8">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex-1 bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting
-            ? "Saving..."
-            : isEdit
-            ? "Update Product"
-            : "Create Product"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-6 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }

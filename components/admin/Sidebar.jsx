@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderOpen, Package, LogOut ,Palette, Layers, Blocks } from "lucide-react";
+import { LayoutDashboard, FolderOpen, Package, LogOut, Palette, Blocks } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -11,25 +11,27 @@ export default function Sidebar() {
     { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
     { name: "Categories", path: "/admin/categories", icon: FolderOpen },
     { name: "Products", path: "/admin/products", icon: Package },
-    { name: "Color Variants", path: "/admin/color-variants", icon: Palette },
-    { name: "Pattern Variants", path: "/admin/pattern-variants", icon: Layers },
+    { name: "Variants", path: "/admin/variants", icon: Palette },
     { name: "Applications", path: "/admin/applications", icon: Blocks },
-
   ];
 
   return (
-    <aside className="w-56  bg-gray-900 text-white min-h-screen flex flex-col rounded-md">
+    <aside className="w-full h-full lg:w-56 b bg-gray-900 text-white flex flex-col justify-between rounded-sm">
       {/* Logo Section */}
       <div className="p-4 border-b border-gray-800">
         <h1 className="text-lg font-bold text-orange-500">Admin Panel</h1>
         <p className="text-xs text-gray-400 mt-0.5">Manage your store</p>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
+      {/* Navigation - Grid on mobile, Flex column on desktop */}
+      <nav className="grid grid-cols-2 lg:grid-cols-1 gap-2 p-3 auto-rows-max">
         {navItems.map((item) => {
-          const isActive = pathname === item.path;
+          // Exact match for Dashboard, startsWith for others
+          const isActive = item.path === "/admin" 
+            ? pathname === "/admin" 
+            : pathname.startsWith(item.path + "/") || pathname === item.path;
           const Icon = item.icon;
+          
           return (
             <Link
               key={item.path}
@@ -40,7 +42,7 @@ export default function Sidebar() {
                   : "text-gray-300 hover:bg-gray-800 hover:text-white"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4 flex-shrink-0" />
               <span>{item.name}</span>
             </Link>
           );
@@ -48,9 +50,9 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-800">
-        <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
-          <LogOut className="w-4 h-4" />
+      <div className="p-4 border-t border-gray-800 mt-auto">
+        <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm w-full">
+          <LogOut className="w-4 h-4 flex-shrink-0" />
           <span>Logout</span>
         </button>
         <p className="text-xs text-gray-500 mt-3">© 2025 Amrita Interior</p>

@@ -1,15 +1,14 @@
-// app/admin/applications/new/page.jsx
-
+// ===== app/admin/applications/new/page.js =====
 import ApplicationForm from "@/components/admin/ApplicationForm";
 
 export default function NewApplicationPage() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-6">Create Application</h1>
-
-      <div className="max-w-xl bg-white p-6 rounded-lg border shadow-sm">
-        <ApplicationForm />
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Create Application</h1>
+        <p className="text-gray-600 mt-2">Add a new application area (Kitchen, Bathroom, etc.)</p>
       </div>
+      <ApplicationForm />
     </div>
   );
 }

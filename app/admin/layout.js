@@ -1,5 +1,4 @@
-// admin/layout.js
-
+// app/admin/layout.js
 import Sidebar from "@/components/admin/Sidebar";
 
 export const metadata = {
@@ -9,9 +8,14 @@ export const metadata = {
 
 export default function AdminLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar/>
-      <main className="flex-1 p-8">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50 ">
+      {/* Sidebar - Top on mobile, Left on desktop */}
+      <div className="w-full lg:w-56 bg-gray-900 z-20 rounded-sm">
+        <Sidebar />
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         {children}
       </main>
     </div>
