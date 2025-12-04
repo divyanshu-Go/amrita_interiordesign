@@ -1,10 +1,15 @@
 import Link from "next/link";
-import { getAllColorVariants, deleteColorVariant } from "@/lib/fetchers/colorVariants";
-import { getAllPatternVariants, deletePatternVariant } from "@/lib/fetchers/patternVariants";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { revalidatePath } from "next/cache";
 
-// Server Actions
+// Fetchers
+import { getAllColorVariantProducts } from "@/lib/fetchers/colorVariantProducts";
+import { getAllPatternVariantProducts } from "@/lib/fetchers/patternVariantProducts";
+
+import { deleteColorVariant } from "@/lib/fetchers/colorVariants";
+import { deletePatternVariant } from "@/lib/fetchers/patternVariants";
+
+/* -------------------- SERVER ACTIONS -------------------- */
 async function handleColorDelete(formData) {
   "use server";
   const id = formData.get("id");
@@ -19,14 +24,57 @@ async function handlePatternDelete(formData) {
   revalidatePath("/admin/variants");
 }
 
-// Color Variant Row Component
-const ColorVariantRow = ({ variant, onDelete }) => (
+/* -------------------- PRODUCT LIST COMPONENT -------------------- */
+const ProductList = ({ products }) => {
+  if (!products || products.length === 0)
+    return <span className="text-gray-400 text-sm">–</span>;
+
+  return (
+    <div className="space-y-1 min-w-36">
+      {products.map((p) => (
+        <div key={p._id} className="flex items-center gap-2">
+          {/* Thumbnail */}
+          {p.images?.[0] ? (
+            <img
+              src={p.images[0]}
+              alt={p.name}
+              className="w-8 h-8 rounded-xs object-cover border-gray-500"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-gray-200 rounded-xs border border-gray-500" />
+          )}
+
+          {/* Product Name (truncate) */}
+          <Link
+            href={`/product/${p.slug}`}
+            className="ml-auto text-sm font-medium text-gray-900 truncate max-w-[120px]"
+          >
+            {p.name}
+          </Link>
+
+          {/* Edit Icon */}
+          <Link
+            href={`/admin/products/${p.slug}`}
+            className="text-blue-600 hover:text-blue-800"
+            title="Edit Product"
+          >
+            <Edit className="w-4 h-4" />
+          </Link>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+/* -------------------- COLOR VARIANT ROW -------------------- */
+const ColorVariantRow = ({ variant, colorProductsMap }) => (
   <tr className="border-b hover:bg-gray-50 transition">
+    {/* Name + Swatch */}
     <td className="py-3 px-4">
       <div className="flex items-center gap-2">
         {variant.hexCode && (
           <div
-            className="w-6 h-6 rounded border border-gray-300"
+            className="w-6 h-6 rounded border"
             style={{ backgroundColor: variant.hexCode }}
             title={variant.hexCode}
           />
@@ -34,10 +82,23 @@ const ColorVariantRow = ({ variant, onDelete }) => (
         <span className="font-medium text-gray-900">{variant.name}</span>
       </div>
     </td>
-    <td className="py-3 px-4 text-gray-600 font-mono text-sm">{variant.hexCode || "-"}</td>
+
+    {/* Hex Code */}
+    <td className="py-3 px-4 text-gray-600 font-mono text-sm">
+      {variant.hexCode || "-"}
+    </td>
+
+    {/* Description */}
     <td className="py-3 px-4 text-gray-600 text-sm line-clamp-1">
       {variant.description || "-"}
     </td>
+
+    {/* Products Column */}
+    <td className="py-3 px-4">
+      <ProductList products={colorProductsMap[variant._id] || []} />
+    </td>
+
+    {/* Actions */}
     <td className="py-3 px-4 text-right space-x-2">
       <Link
         href={`/admin/variants/color/${variant._id}`}
@@ -47,8 +108,8 @@ const ColorVariantRow = ({ variant, onDelete }) => (
         Edit
       </Link>
 
-      <form action={onDelete} className="inline-block">
-        <input type="hidden" name="id" value={variant._id} />
+      <form action={handleColorDelete} className="inline-block">
+        <input type="hidden" name="id" value={String(variant._id)} />
         <button
           type="submit"
           className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition text-sm font-medium"
@@ -61,16 +122,30 @@ const ColorVariantRow = ({ variant, onDelete }) => (
   </tr>
 );
 
-// Pattern Variant Row Component
-const PatternVariantRow = ({ variant, onDelete }) => (
+/* -------------------- PATTERN VARIANT ROW -------------------- */
+const PatternVariantRow = ({ variant, patternProductsMap }) => (
   <tr className="border-b hover:bg-gray-50 transition">
+    {/* Name */}
     <td className="py-3 px-4">
       <span className="font-medium text-gray-900">{variant.name}</span>
     </td>
-    <td className="py-3 px-4 text-gray-600 font-mono text-sm">{variant.hexCode || "-"}</td>
+
+    {/* Hex Code */}
+    <td className="py-3 px-4 text-gray-600 font-mono text-sm">
+      {variant.hexCode || "-"}
+    </td>
+
+    {/* Description */}
     <td className="py-3 px-4 text-gray-600 text-sm line-clamp-1">
       {variant.description || "-"}
     </td>
+
+    {/* Products Column */}
+    <td className="py-3 px-4">
+      <ProductList products={patternProductsMap[variant._id] || []} />
+    </td>
+
+    {/* Actions */}
     <td className="py-3 px-4 text-right space-x-2">
       <Link
         href={`/admin/variants/pattern/${variant._id}`}
@@ -80,8 +155,8 @@ const PatternVariantRow = ({ variant, onDelete }) => (
         Edit
       </Link>
 
-      <form action={onDelete} className="inline-block">
-        <input type="hidden" name="id" value={variant._id} />
+      <form action={handlePatternDelete} className="inline-block">
+        <input type="hidden" name="id" value={String(variant._id)} />
         <button
           type="submit"
           className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition text-sm font-medium"
@@ -94,17 +169,18 @@ const PatternVariantRow = ({ variant, onDelete }) => (
   </tr>
 );
 
-// Variant Section Component
+/* -------------------- REUSABLE VARIANT TABLE WRAPPER -------------------- */
 const VariantSection = ({
   title,
   label,
   variants,
+  productsMap,
   createLink,
-  deleteAction,
   rowComponent: RowComponent,
 }) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-    <div className="flex items-center justify-between p-6 border-b border-gray-200">
+    {/* Header */}
+    <div className="flex items-center justify-between p-6 border-b">
       <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
       <Link
         href={createLink}
@@ -115,27 +191,44 @@ const VariantSection = ({
       </Link>
     </div>
 
+    {/* Table */}
     <div className="overflow-x-auto">
       {variants.length === 0 ? (
-        <div className="p-6 text-center text-gray-500">
-          <p className="text-sm">No {title.toLowerCase()} added yet</p>
+        <div className="p-6 text-center text-gray-500 text-sm">
+          No {title.toLowerCase()} added yet
         </div>
       ) : (
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 border-b">
-              <th className="py-3 px-4 text-left font-semibold text-gray-700">Name</th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-700">{label}</th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-700">Description</th>
-              <th className="py-3 px-4 text-right font-semibold text-gray-700">Actions</th>
+              <th className="py-3 px-4 text-left font-semibold text-gray-700">
+                Name
+              </th>
+              <th className="py-3 px-4 text-left font-semibold text-gray-700">
+                {label}
+              </th>
+              <th className="py-3 px-4 text-left font-semibold text-gray-700">
+                Description
+              </th>
+
+              {/* New Products Column */}
+              <th className="py-3 px-4 text-left font-semibold text-gray-700">
+                Products
+              </th>
+
+              <th className="py-3 px-4 text-right font-semibold text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
+
           <tbody>
             {variants.map((variant) => (
               <RowComponent
                 key={variant._id}
                 variant={variant}
-                onDelete={deleteAction}
+                colorProductsMap={productsMap}
+                patternProductsMap={productsMap}
               />
             ))}
           </tbody>
@@ -145,37 +238,42 @@ const VariantSection = ({
   </div>
 );
 
+/* -------------------- PAGE COMPONENT -------------------- */
 export default async function VariantsManagementPage() {
-  const colorVariants = await getAllColorVariants();
-  const patternVariants = await getAllPatternVariants();
+  // Optimized fetch: variants + grouped products
+  const { variants: colorVariants, map: colorProductsMap } =
+    await getAllColorVariantProducts();
+
+  const { variants: patternVariants, map: patternProductsMap } =
+    await getAllPatternVariantProducts();
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Variants Management</h1>
-        <p className="text-gray-600 mt-2">Manage color and pattern variants for your products</p>
+        <p className="text-gray-600 mt-2">
+          Manage color and pattern variants for your products
+        </p>
       </div>
 
-      {/* Two Row Grid */}
       <div className="space-y-6">
-        {/* Color Variants Row */}
+        {/* Color Variants Table */}
         <VariantSection
           title="Color Variants"
           label="Hex Code"
           variants={colorVariants}
+          productsMap={colorProductsMap}
           createLink="/admin/variants/color/new"
-          deleteAction={handleColorDelete}
           rowComponent={ColorVariantRow}
         />
 
-        {/* Pattern Variants Row */}
+        {/* Pattern Variants Table */}
         <VariantSection
           title="Pattern Variants"
           label="Pattern Code"
           variants={patternVariants}
+          productsMap={patternProductsMap}
           createLink="/admin/variants/pattern/new"
-          deleteAction={handlePatternDelete}
           rowComponent={PatternVariantRow}
         />
       </div>

@@ -1,7 +1,7 @@
 // components/admin/ProductDetailsPopup.js
 "use client";
 
-export default function ProductDetailsPopup({ product }) {
+export default function ProductDetailsPopup({ product, isOpen }) {
   // Helper to show value or "-"
   const showOrDash = (val) => {
     if (
@@ -19,9 +19,12 @@ export default function ProductDetailsPopup({ product }) {
     typeof num === "number" ? `₹${num.toLocaleString("en-IN")}` : "-";
 
   return (
-    <div className="hidden group-hover:block absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg p-3 text-sm z-50">
+    <div
+      className={`${
+        isOpen ? "block" : "hidden"
+      } absolute right-0 top-6 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg p-3 text-sm z-50`}
+    >
       <div className="space-y-1 text-gray-700">
-
         <Item label="Color" value={showOrDash(product.color)} />
         <Item label="Thickness" value={showOrDash(product.thickness)} />
         <Item label="Size" value={showOrDash(product.size)} />
@@ -35,6 +38,21 @@ export default function ProductDetailsPopup({ product }) {
           label="Pattern Variant"
           value={showOrDash(product.patternVariant?.name)}
         />
+        <Item label="Retail Price" value={money(product.retailPrice)} />
+        <Item label="Enterprise Price" value={money(product.enterprisePrice)} />
+        <Item label="Sell By" value={showOrDash(product.sellBy)} />
+        <Item
+          label="Show Per Sq Ft"
+          value={product.showPerSqFtPrice ? "Yes" : "No"}
+        />
+        <Item
+          label="Applications"
+          value={
+            Array.isArray(product.application) && product.application.length
+              ? product.application.map((a) => a.name).join(", ")
+              : "-"
+          }
+        />
 
         <Item
           label="Tags"
@@ -46,26 +64,6 @@ export default function ProductDetailsPopup({ product }) {
         />
 
         <Item label="Featured" value={product.isFeatured ? "Yes" : "No"} />
-
-        <Item label="Sell By" value={showOrDash(product.sellBy)} />
-
-        <Item
-          label="Per Sq Ft (Retail)"
-          value={
-            product.showPerSqFtPrice
-              ? money(product.perSqFtPriceRetail)
-              : "-"
-          }
-        />
-
-        <Item
-          label="Per Sq Ft (Enterprise)"
-          value={
-            product.showPerSqFtPrice
-              ? money(product.perSqFtPriceEnterprise)
-              : "-"
-          }
-        />
 
         <Item
           label="Material"
@@ -95,6 +93,7 @@ export default function ProductDetailsPopup({ product }) {
         />
 
         <Item label="Coverage Area" value={showOrDash(product.coverageArea)} />
+        <Item label="Slug" value={product.slug} />
       </div>
     </div>
   );
@@ -105,7 +104,7 @@ function Item({ label, value }) {
   return (
     <div className="flex justify-between">
       <span className="text-xs text-gray-500">{label}:</span>
-      <span className="font-medium text-xs">{value}</span>
+      <span className="font-medium text-xs text-right">{value}</span>
     </div>
   );
 }

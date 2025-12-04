@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { deleteProduct } from "@/lib/fetchers/products";
@@ -15,6 +15,14 @@ export default function ProductsTable({ products, categories }) {
   const [deleting, setDeleting] = useState(null);
   const [toast, setToast] = useState(null);
   const router = useRouter();
+
+  const [openId, setOpenId] = useState(null);
+  useEffect(() => {
+  const closeOnOutsideClick = () => setOpenId(null);
+  window.addEventListener("click", closeOnOutsideClick);
+  return () => window.removeEventListener("click", closeOnOutsideClick);
+}, []);
+
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
@@ -131,36 +139,39 @@ export default function ProductsTable({ products, categories }) {
       </div>
 
       {/* Table */}
-      <div className=" bg-white rounded-lg  border border-gray-200 overflow-hidden">
+      <div className=" bg-white rounded-md  border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr className="">
-                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Product
                 </th>
 
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Categories
                 </th>
 
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   SKU
                 </th>
 
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th
+                  className="px-4  py-3 min-w-40 text-center text-xs font-semibold text-gray-700
+                 uppercase tracking-wider"
+                >
                   Price
                 </th>
 
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Stock
                 </th>
 
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Details
                 </th>
 
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -186,10 +197,10 @@ export default function ProductsTable({ products, categories }) {
                           <img
                             src={product.images[0]}
                             alt={product.name}
-                            className="w-10 h-10 rounded object-cover"
+                            className="w-10 h-10 rounded-sm object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                          <div className="w-10 h-10 bg-gray-200 rounded-sm flex items-center justify-center">
                             <Package className="w-5 h-5 text-gray-400" />
                           </div>
                         )}
@@ -214,13 +225,13 @@ export default function ProductsTable({ products, categories }) {
                           product.category.map((cat) => (
                             <span
                               key={cat._id}
-                              className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+                              className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-xs"
                             >
                               {cat.name}
                             </span>
                           ))
                         ) : (
-                          <span className="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-400 rounded">
+                          <span className="text-[10px] px-2 py-0.5 bg-gray-50 text-gray-400 rounded-xs">
                             -
                           </span>
                         )}
@@ -229,67 +240,74 @@ export default function ProductsTable({ products, categories }) {
 
                     {/* SKU */}
                     <td className="px-4 py-3">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded-xs text-gray-700">
                         {showOrDash(product.sku)}
                       </code>
                     </td>
 
-                    {/* Price column: show only discount prices and per sqft if enabled */}
-                    <td className="px-4 py-3">
-                      <div className="text-sm text-gray-900 space-y-1">
+                    {/* Price Column with sub-columns */}
+                    <td className="px-4 border border-gray-200 py-3 min-w-40">
+                      <div className="grid grid-cols-2 gap-3 ">
+                        {/* RETAIL BLOCK */}
                         <div>
-                          <span className="text-xs text-gray-500">
-                            Retail (discount):{" "}
-                          </span>
-                          <span className="font-semibold">
+                          <p className="text-[11px] font-semibold text-gray-700">
+                            Retail
+                          </p>
+
+                          <p className="text-[10px] text-gray-500">Discount:</p>
+                          <p className="font-medium text-sm">
                             {product.retailDiscountPrice != null
                               ? money(product.retailDiscountPrice)
                               : "-"}
-                          </span>
-                        </div>
+                          </p>
 
-                        <div>
-                          <span className="text-xs text-gray-500">
-                            Enterprise (discount):{" "}
-                          </span>
-                          <span className="font-semibold">
-                            {product.enterpriseDiscountPrice != null
-                              ? money(product.enterpriseDiscountPrice)
-                              : "-"}
-                          </span>
-                        </div>
-
-                        {product.showPerSqFtPrice && (
-                          <>
-                            <div>
-                              <span className="text-xs text-gray-500">
-                                Per Sq Ft (Retail):{" "}
-                              </span>
-                              <span className="font-semibold">
+                          {product.showPerSqFtPrice && (
+                            <>
+                              <p className="text-[11px] text-gray-500 mt-1">
+                                Per Sq Ft:
+                              </p>
+                              <p className="font-medium text-sm">
                                 {product.perSqFtPriceRetail != null
                                   ? money(product.perSqFtPriceRetail)
                                   : "-"}
-                              </span>
-                            </div>
-                            <div>
-                              <span className="text-xs text-gray-500">
-                                Per Sq Ft (Enterprise):{" "}
-                              </span>
-                              <span className="font-semibold">
+                              </p>
+                            </>
+                          )}
+                        </div>
+
+                        {/* ENTERPRISE BLOCK */}
+                        <div>
+                          <p className="text-[11px] font-semibold text-gray-700">
+                            Enterprise
+                          </p>
+
+                          <p className="text-[10px] text-gray-500">Discount:</p>
+                          <p className="font-medium text-sm">
+                            {product.enterpriseDiscountPrice != null
+                              ? money(product.enterpriseDiscountPrice)
+                              : "-"}
+                          </p>
+
+                          {product.showPerSqFtPrice && (
+                            <>
+                              <p className="text-[11px] text-gray-500 mt-1">
+                                Per Sq Ft:
+                              </p>
+                              <p className="font-medium text-sm">
                                 {product.perSqFtPriceEnterprise != null
                                   ? money(product.perSqFtPriceEnterprise)
                                   : "-"}
-                              </span>
-                            </div>
-                          </>
-                        )}
+                              </p>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </td>
 
                     {/* Stock */}
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-sm ${
                           product.stock === 0
                             ? "bg-red-100 text-red-800"
                             : product.stock < 10
@@ -303,18 +321,28 @@ export default function ProductsTable({ products, categories }) {
 
                     {/* Details column - info icon with hover popup */}
                     <td className="px-4 py-3 text-center">
-                      <div className="relative inline-block group">
-                        <button
-                          type="button"
-                          className="p-1.5 bg-gray-50 hover:bg-gray-100 rounded-md border border-gray-100"
-                          aria-label="Product details"
-                        >
-                          <Info className="w-4 h-4 text-gray-600" />
-                        </button>
+                      <div
+  className="relative inline-block"
+  onMouseEnter={() => setOpenId(product._id)}     // desktop hover open
+  onMouseLeave={() => setOpenId(null)}            // desktop hover close
+>
+  <button
+    type="button"
+    onClick={(e) => {
+      e.stopPropagation();
+      setOpenId(openId === product._id ? null : product._id); // mobile toggle
+    }}
+    className="p-1.5 bg-gray-50 hover:bg-gray-100 rounded-md border border-gray-100"
+  >
+    <Info className="w-4 h-4 text-gray-600" />
+  </button>
 
-                        {/* Popup Component */}
-                        <ProductDetailsPopup product={product} />
-                      </div>
+  <ProductDetailsPopup
+    product={product}
+    isOpen={openId === product._id}
+  />
+</div>
+
                     </td>
 
                     {/* Actions */}
@@ -322,7 +350,7 @@ export default function ProductsTable({ products, categories }) {
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/product/${product.slug}`}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
                           title="View"
                         >
                           <Eye className="w-4 h-4" />

@@ -115,7 +115,7 @@ export default function CategoriesTable({ categories }) {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
                         <Link href={`/category/${category.slug}`}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                          className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
                           title="View"
                         >
                           <EyeIcon className="w-4 h-4" />
