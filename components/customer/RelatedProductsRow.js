@@ -7,9 +7,9 @@ export default function RelatedProductsRow({ title, products = [], userRole }) {
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="my-8">
+    <section className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
       {/* Title Row */}
-      <div className="flex items-center justify-between mb-3 px-1">
+      <div className=" flex items-center justify-between mb-3 px-1">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900">
           {title}
         </h3>
@@ -20,12 +20,19 @@ export default function RelatedProductsRow({ title, products = [], userRole }) {
 
       {/* Horizontal Scroll Container */}
       <div className="overflow-x-auto scrollbar-hide -mx-1 py-1">
-        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 lg:gap-6">
+        <div
+          className="
+            grid 
+            auto-cols-[150px] 
+            sm:auto-cols-[180px] 
+            md:auto-cols-[220px] 
+            grid-flow-col 
+            gap-8 lg:gap-10
+            px-1
+          "
+        >
           {products.map((product) => (
-            <div
-              key={product._id}
-              className=""
-            >
+            <div key={product._id}>
               <ProductCardGrid product={product} userRole={userRole} />
             </div>
           ))}

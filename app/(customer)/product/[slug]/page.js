@@ -13,7 +13,7 @@ import RelatedProductsRow from "@/components/customer/RelatedProductsRow";
 
 // app/(customer)/product/[slug]/page.js
 export default async function ProductPage({ params }) {
-  const parameter = await params.slug
+  const parameter = await params.slug;
   const data = await getProductBySlug(parameter);
   const user = await getUserProfile();
 
@@ -24,18 +24,23 @@ export default async function ProductPage({ params }) {
   const { product, variants, colorVariants, patternVariants } = data;
   const userRole = user?.role || "user";
 
-  // 1️⃣ Extract IDs
-  const productId = product._id;
+  // 1️⃣ Extract safe string IDs
+  const productId = product._id.toString();
 
-const colorVariantIds = product.colorVariant
-  ? [ product.colorVariant._id || product.colorVariant ]  // handles both populated/unpopulated
-  : [];
+  // Color variant ID (populated OR unpopulated)
+  const colorVariantIds = product.colorVariant
+    ? [String(product.colorVariant._id || product.colorVariant)]
+    : [];
 
-const patternVariantIds = product.patternVariant
-  ? [ product.patternVariant._id || product.patternVariant ]
-  : [];
+  // Pattern variant ID
+  const patternVariantIds = product.patternVariant
+    ? [String(product.patternVariant._id || product.patternVariant)]
+    : [];
 
-  const categoryId = product.category?.[0]?._id || product.category?.[0];
+  // Category ID (supports populated OR unpopulated)
+  const categoryId = product.category?.[0]
+    ? String(product.category[0]._id || product.category[0])
+    : null;
 
   // 2️⃣ Fetch related products in parallel
   const [relatedCollection, relatedCategory] = await Promise.all([
@@ -60,7 +65,7 @@ const patternVariantIds = product.patternVariant
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen ">
       <Breadcrumb
         items={[
           {

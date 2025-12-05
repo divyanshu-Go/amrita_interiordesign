@@ -61,7 +61,7 @@ export default function ProductCardGrid({ product, userRole }) {
     product.images && product.images.length > 0 ? product.images[0] : null;
 
   return (
-    <Link href={`/product/${product.slug}`} className="block">
+    <Link href={`/product/${product.slug}`} className="block b min-w-44">
       <article className="group bg-white rounded-md border border-gray-200 hover:shadow-sm transition-shadow duration-250 overflow-hidden h-full flex flex-col">
         {/* Image: wider aspect to make card shorter */}
         <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden flex-shrink-0">

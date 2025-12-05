@@ -16,6 +16,46 @@ export default async function CategoryPage({ params }) {
   const { category, products } = data;
   const userRole = user?.role || "user";
 
+  const headerContent = (
+    <section
+      key={`category-header-${category.slug || category._id}`}
+      className="bg-white border border-gray-100 rounded-md p-4 mb-4"
+    >
+      <div className="flex items-center gap-4">
+        {category.image && (
+          <img
+            src={category.image}
+            className="w-14 h-14 object-cover rounded-md shadow-sm ring-1 ring-gray-200"
+          />
+        )}
+
+        <div className="flex-1">
+          <h1 className="text-lg font-semibold text-gray-900">
+            {category.name}
+          </h1>
+
+          {category.description && (
+            <p className="text-xs text-gray-600 line-clamp-1">
+              {category.description}
+            </p>
+          )}
+
+          <div className="mt-1 flex items-center gap-2 text-xs">
+            <span className="px-2 py-0.5 rounded-xs bg-gray-100 text-gray-600">
+              {products.length} Products
+            </span>
+
+            {userRole === "enterprise" && (
+              <span className="px-2 py-0.5 rounded-xs bg-orange-50 text-orange-600">
+                Enterprise Pricing
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
   return (
     <>
       <Breadcrumb items={[{ label: category?.name }]} />
@@ -34,42 +74,7 @@ export default async function CategoryPage({ params }) {
           <CategoryPageClient
             products={products}
             userRole={userRole}
-            headerContent={
-              <section className="bg-white border border-gray-100 rounded-md p-4 mb-4">
-                <div className="flex items-center gap-4">
-                  {category.image && (
-                    <img
-                      src={category.image}
-                      className="w-14 h-14 object-cover rounded-md shadow-sm ring-1 ring-gray-200"
-                    />
-                  )}
-
-                  <div className="flex-1">
-                    <h1 className="text-lg font-semibold text-gray-900">
-                      {category.name}
-                    </h1>
-
-                    {category.description && (
-                      <p className="text-xs text-gray-600 line-clamp-1">
-                        {category.description}
-                      </p>
-                    )}
-
-                    <div className="mt-1 flex items-center gap-2 text-xs">
-                      <span className="px-2 py-0.5 rounded-xs bg-gray-100 text-gray-600">
-                        {products.length} Products
-                      </span>
-
-                      {userRole === "enterprise" && (
-                        <span className="px-2 py-0.5 rounded-xs bg-orange-50 text-orange-600">
-                          Enterprise Pricing
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            }
+            headerContent={headerContent}
           />
         )}
       </section>
