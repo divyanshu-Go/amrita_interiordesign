@@ -23,9 +23,9 @@ export default function ProductImageGallery({ images, productName }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       {/* Main Image */}
-      <div className="relative w-full h-[48vw] max-h-[350px] aspect-[3/4] rounded-sm border border-gray-100 
+      <div className="relative w-full max-h-[400px] aspect-[4/4] rounded-sm border border-gray-100 
                       bg-white pattern-dots-sm text-gray-300 flex flex-col justify-center">
         <img
           src={images[selectedImage]}

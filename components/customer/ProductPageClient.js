@@ -107,13 +107,12 @@ export default function ProductPageClient({
         className="
     grid grid-cols-1 
     sm:grid-cols-[auto_1fr] 
-    gap-4 sm:gap-6 mb-4
+    gap-4 sm:gap-6 mb-4 
   "
       >
         {/* LEFT: Image Gallery */}
         <div
-          className="max-w-sm
-   w-full mx-auto sm:mx-0"
+          className="max-w-md w-full mx-auto md:mx-0"
         >
           <ProductImageGallery
             images={product.images}

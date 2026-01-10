@@ -5,14 +5,18 @@ import { useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import FilterSidebar from "./FilterSidebar";
 import ProductCardGrid from "./ProductCardGrid";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function CategoryPageClient({
   products,
-  userRole,
   headerContent,
 }) {
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [showFilters, setShowFilters] = useState(false);
+  const { userRole, loading } = useAuth();
+
+  console.log("userRole:", userRole, "loading:", loading);  
+
 
   const handleFilterChange = (filters, sortBy) => {
     let result = [...products];

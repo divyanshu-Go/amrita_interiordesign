@@ -2,6 +2,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
 import { getUserProfile } from "@/lib/api/api";
+import { AuthProvider } from "./providers/AuthProvider";
 // import { Toaster } from "sonner";
 
 const poppins = Poppins({
@@ -20,9 +21,9 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`font-[Poppins] relative min-h-screen flex flex-col `}>
-        
+        <AuthProvider>
         <ClientLayout user={user}>{children}</ClientLayout>
-        
+        </AuthProvider>
       </body>
     </html>
   );

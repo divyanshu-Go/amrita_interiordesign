@@ -3,9 +3,10 @@ import { getCategoryBySlug } from "@/lib/fetchers/serverCategories";
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import CategoryPageClientTest from "@/components/customer/CategoryPageClientTest";
+import CategoryPageClient from "@/components/customer/CategoryPageClient";
 
 // Regenerate this page every 60 seconds (ISR)
-export const revalidate = 600;
+export const revalidate = 3000;
 
 export default async function CategoryPage({ params }) {
   const data = await getCategoryBySlug(params.slug);
@@ -69,9 +70,8 @@ export default async function CategoryPage({ params }) {
         ) : (
           // Note: we pass products and a defaultUserRole of "user".
           // The client component will fetch the real user profile and update UI.
-          <CategoryPageClientTest
+          <CategoryPageClient
             products={products}
-            initialUserRole={"user"}
             headerContent={headerContent}
           />
         )}

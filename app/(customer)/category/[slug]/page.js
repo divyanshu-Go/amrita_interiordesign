@@ -7,14 +7,14 @@ import CategoryPageClient from "@/components/customer/CategoryPageClient";
 
 export default async function CategoryPage({ params }) {
   const data = await getCategoryBySlug(params.slug);
-  const user = await getUserProfile();
+  // const user = await getUserProfile();
 
   if (!data) {
     notFound();
   }
 
   const { category, products } = data;
-  const userRole = user?.role || "user";
+  // const userRole = user?.role || "user";
 
   const headerContent = (
     <section
@@ -45,11 +45,11 @@ export default async function CategoryPage({ params }) {
               {products.length} Products
             </span>
 
-            {userRole === "enterprise" && (
+            {/* {userRole === "enterprise" && (
               <span className="px-2 py-0.5 rounded-xs bg-orange-50 text-orange-600">
                 Enterprise Pricing
               </span>
-            )}
+            )} */}
           </div>
         </div>
       </div>
@@ -73,7 +73,6 @@ export default async function CategoryPage({ params }) {
         ) : (
           <CategoryPageClient
             products={products}
-            userRole={userRole}
             headerContent={headerContent}
           />
         )}

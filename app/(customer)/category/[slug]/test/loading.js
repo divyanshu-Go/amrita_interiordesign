@@ -1,4 +1,5 @@
-// app/(customer)/category/[slug]/loading.js
+// app/(customer)/category/[slug]/test/loading.js
+
 export default function Loading() {
   // simple skeleton for header + cards
   return (
