@@ -1,3 +1,4 @@
+// components/admin/Sidebar.jsx
 "use client";
 
 import Link from "next/link";
@@ -37,6 +38,7 @@ export default function Sidebar() {
             <Link
               key={item.path}
               href={item.path}
+              prefetch
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${
                 isActive
                   ? "bg-orange-600 text-white shadow-lg"

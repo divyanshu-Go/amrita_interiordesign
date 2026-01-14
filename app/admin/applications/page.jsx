@@ -1,3 +1,5 @@
+// app/admin/applications/page.jsx
+
 import Link from "next/link";
 import { deleteApplication } from "@/lib/fetchers/applications";
 import { Plus, Edit, Trash2, EyeIcon } from "lucide-react";
@@ -11,6 +13,9 @@ async function handleDelete(formData) {
   await deleteApplication(id);
   revalidatePath("/admin/applications");
 }
+
+
+export const revalidate = 600; // Revalidate every 10 minutes
 
 /* -------------------- PAGE COMPONENT -------------------- */
 export default async function ApplicationsPage() {

@@ -5,10 +5,12 @@ import { useState } from "react";
 import FilterSidebar from "./FilterSidebar";
 import ProductCardGrid from "./ProductCardGrid";
 import { SlidersHorizontal, X } from "lucide-react";
+import { useAuth } from "@/app/providers/AuthProvider";
 
-export default function SearchResultsPageClient({ products, userRole, query,headerContent }) {
+export default function SearchResultsPageClient({ products, query,headerContent }) {
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [showFilters, setShowFilters] = useState(false);
+   const { userRole, loading } = useAuth();
 
   const handleFilterChange = (filters, sortBy) => {
     let result = [...products];

@@ -16,6 +16,9 @@ export default function ProductsTable({ products, categories }) {
   const [toast, setToast] = useState(null);
   const router = useRouter();
 
+
+  console.log(products)
+
   const [openId, setOpenId] = useState(null);
   useEffect(() => {
   const closeOnOutsideClick = () => setOpenId(null);

@@ -15,7 +15,6 @@ export default function CategoryPageClient({
   const [showFilters, setShowFilters] = useState(false);
   const { userRole, loading } = useAuth();
 
-  console.log("userRole:", userRole, "loading:", loading);  
 
 
   const handleFilterChange = (filters, sortBy) => {

@@ -1,3 +1,4 @@
+// components/customer/ProductPageClient.js
 "use client";
 
 import { useState } from "react";
@@ -13,16 +14,17 @@ import ProductImageGallery from "./ProductImageGallery";
 import ProductDetails from "./ProductDetails";
 import ApplicationsGallery from "./ApplicationsGallery";
 import TrustBadges from "./TrustBadges";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function ProductPageClient({
   product,
   variants,
   colorVariants,
   patternVariants,
-  userRole,
 }) {
   const [showCopied, setShowCopied] = useState(false);
   const [showNumberCopied, setShowNumberCopied] = useState(false);
+   const { userRole, loading } = useAuth();
 
   const phoneNumber = "+916299811965";
   const isEnterprise = userRole === "enterprise";

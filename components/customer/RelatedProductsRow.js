@@ -1,9 +1,12 @@
 // components/customer/RelatedProductsRow.jsx
+"use client";
 
 import Link from "next/link";
 import ProductCardGrid from "@/components/customer/ProductCardGrid"; // adjust path if your card lives elsewhere
+import { useAuth } from "@/app/providers/AuthProvider";
 
-export default function RelatedProductsRow({ title, products = [], userRole }) {
+export default function RelatedProductsRow({ title, products = [] }) {
+   const { userRole, loading } = useAuth();
   if (!products || products.length === 0) return null;
 
   return (

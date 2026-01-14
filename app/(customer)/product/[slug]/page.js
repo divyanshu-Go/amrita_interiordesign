@@ -13,16 +13,15 @@ import RelatedProductsRow from "@/components/customer/RelatedProductsRow";
 
 // app/(customer)/product/[slug]/page.js
 export default async function ProductPage({ params }) {
-  const parameter = await params.slug;
-  const data = await getProductBySlug(parameter);
-  const user = await getUserProfile();
+  const slug = await params.slug;
+  const data = await getProductBySlug(slug);
+  // const user = await getUserProfile();
 
   if (!data) {
     notFound();
   }
 
   const { product, variants, colorVariants, patternVariants } = data;
-  const userRole = user?.role || "user";
 
   // 1️⃣ Extract safe string IDs
   const productId = product._id.toString();
@@ -57,6 +56,9 @@ export default async function ProductPage({ params }) {
     }),
   ]);
 
+
+
+
   // 3️⃣ Remove duplicates between collection and category items
   const collectionIds = new Set(relatedCollection.map((p) => p._id.toString()));
 
@@ -83,7 +85,6 @@ export default async function ProductPage({ params }) {
         variants={variants}
         colorVariants={colorVariants}
         patternVariants={patternVariants}
-        userRole={userRole}
       />
 
       {/* ───────────────────────────────────────────────
@@ -92,13 +93,11 @@ export default async function ProductPage({ params }) {
       <RelatedProductsRow
         title="Similar Designs & Variants"
         products={relatedCollection}
-        userRole={userRole}
       />
 
       <RelatedProductsRow
         title="More from this Category"
         products={categoryFiltered}
-        userRole={userRole}
       />
     </div>
   );

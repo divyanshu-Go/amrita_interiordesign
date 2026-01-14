@@ -1,5 +1,5 @@
 // components/customer/ProductCardGrid.js
-
+"use client"
 import Link from "next/link";
 
 export default function ProductCardGrid({ product, userRole }) {

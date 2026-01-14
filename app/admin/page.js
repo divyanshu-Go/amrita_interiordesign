@@ -1,33 +1,31 @@
 // app/admin/page.js
 import Link from "next/link";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
-import { getAllProducts } from "@/lib/fetchers/serverProducts";
 import { FolderOpen, Package, CheckCircle, XCircle, Plus, TrendingUp } from "lucide-react";
+import { getAdminDashboardData } from "@/lib/fetchers/adminDashboard";
 
 export default async function AdminDashboard() {
-  const categories = await getAllCategories();
-  const products = await getAllProducts();
-
-  const inStock = products.filter((p) => p.stock > 0).length;
-  const outOfStock = products.filter((p) => p.stock === 0).length;
-  const lowStock = products.filter((p) => p.stock > 0 && p.stock < 10).length;
+  const {
+    totalCategories,
+    totalProducts,
+    inStock,
+    lowStock,
+    recentCategories,
+  } = await getAdminDashboardData();
 
   const stats = [
     {
       title: "Total Categories",
-      value: categories.length,
+      value: totalCategories,
       icon: FolderOpen,
       link: "/admin/categories",
-      color: "bg-blue-500",
       textColor: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       title: "Total Products",
-      value: products.length,
+      value: totalProducts,
       icon: Package,
       link: "/admin/products",
-      color: "bg-purple-500",
       textColor: "text-purple-600",
       bgColor: "bg-purple-50",
     },
@@ -36,7 +34,6 @@ export default async function AdminDashboard() {
       value: inStock,
       icon: CheckCircle,
       link: "/admin/products",
-      color: "bg-green-500",
       textColor: "text-green-600",
       bgColor: "bg-green-50",
     },
@@ -45,14 +42,10 @@ export default async function AdminDashboard() {
       value: lowStock,
       icon: TrendingUp,
       link: "/admin/products",
-      color: "bg-orange-500",
       textColor: "text-orange-600",
       bgColor: "bg-orange-50",
     },
   ];
-
-  const recentProducts = products.slice(0, 5);
-  const recentCategories = categories.slice(0, 5);
 
   return (
     <div>
