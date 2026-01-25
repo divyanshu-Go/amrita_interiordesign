@@ -15,6 +15,9 @@ import ProductDetails from "./ProductDetails";
 import ApplicationsGallery from "./ApplicationsGallery";
 import TrustBadges from "./TrustBadges";
 import { useAuth } from "@/app/providers/AuthProvider";
+import { addToCart } from "@/lib/actions/cart";
+
+
 
 export default function ProductPageClient({
   product,
@@ -24,6 +27,27 @@ export default function ProductPageClient({
 }) {
   const [showCopied, setShowCopied] = useState(false);
   const [showNumberCopied, setShowNumberCopied] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+
+
+  const handleAddToCart = async () => {
+  try {
+    setAdding(true);
+    await addToCart(product._id, 1);
+    setAdded(true);
+
+    // reset success state after a moment
+    setTimeout(() => setAdded(false), 2000);
+  } catch (err) {
+    alert(err.message || "Failed to add to cart");
+  } finally {
+    setAdding(false);
+  }
+};
+
+
+
    const { userRole, loading } = useAuth();
 
   const phoneNumber = "+916299811965";
@@ -285,11 +309,41 @@ export default function ProductPageClient({
             </div>
           )}
 
+
+
+
           {/* Add to Cart Button */}
-          <button className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2.5 rounded-sm font-semibold transition-colors text-sm">
-            <ShoppingCart className="w-4 h-4  " />
-            <span className="">Add to Cart</span>
-          </button>
+          <button
+  onClick={handleAddToCart}
+  disabled={adding}
+  className={`
+    w-full flex items-center justify-center gap-2
+    px-3 py-2.5 rounded-sm font-semibold text-sm
+    transition-colors
+    ${
+      added
+        ? "bg-green-600 text-white"
+        : "bg-orange-500 hover:bg-orange-600 text-white"
+    }
+    ${adding ? "opacity-70 cursor-not-allowed" : ""}
+  `}
+>
+  {added ? (
+    <>
+      <Check className="w-4 h-4" />
+      <span>Added to Cart</span>
+    </>
+  ) : (
+    <>
+      <ShoppingCart className="w-4 h-4" />
+      <span>{adding ? "Adding…" : "Add to Cart"}</span>
+    </>
+  )}
+</button>
+
+
+
+
 
           {/* Contact Buttons */}
           <div className="grid grid-cols-12 gap-1.5">
