@@ -18,6 +18,8 @@ export default function AccountDataProvider({ children }) {
   const [addresses, setAddresses] = useState(null);
   const [cart, setCart] = useState(null);
   const [orders, setOrders] = useState(null);
+const [orderDetails, setOrderDetails] = useState({});
+
 
 
   // ----- loading flags (per resource) -----
@@ -76,12 +78,27 @@ export default function AccountDataProvider({ children }) {
     setLoading((l) => ({ ...l, orders: false }));
   }
 
-  async function loadOrderDetail(orderId) {
+async function loadOrderDetail(orderId) {
+  if (orderDetails[orderId]) return;
+
+  setLoading((l) => ({ ...l, orders: true }));
+
   const res = await fetch(`/api/orders/${orderId}`);
-  if (!res.ok) throw new Error("Failed to load order detail");
+  if (!res.ok) {
+    setLoading((l) => ({ ...l, orders: false }));
+    throw new Error("Failed to fetch order details");
+  }
+
   const data = await res.json();
-  return data.order;
+
+  setOrderDetails((prev) => ({
+    ...prev,
+    [orderId]: data.order,
+  }));
+
+  setLoading((l) => ({ ...l, orders: false }));
 }
+
 
 
   return (
@@ -92,6 +109,7 @@ export default function AccountDataProvider({ children }) {
         addresses,
         cart,
         orders,
+        orderDetails,
 
         // setters (used after mutations)
         setUser,

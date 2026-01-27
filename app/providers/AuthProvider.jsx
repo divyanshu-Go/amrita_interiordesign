@@ -1,3 +1,4 @@
+// app/providers/AuthProvider.jsx
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";

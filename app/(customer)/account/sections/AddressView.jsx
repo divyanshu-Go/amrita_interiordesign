@@ -1,6 +1,11 @@
 "use client";
 
 import { useAccount } from "../AccountDataProvider";
+import {
+  createAddress,
+  updateAddress,
+  deleteAddress,
+} from "@/lib/actions/address";
 import { useState } from "react";
 
 const EMPTY_FORM = {
@@ -34,34 +39,45 @@ export default function AddressView() {
     );
   }
 
-  async function saveAddress() {
+  function openAdd() {
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    setShowForm(true);
+  }
+
+  function openEdit(addr) {
+    setEditing(addr);
+    setForm({ ...addr });
+    setShowForm(true);
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
     setSaving(true);
+
     try {
-      const res = await fetch(
-        editing ? `/api/addresses/${editing._id}` : "/api/addresses",
-        {
-          method: editing ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        }
-      );
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
+      let updated;
       if (editing) {
-        setAddresses(
-          addresses.map((a) =>
-            a._id === editing._id ? data.address : a
-          )
+        updated = await updateAddress(editing._id, form);
+        setAddresses((prev) =>
+          prev.map((a) => (a._id === updated._id ? updated : a))
         );
       } else {
-        setAddresses([...addresses, data.address]);
+        updated = await createAddress(form);
+        setAddresses((prev) => [...prev, updated]);
+      }
+
+      if (form.isDefault) {
+        setAddresses((prev) =>
+          prev.map((a) =>
+            a._id === updated._id
+              ? { ...a, isDefault: true }
+              : { ...a, isDefault: false }
+          )
+        );
       }
 
       setShowForm(false);
-      setEditing(null);
-      setForm(EMPTY_FORM);
     } catch (err) {
       alert(err.message);
     } finally {
@@ -69,127 +85,140 @@ export default function AddressView() {
     }
   }
 
-  async function deleteAddress(id) {
+  async function handleDelete(id) {
     if (!confirm("Delete this address?")) return;
-
-    await fetch(`/api/addresses/${id}`, { method: "DELETE" });
-    setAddresses(addresses.filter((a) => a._id !== id));
+    await deleteAddress(id);
+    setAddresses((prev) => prev.filter((a) => a._id !== id));
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Addresses</h2>
         <button
-          onClick={() => {
-            setForm(EMPTY_FORM);
-            setEditing(null);
-            setShowForm(true);
-          }}
-          className="text-sm bg-orange-500 text-white px-3 py-1.5 rounded"
+          onClick={openAdd}
+          className="bg-orange-500 text-white px-4 py-2 rounded text-sm"
         >
           Add Address
         </button>
       </div>
 
-      {addresses.length === 0 && (
+      {/* List */}
+      {addresses.length === 0 ? (
         <div className="bg-white border rounded p-6 text-sm text-gray-600">
           No addresses added yet.
         </div>
+      ) : (
+        <div className="grid gap-4">
+          {addresses.map((addr) => (
+            <div
+              key={addr._id}
+              className={`border rounded p-4 bg-white ${
+                addr.isDefault ? "border-orange-500" : ""
+              }`}
+            >
+              <div className="flex justify-between">
+                <div className="text-sm space-y-1">
+                  <p className="font-medium">
+                    {addr.name}
+                    {addr.isDefault && (
+                      <span className="ml-2 text-xs text-orange-600">
+                        Default
+                      </span>
+                    )}
+                  </p>
+                  <p>{addr.phone}</p>
+                  <p>
+                    {addr.addressLine1}
+                    {addr.addressLine2 && `, ${addr.addressLine2}`}
+                  </p>
+                  <p>
+                    {addr.city}, {addr.state} – {addr.pincode}
+                  </p>
+                </div>
+
+                <div className="flex gap-3 text-sm">
+                  <button
+                    onClick={() => openEdit(addr)}
+                    className="text-blue-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(addr._id)}
+                    className="text-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
-      {addresses.map((addr) => (
-        <div
-          key={addr._id}
-          className={`border rounded p-4 bg-white ${
-            addr.isDefault ? "border-orange-500" : ""
-          }`}
-        >
-          <p className="font-medium text-sm">
-            {addr.name}{" "}
-            {addr.isDefault && (
-              <span className="text-xs text-orange-600">
-                (Default)
-              </span>
-            )}
-          </p>
-          <p className="text-sm text-gray-600">
-            {addr.addressLine1}, {addr.city}
-          </p>
-
-          <div className="flex gap-3 mt-2 text-sm">
-            <button
-              onClick={() => {
-                setEditing(addr);
-                setForm(addr);
-                setShowForm(true);
-              }}
-              className="text-blue-600"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => deleteAddress(addr._id)}
-              className="text-red-600"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      ))}
-
+      {/* Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded w-full max-w-md space-y-3">
-            <h3 className="font-semibold">
+          <form
+            onSubmit={handleSave}
+            className="bg-white rounded-lg w-full max-w-md p-6 space-y-4"
+          >
+            <h3 className="text-lg font-semibold">
               {editing ? "Edit Address" : "Add Address"}
             </h3>
 
-            {Object.keys(EMPTY_FORM).map(
-              (key) =>
-                key !== "isDefault" && (
-                  <input
-                    key={key}
-                    placeholder={key}
-                    value={form[key] || ""}
-                    onChange={(e) =>
-                      setForm({ ...form, [key]: e.target.value })
-                    }
-                    className="w-full border px-3 py-2 rounded text-sm"
-                  />
-                )
-            )}
+            {Object.entries({
+              name: "Name",
+              phone: "Phone",
+              addressLine1: "Address Line 1",
+              addressLine2: "Address Line 2",
+              city: "City",
+              state: "State",
+              pincode: "Pincode",
+            }).map(([key, label]) => (
+              <div key={key}>
+                <label className="block text-sm mb-1">{label}</label>
+                <input
+                  value={form[key] || ""}
+                  required={key !== "addressLine2"}
+                  onChange={(e) =>
+                    setForm({ ...form, [key]: e.target.value })
+                  }
+                  className="w-full border rounded px-3 py-2 text-sm"
+                />
+              </div>
+            ))}
 
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={form.isDefault}
                 onChange={(e) =>
-                  setForm({
-                    ...form,
-                    isDefault: e.target.checked,
-                  })
+                  setForm({ ...form, isDefault: e.target.checked })
                 }
               />
-              Default address
+              Set as default address
             </label>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 pt-4">
               <button
+                type="button"
                 onClick={() => setShowForm(false)}
-                className="border px-3 py-1.5 rounded text-sm"
+                className="border px-4 py-2 rounded text-sm"
               >
                 Cancel
               </button>
               <button
+                type="submit"
                 disabled={saving}
-                onClick={saveAddress}
-                className="bg-orange-500 text-white px-3 py-1.5 rounded text-sm"
+                className="bg-orange-500 text-white px-4 py-2 rounded text-sm"
               >
-                Save
+                {saving ? "Saving…" : "Save"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
     </div>

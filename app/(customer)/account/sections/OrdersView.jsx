@@ -3,16 +3,45 @@
 import { useAccount } from "../AccountDataProvider";
 import { useState } from "react";
 
+function StatusBadge({ status, type }) {
+  const map = {
+    order: {
+      processing: "bg-blue-100 text-blue-700",
+      payment_failed: "bg-red-100 text-red-700",
+      shipped: "bg-purple-100 text-purple-700",
+      delivered: "bg-green-100 text-green-700",
+      cancelled: "bg-gray-100 text-gray-700",
+      created: "bg-gray-100 text-gray-700",
+      payment_pending: "bg-yellow-100 text-yellow-700",
+    },
+    payment: {
+      paid: "bg-green-100 text-green-700",
+      pending: "bg-yellow-100 text-yellow-700",
+      failed: "bg-red-100 text-red-700",
+      not_required: "bg-gray-100 text-gray-700",
+    },
+  };
+
+  return (
+    <span
+      className={`text-xs px-2 py-0.5 rounded ${
+        map[type][status] || "bg-gray-100 text-gray-700"
+      }`}
+    >
+      {status.replace("_", " ")}
+    </span>
+  );
+}
+
 export default function OrdersView() {
   const {
     orders,
-    loading,
+    orderDetails,
     loadOrderDetail,
+    loading,
   } = useAccount();
 
   const [expandedId, setExpandedId] = useState(null);
-  const [orderDetail, setOrderDetail] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   if (loading.orders || !orders) {
     return (
@@ -33,88 +62,65 @@ export default function OrdersView() {
   async function toggleOrder(orderId) {
     if (expandedId === orderId) {
       setExpandedId(null);
-      setOrderDetail(null);
       return;
     }
 
     setExpandedId(orderId);
-    setDetailLoading(true);
-
-    try {
-      const detail = await loadOrderDetail(orderId);
-      setOrderDetail(detail);
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setDetailLoading(false);
-    }
+    await loadOrderDetail(orderId);
   }
 
   return (
     <div className="space-y-4">
-      {orders.map((order) => (
-        <div
-          key={order._id}
-          className="bg-white border rounded"
-        >
-          {/* Order Summary */}
-          <button
-            onClick={() => toggleOrder(order._id)}
-            className="w-full text-left p-4 flex flex-col sm:flex-row sm:justify-between gap-2"
+      {orders.map((order) => {
+        const detail = orderDetails[order._id];
+
+        return (
+          <div
+            key={order._id}
+            className="bg-white border rounded"
           >
-            <div>
-              <p className="text-sm font-medium">
-                Order #{order.orderNumber}
-              </p>
-              <p className="text-xs text-gray-500">
-                {new Date(order.createdAt).toLocaleString()}
-              </p>
-            </div>
-
-            <div className="flex gap-3 items-center text-sm">
-              <span className="font-semibold">
-                ₹{order.totals.grandTotal}
-              </span>
-
-              <span
-                className={`text-xs px-2 py-0.5 rounded ${
-                  order.orderStatus === "payment_failed"
-                    ? "bg-red-100 text-red-700"
-                    : order.orderStatus === "processing"
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {order.orderStatus.replace("_", " ")}
-              </span>
-
-              <span
-                className={`text-xs px-2 py-0.5 rounded ${
-                  order.paymentStatus === "paid"
-                    ? "bg-green-100 text-green-700"
-                    : order.paymentStatus === "failed"
-                    ? "bg-red-100 text-red-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {order.paymentStatus.replace("_", " ")}
-              </span>
-            </div>
-          </button>
-
-          {/* Order Detail */}
-          {expandedId === order._id && (
-            <div className="border-t p-4 space-y-4">
-              {detailLoading ? (
-                <p className="text-sm text-gray-500">
-                  Loading order details…
+            {/* Summary */}
+            <button
+              onClick={() => toggleOrder(order._id)}
+              className="w-full text-left p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+            >
+              <div>
+                <p className="text-sm font-medium">
+                  Order #{order.orderNumber}
                 </p>
-              ) : (
-                orderDetail && (
+                <p className="text-xs text-gray-500">
+                  {new Date(order.createdAt).toLocaleString()}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 text-sm">
+                <span className="font-semibold">
+                  ₹{order.totals.grandTotal}
+                </span>
+
+                <StatusBadge
+                  type="order"
+                  status={order.orderStatus}
+                />
+                <StatusBadge
+                  type="payment"
+                  status={order.paymentStatus}
+                />
+              </div>
+            </button>
+
+            {/* Detail */}
+            {expandedId === order._id && (
+              <div className="border-t p-4 space-y-4">
+                {!detail ? (
+                  <p className="text-sm text-gray-500">
+                    Loading order details…
+                  </p>
+                ) : (
                   <>
                     {/* Items */}
                     <div className="space-y-2">
-                      {orderDetail.items.map((item) => (
+                      {detail.items.map((item) => (
                         <div
                           key={item.productId}
                           className="flex justify-between text-sm"
@@ -130,34 +136,34 @@ export default function OrdersView() {
                       ))}
                     </div>
 
-                    {/* Address Snapshot */}
+                    {/* Address */}
                     <div className="border-t pt-3 text-sm">
                       <p className="font-medium mb-1">
                         Shipping Address
                       </p>
-                      <p>{orderDetail.addressSnapshot.name}</p>
+                      <p>{detail.addressSnapshot.name}</p>
                       <p className="text-gray-600">
-                        {orderDetail.addressSnapshot.addressLine1},{" "}
-                        {orderDetail.addressSnapshot.city},{" "}
-                        {orderDetail.addressSnapshot.state} –{" "}
-                        {orderDetail.addressSnapshot.pincode}
+                        {detail.addressSnapshot.addressLine1},{" "}
+                        {detail.addressSnapshot.city},{" "}
+                        {detail.addressSnapshot.state} –{" "}
+                        {detail.addressSnapshot.pincode}
                       </p>
                     </div>
 
-                    {/* Total */}
-                    <div className="border-t pt-3 flex justify-between font-semibold text-sm">
+                    {/* Totals */}
+                    <div className="border-t pt-3 flex justify-between text-sm font-semibold">
                       <span>Total</span>
                       <span>
-                        ₹{orderDetail.totals.grandTotal}
+                        ₹{detail.totals.grandTotal}
                       </span>
                     </div>
                   </>
-                )
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

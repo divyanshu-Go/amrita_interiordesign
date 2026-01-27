@@ -1,15 +1,14 @@
 "use client";
 
 import { useAccount } from "../AccountDataProvider";
-import {
-  updateCartItem,
-  removeFromCart,
-} from "@/lib/actions/cart";
+import { updateCartItem, removeFromCart } from "@/lib/actions/cart";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function CartView() {
-  const { cart, setCart, loading } = useAccount();
   const router = useRouter();
+  const { cart, setCart, loading } = useAccount();
+  const [updatingId, setUpdatingId] = useState(null);
 
   if (loading.cart || !cart) {
     return (
@@ -27,71 +26,121 @@ export default function CartView() {
     );
   }
 
-  async function updateQty(productId, qty) {
-    const updatedCart = await updateCartItem(productId, qty);
-    setCart(updatedCart);
+  async function handleQuantityChange(productId, quantity) {
+    try {
+      setUpdatingId(productId);
+      await updateCartItem(productId, quantity);
+
+      setCart((prev) => ({
+        ...prev,
+        items: prev.items.map((item) =>
+          item.product._id === productId
+            ? { ...item, quantity }
+            : item
+        ),
+      }));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
-  async function removeItem(productId) {
-    const updatedCart = await removeFromCart(productId);
-    setCart(updatedCart);
+  async function handleRemove(productId) {
+    try {
+      setUpdatingId(productId);
+      await removeFromCart(productId);
+
+      setCart((prev) => ({
+        ...prev,
+        items: prev.items.filter(
+          (item) => item.product._id !== productId
+        ),
+      }));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUpdatingId(null);
+    }
   }
 
   return (
-    <div className="space-y-4">
-      {cart.items.map((item) => (
-        <div
-          key={item.product._id}
-          className="bg-white border rounded p-4 flex justify-between"
-        >
-          <div>
-            <p className="text-sm font-medium">
-              {item.product.name}
-            </p>
-            <p className="text-xs text-gray-500">
-              ₹{item.pricing.finalUnitPrice}
-            </p>
+    <div className="space-y-6">
+      {/* Items */}
+      <div className="space-y-4">
+        {cart.items.map(({ product, quantity, pricing }) => (
+          <div
+            key={product._id}
+            className="bg-white border rounded p-4 flex gap-4"
+          >
+            {/* Image */}
+            <div className="w-20 h-20 bg-gray-100 rounded overflow-hidden">
+              {product.images?.[0] && (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
 
-            <input
-              type="number"
-              min={1}
-              value={item.quantity}
-              onChange={(e) =>
-                updateQty(
-                  item.product._id,
-                  Number(e.target.value)
-                )
-              }
-              className="border px-2 py-1 rounded text-sm w-16 mt-2"
-            />
+            {/* Info */}
+            <div className="flex-1 space-y-2">
+              <p className="font-medium text-sm">{product.name}</p>
 
-            <button
-              onClick={() => removeItem(item.product._id)}
-              className="block text-xs text-red-600 mt-1"
-            >
-              Remove
-            </button>
+              <p className="text-xs text-gray-600">
+                ₹{pricing.finalUnitPrice} / {product.sellBy}
+              </p>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  disabled={updatingId === product._id}
+                  onChange={(e) =>
+                    handleQuantityChange(
+                      product._id,
+                      Number(e.target.value)
+                    )
+                  }
+                  className="w-16 border rounded px-2 py-1 text-sm"
+                />
+
+                <button
+                  onClick={() => handleRemove(product._id)}
+                  disabled={updatingId === product._id}
+                  className="text-xs text-red-600"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            {/* Line total */}
+            <div className="text-sm font-semibold">
+              ₹{pricing.lineTotal}
+            </div>
           </div>
-
-          <p className="font-medium text-sm">
-            ₹{item.pricing.lineTotal}
-          </p>
-        </div>
-      ))}
-
-      <div className="bg-white border rounded p-6 flex justify-between">
-        <span className="font-semibold">Total</span>
-        <span className="font-semibold">
-          ₹{cart.subtotal}
-        </span>
+        ))}
       </div>
 
-      <button
-        onClick={() => router.push("/checkout")}
-        className="bg-orange-500 text-white py-2 rounded text-sm font-semibold w-full"
-      >
-        Proceed to Checkout
-      </button>
+      {/* Summary */}
+      <div className="bg-white border rounded p-6 flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-600">Subtotal</p>
+          <p className="text-lg font-semibold">
+            ₹{cart.subtotal}
+          </p>
+        </div>
+
+        <button
+          onClick={() => router.push("/checkout")}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded text-sm font-semibold"
+        >
+          Proceed to Checkout
+        </button>
+      </div>
     </div>
   );
 }

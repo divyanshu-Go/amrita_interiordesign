@@ -50,6 +50,7 @@ export default function ProfileView() {
       <div>
         <label className="block text-sm mb-1">Email</label>
         <p className="text-sm font-medium">{user.email}</p>
+        
       </div>
 
       {isEditing && (
