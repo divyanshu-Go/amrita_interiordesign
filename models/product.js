@@ -1,3 +1,4 @@
+// models/product.js
 import mongoose, { Schema } from "mongoose";
 import Category from "./category.js";
 import ColorVariant from "./colorVariant.js";

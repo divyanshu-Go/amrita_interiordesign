@@ -1,3 +1,4 @@
+// account/page.js
 import AccountDataProvider from "./AccountDataProvider";
 import AccountShell from "./AccountShell";
 
