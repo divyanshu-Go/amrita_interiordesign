@@ -3,30 +3,69 @@
 import { useAccount } from "../AccountDataProvider";
 import { updateUserProfile } from "@/lib/actions/user";
 import { useState } from "react";
+import { AlertCircle, CheckCircle, User, Mail, Building2, FileText, Phone, ShieldCheck } from "lucide-react";
+import AccountLoader from "@/components/Loaders/AccountLoader";
+
+// Skeleton Loader Component
+function ProfileSkeleton() {
+  return (
+    <div className="space-y-5 animate-pulse">
+      {/* Personal Information Card Skeleton */}
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+        <div className="flex justify-between items-start mb-5">
+          <div className="flex-1">
+            <div className="h-6 w-48 bg-gray-200 rounded mb-2" />
+            <div className="h-3 w-64 bg-gray-100 rounded" />
+          </div>
+          <div className="h-10 w-32 bg-gray-200 rounded-lg" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[...Array(2)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
+              <div className="h-10 w-full bg-gray-100 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Enterprise Card Skeleton */}
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+        <div className="mb-5">
+          <div className="h-6 w-48 bg-gray-200 rounded mb-2" />
+          <div className="h-3 w-64 bg-gray-100 rounded" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {[...Array(4)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
+              <div className="h-10 w-full bg-gray-100 rounded-lg" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProfileView() {
   const { user, setUser, loading } = useAccount();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    businessName: "",
-    gstNumber: "",
-    phone: "",
+    name: user?.name || "",
+    businessName: user?.enterpriseProfile?.businessName || "",
+    gstNumber: user?.enterpriseProfile?.gstNumber || "",
+    phone: user?.enterpriseProfile?.phone || "",
   });
 
+  // Show skeleton while loading
   if (loading.user || !user) {
-    return (
-      <div className="bg-white rounded-lg shadow p-8">
-        <div className="flex items-center justify-center h-40">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-            <p className="text-gray-500 text-sm">Loading profile…</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <AccountLoader />;
   }
 
   const isEnterprise = user.role === "enterprise";
@@ -40,18 +79,21 @@ export default function ProfileView() {
       phone: enterprise.phone || "",
     });
     setError(null);
+    setSuccess(false);
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setError(null);
+    setSuccess(false);
   };
 
   const handleSave = async () => {
     try {
       setIsSaving(true);
       setError(null);
+      setSuccess(false);
 
       const updated = await updateUserProfile({
         name: formData.name,
@@ -63,7 +105,9 @@ export default function ProfileView() {
       });
 
       setUser(updated);
+      setSuccess(true);
       setIsEditing(false);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setError(err.message || "Failed to update profile");
     } finally {
@@ -81,23 +125,44 @@ export default function ProfileView() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Success Alert */}
+      {success && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex gap-3">
+          <CheckCircle size={20} className="text-green-600 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-green-800 text-sm">Success</p>
+            <p className="text-green-700 text-sm">Profile updated successfully</p>
+          </div>
+        </div>
+      )}
+
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-          <div className="flex">
-            <span className="text-lg mr-3">⚠️</span>
-            <div>{error}</div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+          <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
+          <div>
+            <p className="font-semibold text-red-800 text-sm">Error</p>
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         </div>
       )}
 
       {/* Personal Information Card */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-            <p className="text-sm text-gray-500 mt-1">Update your basic account details</p>
+      <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100">
+              <User size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                Personal Information
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Update your basic account details
+              </p>
+            </div>
           </div>
           {!isEditing && (
             <button
@@ -109,10 +174,11 @@ export default function ProfileView() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Name Field */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <User size={16} className="text-gray-500" />
               Full Name
             </label>
             {isEditing ? (
@@ -122,34 +188,43 @@ export default function ProfileView() {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                placeholder="Enter your name"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             ) : (
               <div className="px-4 py-2 bg-gray-50 rounded-lg">
-                <p className="text-gray-900 font-medium">{user.name}</p>
+                <p className="text-gray-900 font-medium text-sm">{user.name}</p>
               </div>
             )}
           </div>
 
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <Mail size={16} className="text-gray-500" />
               Email Address
             </label>
             <div className="flex gap-2">
               <div className="flex-1 px-4 py-2 bg-gray-50 rounded-lg">
-                <p className="text-gray-900 font-medium text-sm">{user.email}</p>
+                <p className="text-gray-900 font-medium text-sm">
+                  {user.email}
+                </p>
               </div>
               <div className="px-3 py-2">
                 <span
-                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
                     user.emailVerified
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {user.emailVerified ? "✓ Verified" : "Unverified"}
+                  {user.emailVerified ? (
+                    <>
+                      <CheckCircle size={12} />
+                      Verified
+                    </>
+                  ) : (
+                    "Unverified"
+                  )}
                 </span>
               </div>
             </div>
@@ -159,16 +234,26 @@ export default function ProfileView() {
 
       {/* Enterprise Information Card */}
       {isEnterprise && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Enterprise Details</h2>
-            <p className="text-sm text-gray-500 mt-1">Business information and verification status</p>
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+          <div className="flex items-start gap-3 mb-6">
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-100">
+              <Building2 size={20} className="text-purple-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                Enterprise Details
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                Business information and verification status
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Business Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Building2 size={16} className="text-gray-500" />
                 Business Name
               </label>
               {isEditing ? (
@@ -176,14 +261,16 @@ export default function ProfileView() {
                   type="text"
                   value={formData.businessName}
                   onChange={(e) =>
-                    setFormData({ ...formData, businessName: e.target.value })
+                    setFormData({
+                      ...formData,
+                      businessName: e.target.value,
+                    })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                  placeholder="Enter business name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               ) : (
                 <div className="px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-gray-900 font-medium text-sm">
                     {enterprise.businessName || "—"}
                   </p>
                 </div>
@@ -192,7 +279,8 @@ export default function ProfileView() {
 
             {/* GST Number */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <FileText size={16} className="text-gray-500" />
                 GST Number
               </label>
               {isEditing ? (
@@ -202,12 +290,11 @@ export default function ProfileView() {
                   onChange={(e) =>
                     setFormData({ ...formData, gstNumber: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                  placeholder="Enter GST number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               ) : (
                 <div className="px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-gray-900 font-medium text-sm">
                     {enterprise.gstNumber || "—"}
                   </p>
                 </div>
@@ -216,7 +303,8 @@ export default function ProfileView() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <Phone size={16} className="text-gray-500" />
                 Phone Number
               </label>
               {isEditing ? (
@@ -226,12 +314,11 @@ export default function ProfileView() {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                  placeholder="Enter phone number"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               ) : (
                 <div className="px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-gray-900 font-medium text-sm">
                     {enterprise.phone || "—"}
                   </p>
                 </div>
@@ -240,19 +327,22 @@ export default function ProfileView() {
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-gray-500" />
                 Verification Status
               </label>
               <div className="pt-2">
                 {enterprise.status ? (
                   <span
-                    className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold border ${getStatusColor()}`}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border ${getStatusColor()}`}
                   >
-                    {enterprise.status === "pending" && "⏳ "}
-                    {enterprise.status === "verified" && "✓ "}
-                    {enterprise.status === "rejected" && "✗ "}
-                    {enterprise.status.charAt(0).toUpperCase() +
-                      enterprise.status.slice(1)}
+                    {enterprise.status === "pending" && "⏳"}
+                    {enterprise.status === "verified" && <CheckCircle size={12} />}
+                    {enterprise.status === "rejected" && "✗"}
+                    <span className="ml-1">
+                      {enterprise.status.charAt(0).toUpperCase() +
+                        enterprise.status.slice(1)}
+                    </span>
                   </span>
                 ) : (
                   <span className="text-gray-500 text-sm">No status</span>
@@ -263,8 +353,10 @@ export default function ProfileView() {
 
           {/* Admin Notes */}
           {enterprise.adminNotes && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-xs font-semibold text-blue-700 mb-1">Admin Notes</p>
+            <div className="mt-5 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs font-semibold text-blue-700 mb-1">
+                📝 Admin Notes
+              </p>
               <p className="text-sm text-blue-700">{enterprise.adminNotes}</p>
             </div>
           )}
@@ -273,7 +365,7 @@ export default function ProfileView() {
 
       {/* Action Buttons */}
       {isEditing && (
-        <div className="bg-white rounded-lg shadow p-6 flex gap-3 justify-end border-t-2 border-gray-100">
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-6 flex gap-3 justify-end">
           <button
             onClick={handleCancel}
             disabled={isSaving}

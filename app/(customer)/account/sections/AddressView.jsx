@@ -16,6 +16,7 @@ import {
   Check,
   AlertCircle,
 } from "lucide-react";
+import AccountLoader from "@/components/Loaders/AccountLoader";
 
 const EMPTY_FORM = {
   name: "",
@@ -39,14 +40,8 @@ export default function AddressView() {
 
   if (loading.addresses || !addresses) {
     return (
-      <div className="bg-white rounded-lg shadow p-8">
-        <div className="flex items-center justify-center h-40">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-2"></div>
-            <p className="text-gray-500 text-sm">Loading addresses…</p>
-          </div>
-        </div>
-      </div>
+            <AccountLoader />
+      
     );
   }
 

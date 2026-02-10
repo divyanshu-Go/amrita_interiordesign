@@ -1,80 +1,65 @@
-// account/loading.js
-// This file provides skeleton UI while data is loading
-// Next.js automatically shows this while the page is being rendered
-
-export default function ProfileLoading() {
+export default function AccountLoading() {
   return (
-    <div className="max-w-3xl mx-auto px-3 py-4 space-y-6">
-      {/* Personal Info Card Skeleton */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        {/* Header Skeleton */}
-        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50">
-          <div className="h-6 w-40 bg-gray-300 rounded animate-pulse" />
-          <div className="h-5 w-16 bg-gray-300 rounded animate-pulse" />
-        </div>
-
-        {/* Content Skeleton */}
-        <div className="p-6 space-y-5">
-          {/* Name Field */}
-          <div>
-            <div className="h-4 w-20 bg-gray-300 rounded animate-pulse mb-2" />
-            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-          </div>
-
-          {/* Email Field */}
-          <div>
-            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse mb-2" />
-            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-          </div>
-
-          {/* Last Updated */}
-          <div className="pt-3 border-t border-gray-100">
-            <div className="h-4 w-48 bg-gray-300 rounded animate-pulse" />
-          </div>
+    <div className="bg-gray-50 min-h-screen">
+      {/* Breadcrumb Skeleton */}
+      <div className="bg-white border-b px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-6xl mx-auto">
+          <div className="h-3 w-48 bg-gray-200 rounded animate-pulse" />
         </div>
       </div>
 
-      {/* Account Status Info Skeleton */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="h-5 w-48 bg-blue-300 rounded animate-pulse mb-2" />
-        <div className="h-4 w-40 bg-blue-300 rounded animate-pulse" />
-      </div>
+      {/* Compact Header with Icon Skeleton */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 animate-pulse">
+          <div className="flex items-center gap-3">
+            {/* Icon Badge */}
+            <div className="w-12 h-12 rounded-lg bg-gray-200" />
 
-      {/* Enterprise Profile Card Skeleton (if applicable) */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        {/* Header Skeleton */}
-        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-transparent">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="h-6 w-40 bg-gray-300 rounded animate-pulse mb-2" />
-              <div className="h-4 w-32 bg-gray-300 rounded animate-pulse" />
+            {/* Text */}
+            <div className="flex-1">
+              <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
+              <div className="h-3 w-48 bg-gray-200 rounded" />
             </div>
-            <div className="h-6 w-24 bg-gray-300 rounded animate-pulse" />
           </div>
         </div>
+      </div>
 
-        {/* Content Skeleton */}
-        <div className="p-6 space-y-5">
-          {/* Alert Skeleton */}
-          <div className="h-16 bg-yellow-50 border border-yellow-200 rounded animate-pulse" />
+      {/* Tab Navigation Skeleton */}
+      <div className="sticky top-0 bg-white shadow-sm z-20 border-b">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
+          <div className="flex gap-0 overflow-x-auto">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="px-6 py-4 flex-1 sm:flex-none"
+              >
+                <div className="h-4 w-16 bg-gray-200 rounded" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-          {/* Business Name */}
-          <div>
-            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse mb-2" />
-            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
+      {/* Content Skeleton */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-pulse">
+        {/* Card Skeleton */}
+        <div className="bg-white rounded-lg shadow border border-gray-200 p-6 space-y-4">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex-1">
+              <div className="h-6 w-32 bg-gray-200 rounded mb-2" />
+              <div className="h-3 w-48 bg-gray-200 rounded" />
+            </div>
+            <div className="h-10 w-24 bg-gray-200 rounded" />
           </div>
 
-          {/* GST Number */}
-          <div>
-            <div className="h-4 w-20 bg-gray-300 rounded animate-pulse mb-2" />
-            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <div className="h-4 w-20 bg-gray-300 rounded animate-pulse mb-2" />
-            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
-          </div>
+          {/* Content Lines */}
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-3 w-24 bg-gray-200 rounded" />
+              <div className="h-4 w-full bg-gray-200 rounded" />
+            </div>
+          ))}
         </div>
       </div>
     </div>

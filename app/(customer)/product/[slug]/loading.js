@@ -1,3 +1,4 @@
+// app/(customer)/product/[slug]/loading.js
 export default function ProductLoading() {
   return (
     <div className="bg-gray-50 min-h-screen">
