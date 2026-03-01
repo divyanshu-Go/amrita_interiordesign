@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Plus, Edit, Trash2, EyeIcon } from "lucide-react";
 import { revalidatePath } from "next/cache";
-import { deleteApplicationByIdServer, deleteApplicationByIdServer, getAllApplicationsServer } from "@/lib/serversideFetchers/applications";
+import { deleteApplicationByIdServer, getAllApplicationsServer } from "@/lib/serversideFetchers/applications";
 
 /* -------------------- SERVER ACTION -------------------- */
 async function handleDelete(formData) {
