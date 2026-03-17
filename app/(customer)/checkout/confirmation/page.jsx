@@ -11,7 +11,30 @@ import {
 const fmt = (n) =>
   (n ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
+
+
+import { Suspense } from "react";
+
 export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-full border-4 border-orange-500 border-t-transparent animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-500">Loading your order…</p>
+        </div>
+      </div>
+    }>
+      <ConfirmationContent />
+    </Suspense>
+  );
+}
+
+
+
+
+
+function ConfirmationContent() {
   const searchParams  = useSearchParams();
   const router        = useRouter();
 
