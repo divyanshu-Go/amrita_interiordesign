@@ -1,10 +1,11 @@
+// components/ProfileIcon.jsx
 "use client";
 
 import Link from "next/link";
 import { User2 } from "lucide-react";
 import Tooltip from "./Tooltip";
 
-export default function CreateAndProfile({ user }) {
+export default function ProfileIcon({ user }) {
   return (
     <div className="gap-4 flex">
       {/* 👤 Profile/Login Icon */}

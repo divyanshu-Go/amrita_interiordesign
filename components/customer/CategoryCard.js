@@ -1,3 +1,4 @@
+// components/customer/CategoryCard.js
 import Link from "next/link";
 
 export default function CategoryCard({ category }) {

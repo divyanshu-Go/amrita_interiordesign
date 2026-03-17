@@ -26,7 +26,7 @@ export default function CartView() {
           Looks like you haven't added any items yet. Start shopping to fill your cart!
         </p>
         <Link
-          href="/products"
+          href="/category/all"
           className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
         >
           Continue Shopping

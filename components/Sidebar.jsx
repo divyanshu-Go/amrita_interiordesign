@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import CreateAndProfile from "./CreateAndProfile";
+import ProfileIcon from "./ProfileIcon";
 import axios from "axios";
 import {
   LogIn,
@@ -124,7 +124,7 @@ export default function Sidebar({ user, open, setOpen, toggleRef }) {
             Login
           </Link>
         )}
-        <CreateAndProfile user={user} />
+        <ProfileIcon user={user} />
       </div>
     </aside>
   );

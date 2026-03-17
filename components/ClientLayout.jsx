@@ -1,24 +1,15 @@
-"use client";
-
-import { useRef, useState } from "react";
+// components/ClientLayout.jsx
 import Footer from "./Footer";
-import Sidebar from "./Sidebar";
 import Header from "./Header";
 
-export default function ClientLayout({ categories, user, children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const toggleRef = useRef();
-
-
+export default function ClientLayout({ user, children }) {
   return (
-    <><div className="relative">
-      <Header user={user} open={sidebarOpen} setOpen={setSidebarOpen} toggleRef={toggleRef}/>
-      <Sidebar user={user} open={sidebarOpen} setOpen={setSidebarOpen} toggleRef={toggleRef}/>
-      <main className="mt-16 mx-auto px-3 py-8 flex flex-col flex-1">
+    <div className="relative min-h-screen flex flex-col">
+      <Header user={user} />
+      <main className="mt-16 py-6 px-2.5 flex-1">
         {children}
       </main>
       <Footer />
     </div>
-    </>
   );
 }

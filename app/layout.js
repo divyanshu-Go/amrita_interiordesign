@@ -1,3 +1,4 @@
+// app/layout.js
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";

@@ -1,3 +1,4 @@
+// components/HomePage/ProductByApplicationSection.jsx
 "use client";
 
 import { useState } from "react";

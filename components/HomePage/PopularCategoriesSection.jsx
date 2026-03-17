@@ -1,3 +1,4 @@
+// components/HomePage/PopularCategoriesSection.jsx
 import CategoryCard from "@/components/customer/CategoryCard";
 import { getAllCategories } from "@/lib/fetchers/serverCategories";
 

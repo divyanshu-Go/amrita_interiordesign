@@ -1,3 +1,4 @@
+// components/HomePage/HeroSection.jsx
 "use client";
 
 import { motion } from "framer-motion";

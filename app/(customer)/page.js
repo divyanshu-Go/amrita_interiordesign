@@ -18,7 +18,6 @@ import { getProductsByApplication } from "@/lib/fetchers/productsByApplication";
 import { getPopularProducts } from "@/lib/fetchers/serverProducts";
 
 import { Suspense } from "react";
-import { getAuthenticatedUser } from "@/lib/actions/cart";
 
 export default async function HomePage() {
   const [

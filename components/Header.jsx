@@ -1,19 +1,20 @@
+// components/Header.jsx
 "use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Search, MapPin, ShoppingCart, User, X, Check } from "lucide-react";
-import CreateAndProfile from "./CreateAndProfile";
+import { Search, MapPin, ShoppingCart, User2 } from "lucide-react";
+import PincodeChecker from "./PincodeChecker";
 
-export default function Header({ user, open, setOpen, toggleRef }) {
+export default function Header({ user }) {
   const pathname = usePathname();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showPinPopover, setShowPinPopover] = useState(false);
-  const [pincode, setPincode] = useState("110086");
-  const [tempPincode, setTempPincode] = useState("110086");
   const router = useRouter();
-  
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [showPinPopover, setShowPinPopover] = useState(false);
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim().length >= 2) {
@@ -21,161 +22,96 @@ export default function Header({ user, open, setOpen, toggleRef }) {
     }
   };
 
-  const handlePincodeSubmit = (e) => {
-    e.preventDefault();
-    if (tempPincode.length === 6) {
-      setPincode(tempPincode);
-      setShowPinPopover(false);
-    }
-  };
-
-  const navLinks = [
-    { name: "Home", href: "/" },
-  ];
-
-  const isActive = (href) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
-
   return (
-    <header className="bg-white flex w-full fixed z-50 shadow-sm">
-      {/* Hamburger icon */}
-      {/* <div className="flex items-center" ref={toggleRef}>
-        <HamburgerIcon open={open} setOpen={setOpen} />
-      </div> */}
+    <header className="bg-white w-full fixed top-0 z-50 border-b border-gray-100 shadow-sm">
+      <div className="flex items-center gap-3 px-4 py-3 max-w-7xl mx-auto w-full">
 
-      {/* Navigation bar */}
-      <div className="flex flex-grow items-center justify-between px-4 py-3 max-w-7xl mx-auto w-full">
-        {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-          <span className="flex items-center gap-2 font-bold text-lg tracking-wider text-orange-600">
-            <img src="/logo.png" alt="logo" width={40} height={40} className="object-contain" />
-            <div className="flex flex-col items-start text-orange-700">
-              <span className="text-xl font-bold tracking-widest leading-tight">Amrita</span>
-              <span className="text-[9px] leading-tight tracking-wide">Interior & Design</span>
-            </div>
-          </span>
+        {/* ── Logo ── */}
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+          <img src="/logo.png" alt="Amrita logo" width={38} height={38} className="object-contain" />
+          <div className="flex flex-col items-start text-orange-700 leading-tight">
+            <span className="text-[16px] font-bold tracking-widest">Amrita</span>
+            <span className="text-[7.5px] tracking-wide text-orange-700 font-bold">Interior & Design</span>
+          </div>
         </Link>
 
-        {/* Delivery Location Selector */}
-        <div className="relative flex-shrink-0 mx-3">
+        {/* ── Delivery Location ── */}
+        <div className="relative flex-shrink-0 hidden sm:block">
           <button
-            onClick={() => setShowPinPopover(!showPinPopover)}
-            className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors group"
+            onClick={() => setShowPinPopover((v) => !v)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-200 transition-colors group"
           >
-            <MapPin className="w-4 h-4 text-orange-600" />
-            <div className="flex flex-col items-start">
-              <span className="text-xs text-gray-600">Deliver to</span>
-              <span className="text-sm font-semibold text-gray-900">{pincode}</span>
+            <MapPin className="w-4 h-4 text-orange-500" />
+            <div className="flex flex-col items-start leading-tight">
+              <span className="text-[10px] text-gray-500">Deliver to</span>
+              <span className="text-xs font-semibold text-gray-800 font-mono">
+                {pincode || "Pincode"}
+              </span>
             </div>
           </button>
 
-          {/* Pincode Popover */}
           {showPinPopover && (
-            <>
-              {/* Backdrop */}
-              <div
-                className="fixed inset-0 bg-black/20 z-40"
-                onClick={() => setShowPinPopover(false)}
-              />
-              
-              {/* Popover */}
-              <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-50">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-orange-600" />
-                    Choose your location
-                  </h3>
-                  <button
-                    onClick={() => setShowPinPopover(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                
-                <p className="text-xs text-gray-600 mb-3">
-                  Enter your pincode to check delivery availability
-                </p>
-
-                <form onSubmit={handlePincodeSubmit} className="space-y-3">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={tempPincode}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-                        setTempPincode(value);
-                      }}
-                      placeholder="Enter 6-digit pincode"
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none text-sm"
-                      maxLength={6}
-                    />
-                    {tempPincode.length === 6 && (
-                      <Check className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-600" />
-                    )}
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    disabled={tempPincode.length !== 6}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white py-2 rounded-lg font-semibold text-sm transition-colors disabled:cursor-not-allowed"
-                  >
-                    Apply
-                  </button>
-                </form>
-
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <p className="text-xs text-gray-500">
-                    Current pincode: <span className="font-semibold text-gray-900">{pincode}</span>
-                  </p>
-                </div>
-              </div>
-            </>
+            <PincodeChecker
+              pincode={pincode}
+              onPincodeChange={setPincode}
+              onClose={() => setShowPinPopover(false)}
+            />
           )}
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-3">
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+        {/* ── Search Bar ── */}
+        <form onSubmit={handleSearch} className="flex flex-1 max-w-2xl mx-auto">
+          <div className="flex w-full rounded-lg border border-gray-200 overflow-hidden focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100 transition-all bg-gray-50 focus-within:bg-white">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for products, categories..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-100 transition-all text-sm placeholder:text-gray-500"
+              placeholder="Search products, categories…"
+              className="flex-1 pl-4 pr-2 py-2.5 bg-transparent text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none min-w-0"
             />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+            <button
+              type="submit"
+              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 text-sm font-medium transition-colors flex-shrink-0"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Search</span>
+            </button>
           </div>
         </form>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* User Icon */}
-          <CreateAndProfile user={user}/>
+        {/* ── Right Actions ── */}
+        <div className="flex items-center gap-2 flex-shrink-0">
 
-          {/* Cart Icon */}
+          {/* Profile */}
           <Link
-            href="/cart"
-            className="relative p-2 hover:bg-gray-50 rounded-lg transition-colors group"
+            href={user ? "/account" : "/login"}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group"
+            title={user ? "My Account" : "Login"}
           >
-            <ShoppingCart className="w-5 h-5 text-gray-600 group-hover:text-orange-600" />
-            {/* Cart Badge - Uncomment when needed */}
-            {/* <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-              3
-            </span> */}
+            <div className="w-7 h-7 rounded-md bg-orange-500 group-hover:bg-orange-600 flex items-center justify-center transition-colors">
+              <User2 className="w-3.5 h-3.5 text-white" />
+            </div>
+            <div className="hidden md:flex flex-col leading-tight">
+              <span className="text-[10px] text-gray-500">{user ? "Hello," : "Sign in"}</span>
+              <span className="text-xs font-semibold text-gray-800 max-w-[80px] truncate">
+                {user ? (user.name?.split(" ")[0] || "Account") : "Login"}
+              </span>
+            </div>
+          </Link>
+
+          {/* Cart */}
+          <Link
+            href="/account?tab=cart"
+            className="relative p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group"
+            title="Cart"
+          >
+            <ShoppingCart className="w-5 h-5 text-gray-600 group-hover:text-orange-500 transition-colors" />
+            {/* Uncomment when cart count is available:
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold leading-none">3</span>
+            */}
           </Link>
         </div>
+
       </div>
     </header>
   );
