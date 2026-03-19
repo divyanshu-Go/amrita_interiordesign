@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthButton, FormInput } from "./AuthUtils/AuthFunctions";
+import { toast } from "sonner";
 
 export const SignupForm = () => {
   const router = useRouter();
@@ -50,8 +51,7 @@ export const SignupForm = () => {
     if (role === "enterprise") {
       if (!formData.businessName)
         newErrors.businessName = "Business name is required";
-      if (!formData.gstNumber)
-        newErrors.gstNumber = "GST number is required";
+      if (!formData.gstNumber) newErrors.gstNumber = "GST number is required";
       if (!formData.phone) newErrors.phone = "Phone number is required";
       else if (!/^[0-9]{10}$/.test(formData.phone))
         newErrors.phone = "Enter a valid 10-digit phone number";
@@ -62,51 +62,53 @@ export const SignupForm = () => {
   };
 
   // ✅ Submit handler
-// ✅ Submit handler
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+  // ✅ Submit handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  setIsLoading(true);
-  try {
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        role,
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        ...(role === "enterprise" && {
-          businessName: formData.businessName,
-          gstNumber: formData.gstNumber,
-          phone: formData.phone,
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role,
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          ...(role === "enterprise" && {
+            businessName: formData.businessName,
+            gstNumber: formData.gstNumber,
+            phone: formData.phone,
+          }),
         }),
-      }),
-    });
+      });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Signup failed");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Signup failed");
 
-    // ✅ If enterprise account, redirect to notice page
-    if (role == "enterprise") {
-      router.push(
-        `/login/notice?msg=${encodeURIComponent(
-          "Your enterprise account has been created successfully. An admin needs to verify your account before you can access enterprise-level features."
-        )}`
-      );
-      return;
+      // ✅ Enterprise user → no login yet
+      if (role === "enterprise") {
+        toast.success("Account created. Awaiting admin approval.");
+
+        window.location.href = `/login/notice?msg=${encodeURIComponent(
+          "Your enterprise account has been created successfully. An admin needs to verify your account before you can access enterprise-level features.",
+        )}`;
+        return;
+      }
+
+      // ✅ Normal user → auto login flow
+      toast.success("Account created successfully");
+
+      // Force full reload to sync navbar/profile/etc
+      window.location.href = "/";
+    } catch (error) {
+      setErrors({ submit: error.message });
+    } finally {
+      setIsLoading(false);
     }
-
-   // ✅ Normal user or admin → go to homepage
-    router.push("/"); // use router.push here too
-  } catch (error) {
-    setErrors({ submit: error.message });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   return (
     <div className="mx-auto my-12 w-full max-w-lg p-6 rounded-lg border border-gray-200 shadow-sm bg-white">
@@ -144,80 +146,82 @@ const handleSubmit = async (e) => {
 
       <form onSubmit={handleSubmit} className="space-y-4 ">
         <div className="flex space-x-6">
-        <div className="w-full space-y-3">
-        {/* Common fields */}
-        <FormInput
-          label="Name"
-          type="text"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          error={errors.name}
-        />
-        <FormInput
-          label="Email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          error={errors.email}
-        />
-        <FormInput
-          label="Password"
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          error={errors.password}
-        />
-        <FormInput
-          label="Confirm Password"
-          type="password"
-          value={formData.confirmPassword}
-          onChange={(e) =>
-            setFormData({ ...formData, confirmPassword: e.target.value })
-          }
-          error={errors.confirmPassword}
-        />
-        <p className="text-xs text-gray-500">
-          Password must be at least 8 characters.
-        </p>
-
-        </div>
-
-
-        {/* 👇 Conditional Enterprise fields */}
-        {role === "enterprise" && (
-        <div className="w-full space-y-3">
+          <div className="w-full space-y-3">
+            {/* Common fields */}
             <FormInput
-              label="Business Name"
+              label="Name"
               type="text"
-              value={formData.businessName}
+              value={formData.name}
               onChange={(e) =>
-                setFormData({ ...formData, businessName: e.target.value })
+                setFormData({ ...formData, name: e.target.value })
               }
-              error={errors.businessName}
+              error={errors.name}
             />
             <FormInput
-              label="GST Number"
-              type="text"
-              value={formData.gstNumber}
+              label="Email"
+              type="email"
+              value={formData.email}
               onChange={(e) =>
-                setFormData({ ...formData, gstNumber: e.target.value })
+                setFormData({ ...formData, email: e.target.value })
               }
-              error={errors.gstNumber}
+              error={errors.email}
             />
             <FormInput
-              label="Phone Number"
-              type="text"
-              value={formData.phone}
+              label="Password"
+              type="password"
+              value={formData.password}
               onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
+                setFormData({ ...formData, password: e.target.value })
               }
-              error={errors.phone}
+              error={errors.password}
             />
-        </div>
-        )}
+            <FormInput
+              label="Confirm Password"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                setFormData({ ...formData, confirmPassword: e.target.value })
+              }
+              error={errors.confirmPassword}
+            />
+            <p className="text-xs text-gray-500">
+              Password must be at least 8 characters.
+            </p>
+          </div>
 
+          {/* 👇 Conditional Enterprise fields */}
+          {role === "enterprise" && (
+            <div className="w-full space-y-3">
+              <FormInput
+                label="Business Name"
+                type="text"
+                value={formData.businessName}
+                onChange={(e) =>
+                  setFormData({ ...formData, businessName: e.target.value })
+                }
+                error={errors.businessName}
+              />
+              <FormInput
+                label="GST Number"
+                type="text"
+                value={formData.gstNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, gstNumber: e.target.value })
+                }
+                error={errors.gstNumber}
+              />
+              <FormInput
+                label="Phone Number"
+                type="text"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                error={errors.phone}
+              />
+            </div>
+          )}
         </div>
-
 
         {errors.submit && (
           <div className="text-sm text-red-600 bg-red-100 px-3 py-2 rounded">
