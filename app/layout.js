@@ -12,8 +12,8 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "Amrita Interior Design",
-  description: "The Best Interior Design Market Place",
+  title: "Interior Designers in Delhi NCR | Interio97",
+  description: "Affordable modular kitchen & home interior design services in Delhi NCR.",
 };
 
 export default function RootLayout({ children }) {
