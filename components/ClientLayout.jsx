@@ -1,6 +1,5 @@
 // components/ClientLayout.jsx
-// FIX: No longer accepts or forwards a `user` prop.
-// Header reads auth state directly from useAuth() now.
+
 import Footer from "./Footer";
 import Header from "./Header";
 

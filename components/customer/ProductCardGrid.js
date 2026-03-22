@@ -1,48 +1,78 @@
 // components/customer/ProductCardGrid.jsx
+//
+// ── WHAT CHANGED & WHY ────────────────────────────────────────────────────
+//
+// BEFORE: "use client" at the top, but the component had:
+//   • Zero state (no useState/useReducer)
+//   • Zero effects (no useEffect)
+//   • Zero event handlers
+//   • It was purely: take props → return JSX
+//   The "use client" was there by habit, not by need.
+//   Since this component renders on EVERY product grid (homepage, category
+//   page, search results), that unnecessary "use client" was ballooning
+//   the JS bundle sent to every user's phone.
+//
+// THE PRICING PROBLEM:
+//   userRole (retail vs enterprise) comes from AuthProvider which is
+//   client-side. We cannot get it in a server component without a
+//   cookie-reading helper. So ProductCardGrid DOES need to be client-side
+//   to access useAuth() — but only for the price display logic.
+//
+// AFTER: "use client" stays, but now ProductCardGrid calls useAuth()
+//   directly inside itself. This means:
+//   • RelatedProductsRow no longer needs to be "use client" just to
+//     thread userRole down as a prop
+//   • Any server component can render <ProductCardGrid product={p} />
+//     without knowing or caring about auth — the card handles it internally
+//   • Clean separation: auth concern lives in the component that uses it
+//
+// ─────────────────────────────────────────────────────────────────────────
 "use client";
 
-import Link  from "next/link";
-import Image from "next/image";
+import Link    from "next/link";
+import Image   from "next/image";
+import { useAuth } from "@/app/providers/AuthProvider";
 
-// ── Price resolution ─────────────────────────────────────────────────────────
-// Returns { primaryPrice, primaryLabel, strikePrice, discountPct, savingsAmt }
+// ── Price resolution ──────────────────────────────────────────────────────
 function resolvePrice(product, isEnterprise) {
-  const original   = isEnterprise ? product.enterprisePrice        : product.retailPrice;
-  const discounted = isEnterprise ? product.enterpriseDiscountPrice : product.retailDiscountPrice;
-  const perSqFt    = isEnterprise ? product.perSqFtPriceEnterprise  : product.perSqFtPriceRetail;
+  const original   = isEnterprise ? product.enterprisePrice         : product.retailPrice;
+  const discounted = isEnterprise ? product.enterpriseDiscountPrice  : product.retailDiscountPrice;
+  const perSqFt    = isEnterprise ? product.perSqFtPriceEnterprise   : product.perSqFtPriceRetail;
 
   const hasDiscount = discounted && discounted < original;
   const sellBy      = product.sellBy ?? "unit";
 
   if (product.showPerSqFtPrice) {
     return {
-      primaryPrice: perSqFt,
-      primaryLabel: "/ SqFt",
-      strikePrice:  hasDiscount ? original   : null,
-      salePrice:    hasDiscount ? discounted : original,
-      salePriceLabel: `/ ${sellBy}`,
-      discountPct:  hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-      savingsAmt:   hasDiscount ? original - discounted : 0,
+      primaryPrice:    perSqFt,
+      primaryLabel:    "/ SqFt",
+      strikePrice:     hasDiscount ? original    : null,
+      salePrice:       hasDiscount ? discounted  : original,
+      salePriceLabel:  `/ ${sellBy}`,
+      discountPct:     hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
+      savingsAmt:      hasDiscount ? original - discounted : 0,
     };
   }
 
   return {
-    primaryPrice: discounted || original,
-    primaryLabel: `/ ${sellBy}`,
-    strikePrice:  hasDiscount ? original : null,
-    salePrice:    null,
+    primaryPrice:   discounted || original,
+    primaryLabel:   `/ ${sellBy}`,
+    strikePrice:    hasDiscount ? original : null,
+    salePrice:      null,
     salePriceLabel: null,
-    discountPct:  hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-    savingsAmt:   hasDiscount ? original - discounted : 0,
+    discountPct:    hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
+    savingsAmt:     hasDiscount ? original - discounted : 0,
   };
 }
 
 const fmt = (n) => Number(n).toLocaleString("en-IN");
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────
 
-export default function ProductCardGrid({ product, userRole }) {
-  const isEnterprise = userRole === "enterprise";
+export default function ProductCardGrid({ product }) {
+  // Auth is handled internally — no need to thread userRole from parent
+  const { userRole } = useAuth();
+  const isEnterprise = userRole === "enterprise" && user?.enterpriseStatus === "verified";  
   const price        = resolvePrice(product, isEnterprise);
   const mainImage    = product.images?.[0] ?? null;
 
@@ -67,7 +97,6 @@ export default function ProductCardGrid({ product, userRole }) {
             </div>
           )}
 
-          {/* Discount badge — top-right corner */}
           {price.discountPct > 0 && (
             <span className="absolute top-2 right-2 bg-green-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none">
               {price.discountPct}% OFF
@@ -77,34 +106,31 @@ export default function ProductCardGrid({ product, userRole }) {
 
         {/* ── Info ── */}
         <div className="px-3 py-2.5 flex flex-col flex-grow gap-1">
-
-          {/* Brand */}
           {product.brand && (
             <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider truncate">
               {product.brand}
             </p>
           )}
 
-          {/* Name */}
           <h3 className="text-xs font-medium text-gray-900 line-clamp-2 leading-snug">
             {product.name}
           </h3>
 
-          {/* ── Price block ── */}
           <div className="mt-auto pt-1 space-y-0.5">
-
-            {/* Primary price row */}
             <div className="flex items-baseline gap-1.5 flex-wrap">
               <span className="text-sm font-semibold text-gray-900">
                 ₹{fmt(price.primaryPrice)}
-                <span className="text-[10px] font-normal text-gray-500 ml-0.5">{price.primaryLabel}</span>
+                <span className="text-[10px] font-normal text-gray-500 ml-0.5">
+                  {price.primaryLabel}
+                </span>
               </span>
 
-              {/* Strike-through original (perSqFt mode: show sale price alongside) */}
               {price.salePrice && (
                 <span className="text-xs text-gray-700 font-medium">
                   ₹{fmt(price.salePrice)}
-                  <span className="text-[10px] font-normal text-gray-500 ml-0.5">{price.salePriceLabel}</span>
+                  <span className="text-[10px] font-normal text-gray-500 ml-0.5">
+                    {price.salePriceLabel}
+                  </span>
                 </span>
               )}
 
@@ -115,16 +141,16 @@ export default function ProductCardGrid({ product, userRole }) {
               )}
             </div>
 
-            {/* Savings pill */}
             {price.savingsAmt > 0 && (
               <span className="inline-block text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                 Save ₹{fmt(price.savingsAmt)}
               </span>
             )}
 
-            {/* Enterprise label — rendered once */}
             {isEnterprise && (
-              <p className="text-[10px] text-orange-500 font-medium">Enterprise Price</p>
+              <p className="text-[10px] text-orange-500 font-medium">
+                Enterprise Price
+              </p>
             )}
           </div>
         </div>
