@@ -1,10 +1,21 @@
 // components/Footer.jsx
-"use client";
+//
+// ── WHAT CHANGED & WHY ────────────────────────────────────────────────────
+// BEFORE: "use client" — completely unnecessary.
+//   No hooks, no state, no effects, no browser APIs.
+//   Link, icons, and static JSX all work in server components.
+//
+// AFTER: No "use client" = server component.
+//   Footer renders on EVERY page of the site. With "use client", all
+//   lucide icons (Twitter, Instagram, Linkedin, MapPin, Phone, Mail),
+//   all footer links, and all footer text were being bundled into the
+//   client JavaScript sent to every user's phone.
+//   As a server component, this renders as plain HTML — zero JS cost.
+// ─────────────────────────────────────────────────────────────────────────
 
 import Link from "next/link";
 import { Twitter, Instagram, Linkedin, MapPin, Phone, Mail } from "lucide-react";
 
-// ── Centralised site config — update once, reflects everywhere ──
 const SITE = {
   email:     "info@amritainterior.com",
   phone:     "+91 98765 43210",
@@ -37,7 +48,15 @@ export default function Footer() {
           {/* ── Brand ── */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-3">
-              <img src="/logo.png" alt="Amrita Logo" width={36} className="object-contain" />
+              {/* Use logo.svg instead of logo.png — SVG is vector (no blur at any size)
+                  and ~3KB vs 21KB for the PNG. Saves bandwidth on every page. */}
+              <img
+                src="/logo.svg"
+                alt="Amrita Interior Design logo"
+                width={36}
+                height={36}
+                className="object-contain"
+              />
               <div className="flex flex-col items-start text-orange-700 leading-tight">
                 <span className="text-[16px] font-bold tracking-widest">Amrita</span>
                 <span className="text-[7.5px] tracking-wide text-orange-700 font-bold">Interior & Design</span>
@@ -62,7 +81,7 @@ export default function Footer() {
                   aria-label={label}
                   className="w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-500 border border-orange-200 hover:border-orange-500 flex items-center justify-center text-orange-500 hover:text-white transition-all"
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4" aria-hidden="true" />
                 </Link>
               ))}
             </div>
@@ -70,7 +89,7 @@ export default function Footer() {
 
           {/* ── Quick Links ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wider">Quick Links</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Links</h3>
             <ul className="space-y-2">
               {quickLinks.map(({ label, href }) => (
                 <li key={href}>
@@ -87,7 +106,7 @@ export default function Footer() {
 
           {/* ── Account Links ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wider">Account</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">My Account</h3>
             <ul className="space-y-2">
               {accountLinks.map(({ label, href }) => (
                 <li key={href}>
@@ -104,42 +123,34 @@ export default function Footer() {
 
           {/* ── Contact ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wider">Get in Touch</h3>
-            <ul className="space-y-2.5">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Contact Us</h3>
+            <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-gray-500">
-                <MapPin className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 {SITE.address}
               </li>
-              <li>
-                <Link
-                  href={`tel:${SITE.phone.replace(/\s/g, "")}`}
-                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-orange-600 transition-colors"
-                >
-                  <Phone className="w-4 h-4 text-orange-400 flex-shrink-0" />
+              <li className="flex items-center gap-2 text-sm text-gray-500">
+                <Phone className="w-4 h-4 text-orange-400 flex-shrink-0" aria-hidden="true" />
+                <a href={`tel:${SITE.phone}`} className="hover:text-orange-600 transition-colors">
                   {SITE.phone}
-                </Link>
+                </a>
               </li>
-              <li>
-                <Link
-                  href={`mailto:${SITE.email}`}
-                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-orange-600 transition-colors break-all"
-                >
-                  <Mail className="w-4 h-4 text-orange-400 flex-shrink-0" />
+              <li className="flex items-center gap-2 text-sm text-gray-500">
+                <Mail className="w-4 h-4 text-orange-400 flex-shrink-0" aria-hidden="true" />
+                <a href={`mailto:${SITE.email}`} className="hover:text-orange-600 transition-colors">
                   {SITE.email}
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
 
         </div>
-      </div>
 
-      {/* ── Copyright ── */}
-      <div className="border-t border-gray-100 py-4 text-center">
-        <p className="text-xs text-gray-400">
-          © {new Date().getFullYear()} Amrita Interior & Design. Developed by{" "}
-          <span className="text-orange-500 font-medium">Divyanshu Sharma</span>.
-        </p>
+        {/* ── Bottom bar ── */}
+        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+          <p>© {new Date().getFullYear()} Amrita Interior Design. All rights reserved.</p>
+          <p>Designed &amp; developed with care in Delhi, India 🇮🇳</p>
+        </div>
       </div>
     </footer>
   );

@@ -1,8 +1,20 @@
 // components/customer/TrendingCollections.jsx
-"use client";
+//
+// ── WHAT CHANGED & WHY ────────────────────────────────────────────────────
+// BEFORE: "use client" — but this component has:
+//   • Zero useState, zero useEffect, zero event handlers
+//   • Pure display: receives categories as props → renders JSX
+//   • "use client" was there by habit/assumption
+//
+// AFTER: No "use client" = server component.
+//   ScrollRow inside it is "use client" — that's fine.
+//   Server components CAN render client components as children.
+//   The section heading, card layout, and Link elements are now
+//   server-rendered HTML — zero JS shipped for this part.
+// ─────────────────────────────────────────────────────────────────────────
 
-import Link          from "next/link";
-import Image         from "next/image";
+import Link           from "next/link";
+import Image          from "next/image";
 import Section        from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ScrollRow      from "@/components/ui/ScrollRow";
@@ -30,7 +42,6 @@ export default function TrendingCollections({ categories = [] }) {
               transition-all duration-200 overflow-hidden
             "
           >
-            {/* Image */}
             <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-gray-100">
               {cat.image ? (
                 <Image
@@ -39,6 +50,7 @@ export default function TrendingCollections({ categories = [] }) {
                   fill
                   sizes="(max-width: 640px) 62vw, (max-width: 768px) 40vw, (max-width: 1024px) 30vw, 22vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-orange-50">
@@ -47,7 +59,6 @@ export default function TrendingCollections({ categories = [] }) {
               )}
             </div>
 
-            {/* Info */}
             <div className="p-3.5">
               <h3 className="text-sm font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
                 {cat.name}

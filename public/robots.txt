@@ -1,6 +1,17 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /account
+Disallow: /checkout
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /pay/
+Disallow: /orders/
 
 # Host
 Host: https://www.interio97.in

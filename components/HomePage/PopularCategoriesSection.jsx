@@ -1,8 +1,15 @@
 // components/HomePage/PopularCategoriesSection.jsx
-import Image         from "next/image";
-import Link          from "next/link";
-import CategoryCard  from "@/components/customer/CategoryCard";
-import Section       from "@/components/ui/Section";
+//
+// ── WHAT CHANGED & WHY ────────────────────────────────────────────────────
+// Passes `priority={i < 3}` to each CategoryCard.
+// The first 3 cards (index 0, 1, 2) get priority={true} — these are
+// above the fold on mobile and are the LCP candidates.
+// Cards 4–12 stay lazy. This is the standard Next.js recommended pattern
+// for image grids: eager first viewport, lazy everything else.
+// ─────────────────────────────────────────────────────────────────────────
+
+import CategoryCard   from "@/components/customer/CategoryCard";
+import Section        from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { getAllCategories } from "@/lib/fetchers/serverCategories";
 
@@ -24,8 +31,12 @@ export default async function PopularCategoriesSection() {
         <EmptyState />
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 sm:gap-5">
-          {top.map((cat) => (
-            <CategoryCard key={cat._id} category={cat} />
+          {top.map((cat, i) => (
+            <CategoryCard
+              key={cat._id}
+              category={cat}
+              priority={i < 3}   // ← first 3 are above fold: load eagerly
+            />
           ))}
         </div>
       )}
