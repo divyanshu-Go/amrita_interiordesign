@@ -23,8 +23,8 @@ const accountLinks = [
 
 export default function Footer({ config = {} }) {
   const {
-    companyName = "Amrita",
-    tagline     = "Interior & Design",
+    companyName = "Interio97",
+    tagline     = "",
     logoUrl     = "",
     email       = "",
     phone       = "",
