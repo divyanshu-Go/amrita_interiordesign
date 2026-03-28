@@ -1,18 +1,25 @@
 // components/Header.jsx
-
 "use client";
 
-import Link from "next/link";
+import Link         from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState }  from "react";
 import { Search, MapPin, ShoppingCart, User2 } from "lucide-react";
-import { useAuth } from "@/app/providers/AuthProvider";
+import { useAuth }   from "@/app/providers/AuthProvider";
 import PincodeChecker from "./PincodeChecker";
 
-export default function Header() {
-  const { user, loading } = useAuth();
+// config is passed from ClientLayout (async server component) via ISR.
+// Fallbacks ensure the header never breaks if config hasn't been saved yet.
+export default function Header({ config = {} }) {
+  const {
+    companyName = "Amrita",
+    tagline     = "Interior & Design",
+    logoUrl     = "",
+  } = config;
 
+  const { user, loading } = useAuth();
   const router = useRouter();
+
   const [searchQuery,    setSearchQuery]    = useState("");
   const [pincode,        setPincode]        = useState("");
   const [showPinPopover, setShowPinPopover] = useState(false);
@@ -33,11 +40,16 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/logo.png" alt="Amrita logo" width={38} height={38} className="object-contain" />
+            <img
+              src={logoUrl || "/logo.png"}
+              width={38}
+              height={38}
+              className="object-contain"
+            />
             <div className="flex flex-col items-start text-orange-700 leading-tight">
-                <span className="text-[16px] font-bold tracking-widest">Amrita</span>
-                <span className="text-[7.5px] tracking-wide text-orange-700 font-bold">Interior & Design</span>
-              </div>
+              <span className="text-[16px] font-bold tracking-widest">{companyName}</span>
+              <span className="text-[7.5px] tracking-wide text-orange-700 font-bold">{tagline}</span>
+            </div>
           </Link>
 
           {/* Delivery location — hidden on mobile, visible sm+ */}
