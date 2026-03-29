@@ -67,7 +67,7 @@ export default function Footer({ config = {} }) {
                 />
               )}
               <div className="flex flex-col items-start text-orange-700 leading-tight">
-                <span className="text-[16px] font-bold tracking-widest">{companyName}</span>
+                <span className="text-[16px] font-bold tracking-wide">{companyName}</span>
                 <span className="text-[7.5px] tracking-wide text-orange-700 font-bold">{tagline}</span>
               </div>
             </Link>

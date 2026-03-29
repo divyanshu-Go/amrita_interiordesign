@@ -23,7 +23,7 @@ export default async function PopularCategoriesSection() {
     <Section>
       <SectionHeading
         title="Popular Categories from"
-        accent="Amrita Interior Design"
+        accent=" Interio97 "
         subtitle="Explore our most loved category selections"
       />
 

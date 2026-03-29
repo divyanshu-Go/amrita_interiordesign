@@ -12,8 +12,8 @@ import PincodeChecker from "./PincodeChecker";
 // Fallbacks ensure the header never breaks if config hasn't been saved yet.
 export default function Header({ config = {} }) {
   const {
-    companyName = "Amrita",
-    tagline     = "Interior & Design",
+    companyName = "Interio97",
+    tagline     = "",
     logoUrl     = "",
   } = config;
 
@@ -42,12 +42,12 @@ export default function Header({ config = {} }) {
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <img
               src={logoUrl || "/logo.png"}
-              width={38}
-              height={38}
+              width={34}
+              height={34}
               className="object-contain"
             />
             <div className="flex flex-col items-start text-orange-700 leading-tight">
-              <span className="text-[16px] font-bold tracking-widest">{companyName}</span>
+              <span className="text-[16px] font-bold tracking-wide ">{companyName}</span>
               <span className="text-[7.5px] tracking-wide text-orange-700 font-bold">{tagline}</span>
             </div>
           </Link>
