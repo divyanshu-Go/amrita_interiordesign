@@ -240,6 +240,8 @@ const VariantSection = ({
   </div>
 );
 
+
+export const revalidate = 0;
 /* -------------------- PAGE COMPONENT -------------------- */
 export default async function VariantsManagementPage() {
   // Optimized fetch: variants + grouped products
