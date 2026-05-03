@@ -1,3 +1,5 @@
+// admin/variants/page.js
+
 import Link from "next/link";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { revalidatePath } from "next/cache";
@@ -95,7 +97,7 @@ const ColorVariantRow = ({ variant, colorProductsMap }) => (
 
     {/* Products Column */}
     <td className="py-3 px-4">
-      <ProductList products={colorProductsMap[variant._id] || []} />
+      <ProductList products={colorProductsMap[variant._id.toString()] || []} />
     </td>
 
     {/* Actions */}
@@ -142,7 +144,7 @@ const PatternVariantRow = ({ variant, patternProductsMap }) => (
 
     {/* Products Column */}
     <td className="py-3 px-4">
-      <ProductList products={patternProductsMap[variant._id] || []} />
+      <ProductList products={patternProductsMap[variant._id.toString()] || []} />
     </td>
 
     {/* Actions */}
