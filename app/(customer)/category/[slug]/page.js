@@ -163,19 +163,3 @@ export default async function CategoryPage({ params }) {
   );
 }
 
-/*
- * ── ACTION REQUIRED ───────────────────────────────────────────────────────
- * generateStaticParams above calls getAllCategories() from serverCategories.js
- * If that function doesn't exist yet, add this to lib/fetchers/serverCategories.js:
- *
- * export async function getAllCategories() {
- *   await DbConnect();
- *   try {
- *     const categories = await Category.find({}, "slug name").lean();
- *     return JSON.parse(JSON.stringify(categories));
- *   } catch {
- *     return [];
- *   }
- * }
- * ─────────────────────────────────────────────────────────────────────────
- */

@@ -1,26 +1,29 @@
 // components/HomePage/ProductByApplicationSection.jsx
 "use client";
 
-import { useState }       from "react";
-import Link               from "next/link";
-import Image              from "next/image";
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { ArrowRightCircle } from "lucide-react";
 
-import Section            from "@/components/ui/Section";
-import SectionHeading     from "@/components/ui/SectionHeading";
-import ProductCardGrid    from "@/components/customer/ProductCardGrid";
+import Section from "@/components/ui/Section";
+import SectionHeading from "@/components/ui/SectionHeading";
+import ProductCardGrid from "@/components/customer/ProductCardGrid";
 
-const MAX_APPS     = 6;
+const MAX_APPS = 6;
 const MAX_PRODUCTS = 5; // +1 "Explore All" card fills the 6th slot
 
 export default function ProductByApplicationSection({ applications, map }) {
   const apps = applications.slice(0, MAX_APPS);
   const [selectedId, setSelectedId] = useState(apps?.[0]?._id ?? null);
 
-  const products     = selectedId ? (map[selectedId] ?? []) : [];
-  const selectedApp  = apps.find((a) => a._id === selectedId);
-
+  const products = selectedId ? (map[selectedId] ?? []) : [];
+  const selectedApp = apps.find((a) => a._id === selectedId);
+  
   if (!apps.length) return null;
+  
+  
+  
 
   return (
     <Section>
@@ -38,30 +41,33 @@ export default function ProductByApplicationSection({ applications, map }) {
             <button
               key={app._id}
               onClick={() => setSelectedId(app._id)}
-              className={`flex flex-col items-center gap-1.5 transition-all ${
-                isActive ? "scale-105" : "opacity-70 hover:opacity-100"
-              }`}
+              className={`flex flex-col items-center gap-1.5 transition-all ${isActive ? "scale-105" : "opacity-70 hover:opacity-100"
+                }`}
             >
               {/* Icon tile */}
               <div
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                  isActive
+                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 transition-all ${isActive
                     ? "border-orange-500 ring-4 ring-orange-100 shadow-md"
                     : "border-gray-200 hover:border-orange-300"
-                }`}
+                  }`}
               >
-                <Image
-                  src={app.image}
-                  alt={app.name}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-contain p-2"
-                />
+                {app.image && app.image.trim() !== "" ? (
+                  <Image
+                    src={app.image || "/logo.png"}
+                    alt={app.name || "Application"}
+                    width={80}
+                    height={80}
+                    className="w-full h-full object-contain p-2"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center p-2 text-gray-400">
+                    <span className="text-xl">🏠</span>
+                  </div>
+                )}
               </div>
               <span
-                className={`text-xs font-medium transition-colors ${
-                  isActive ? "text-orange-600" : "text-gray-600"
-                }`}
+                className={`text-xs font-medium transition-colors ${isActive ? "text-orange-600" : "text-gray-600"
+                  }`}
               >
                 {app.name}
               </span>
