@@ -7,22 +7,23 @@ import { revalidatePath } from "next/cache";
 // Fetchers
 import { getAllColorVariantProducts } from "@/lib/fetchers/colorVariantProducts";
 import { getAllPatternVariantProducts } from "@/lib/fetchers/patternVariantProducts";
+import { deleteColorVariantById } from "@/lib/serversideMutations/colorVariants";
+import { deletePatternVariantById } from "@/lib/serversideMutations/patternVariants";
 
-import { deleteColorVariant } from "@/lib/fetchers/colorVariants";
-import { deletePatternVariant } from "@/lib/fetchers/patternVariants";
+
 
 /* -------------------- SERVER ACTIONS -------------------- */
 async function handleColorDelete(formData) {
   "use server";
   const id = formData.get("id");
-  await deleteColorVariant(id);
+  await deleteColorVariantById(id);
   revalidatePath("/admin/variants");
 }
 
 async function handlePatternDelete(formData) {
   "use server";
   const id = formData.get("id");
-  await deletePatternVariant(id);
+  await deletePatternVariantById(id);
   revalidatePath("/admin/variants");
 }
 

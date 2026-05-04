@@ -1,10 +1,10 @@
 // admin/color-variants/page.js
 
 import Link from "next/link";
-import { deleteColorVariant } from "@/lib/fetchers/colorVariants";
 import { Plus } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { getAllColorVariantsServer } from "@/lib/serversideFetchers/colorVariants";
+import { deleteColorVariantById } from "@/lib/serversideMutations/colorVariants";
 
 /* -------------------- SERVER ACTION -------------------- */
 async function handleDelete(formData) {
@@ -13,7 +13,7 @@ async function handleDelete(formData) {
   const id = formData.get("id");
 
   // You can use your server-side function here ✔
-  await deleteColorVariant(id);
+  await deleteColorVariantById(id);
 
   // Refresh this page to update the list
   revalidatePath("/admin/color-variants");

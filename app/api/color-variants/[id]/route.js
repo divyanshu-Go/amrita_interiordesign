@@ -1,3 +1,4 @@
+// api/color-variants/[id]/route.js
 import { NextResponse } from "next/server";
 import DbConnect from "@/lib/Db/DbConnect";
 import ColorVariant from "@/models/colorVariant";
