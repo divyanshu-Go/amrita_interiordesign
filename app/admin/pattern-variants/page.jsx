@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { deletePatternVariant } from "@/lib/fetchers/patternVariants";
 import { Plus } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { getAllPatternVariantsServer } from "@/lib/serversideFetchers/patternVariants";
+import { deletePatternVariantById } from "@/lib/serversideMutations/patternVariants";
 
 /* -------------------- SERVER ACTION -------------------- */
 async function handleDelete(formData) {
@@ -11,7 +11,7 @@ async function handleDelete(formData) {
   const id = formData.get("id");
 
   // Call your existing server-side delete
-  await deletePatternVariant(id);
+  await deletePatternVariantById(id);
 
   // Refresh this page so updated list shows
   revalidatePath("/admin/pattern-variants");

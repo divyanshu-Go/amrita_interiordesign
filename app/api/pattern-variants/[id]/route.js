@@ -1,3 +1,4 @@
+// api/pattern-variants/[id]/route.js
 import { NextResponse } from "next/server";
 import DbConnect from "@/lib/Db/DbConnect";
 import PatternVariant from "@/models/patternVariant";
