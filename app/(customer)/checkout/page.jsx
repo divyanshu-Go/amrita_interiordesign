@@ -48,15 +48,14 @@ export default function CheckoutPage() {
         const cartData = await cartRes.json();
         const addrData = await addrRes.json();
 
-        console.log("Cart Data:", cartRes);
-        console.log("Address Data:", addrRes);
         // Validate cart is not empty
         if (!cartData.cart || cartData.cart.items.length === 0) {
           throw new Error("Your cart is empty");
         }
-
+        
         setCart(cartData.cart);
         setAddresses(addrData.addresses || []);
+
 
         // Auto-select default address
         const defaultAddr = addrData.addresses?.find((a) => a.isDefault);

@@ -29,39 +29,39 @@
 // ─────────────────────────────────────────────────────────────────────────
 "use client";
 
-import Link    from "next/link";
-import Image   from "next/image";
+import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/app/providers/AuthProvider";
 
 // ── Price resolution ──────────────────────────────────────────────────────
 function resolvePrice(product, isEnterprise) {
-  const original   = isEnterprise ? product.enterprisePrice         : product.retailPrice;
-  const discounted = isEnterprise ? product.enterpriseDiscountPrice  : product.retailDiscountPrice;
-  const perSqFt    = isEnterprise ? product.perSqFtPriceEnterprise   : product.perSqFtPriceRetail;
+  const original = isEnterprise ? product.enterprisePrice : product.retailPrice;
+  const discounted = isEnterprise ? product.enterpriseDiscountPrice : product.retailDiscountPrice;
+  const perSqFt = isEnterprise ? product.perSqFtPriceEnterprise : product.perSqFtPriceRetail;
 
   const hasDiscount = discounted && discounted < original;
-  const sellBy      = product.sellBy ?? "unit";
+  const sellBy = product.sellBy ?? "unit";
 
   if (product.showPerSqFtPrice) {
     return {
-      primaryPrice:    perSqFt,
-      primaryLabel:    "/ SqFt",
-      strikePrice:     hasDiscount ? original    : null,
-      salePrice:       hasDiscount ? discounted  : original,
-      salePriceLabel:  `/ ${sellBy}`,
-      discountPct:     hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-      savingsAmt:      hasDiscount ? original - discounted : 0,
+      primaryPrice: perSqFt,
+      primaryLabel: "/ SqFt",
+      strikePrice: hasDiscount ? original : null,
+      salePrice: hasDiscount ? discounted : original,
+      salePriceLabel: `/ ${sellBy}`,
+      discountPct: hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
+      savingsAmt: hasDiscount ? original - discounted : 0,
     };
   }
 
   return {
-    primaryPrice:   discounted || original,
-    primaryLabel:   `/ ${sellBy}`,
-    strikePrice:    hasDiscount ? original : null,
-    salePrice:      null,
+    primaryPrice: discounted || original,
+    primaryLabel: `/ ${sellBy}`,
+    strikePrice: hasDiscount ? original : null,
+    salePrice: null,
     salePriceLabel: null,
-    discountPct:    hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-    savingsAmt:     hasDiscount ? original - discounted : 0,
+    discountPct: hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
+    savingsAmt: hasDiscount ? original - discounted : 0,
   };
 }
 
@@ -71,11 +71,11 @@ const fmt = (n) => Number(n).toLocaleString("en-IN");
 
 export default function ProductCardGrid({ product }) {
   // Auth is handled internally — no need to thread userRole from parent
-  const { userRole } = useAuth();
-  const isEnterprise = userRole === "enterprise" && user?.enterpriseStatus === "verified";  
-  const price        = resolvePrice(product, isEnterprise);
-  const mainImage    = product.images?.[0] ?? null;
-
+  const { userRole, user } = useAuth();
+  const isEnterprise = userRole === "enterprise" && user?.enterpriseStatus === "verified";
+  const price = resolvePrice(product, isEnterprise);
+  const mainImage = product.images?.[0] || null;
+  
   return (
     <Link href={`/product/${product.slug}`} className="block min-w-44">
       <article className="group bg-white rounded-xl border border-gray-200 hover:border-orange-200 hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">

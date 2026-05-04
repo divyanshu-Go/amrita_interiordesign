@@ -16,7 +16,7 @@
 //    the initial SSR pass — this is the right pattern.
 // ─────────────────────────────────────────────────────────────────────────
 
-import { searchProducts }          from "@/lib/fetchers/search";
+import { searchProducts } from "@/lib/serversideFetchers/search";
 import Breadcrumb                  from "@/components/customer/Breadcrumb";
 import SearchResultsPageClient     from "@/components/customer/SearchResultsClient";
 
@@ -28,6 +28,9 @@ export const metadata = {
     follow: true,    // still follow links on it
   },
 };
+
+
+export const dynamic = "force-dynamic";
 
 export default async function SearchPage({ searchParams }) {
   // Next.js 15: searchParams is async — must be awaited

@@ -1,3 +1,5 @@
+// admin/color-variants/page.js
+
 import Link from "next/link";
 import { deleteColorVariant } from "@/lib/fetchers/colorVariants";
 import { Plus } from "lucide-react";
