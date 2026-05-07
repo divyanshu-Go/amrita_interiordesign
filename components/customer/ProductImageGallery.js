@@ -22,7 +22,7 @@ export default function ProductImageGallery({ images, productName }) {
     setSelectedImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
 
   return (
-    <div className="space-y-2">
+    <div className="max-w-lg w-full lg:px-4 mx-auto sm:mx-0 space-y-2">
       {/* ── Main Image ─────────────────────────────────────────────────────── */}
       <div className="relative w-full aspect-square rounded-sm border border-gray-100 bg-white overflow-hidden">
         <img

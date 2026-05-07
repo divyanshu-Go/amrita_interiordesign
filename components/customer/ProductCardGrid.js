@@ -77,11 +77,11 @@ export default function ProductCardGrid({ product }) {
   const mainImage = product.images?.[0] || null;
   
   return (
-    <Link href={`/product/${product.slug}`} className="block min-w-44">
-      <article className="group bg-white rounded-xl border border-gray-200 hover:border-orange-200 hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col">
+    <Link href={`/product/${product.slug}`} className="block min-w-44 bg-white  border border-gray-100  hover:border-orange-100 hover:shadow-md transition-all duration-200">
+      <article className="grouprounded-sm  overflow-hidden flex flex-col">
 
         {/* ── Image ── */}
-        <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden flex-shrink-0">
+        <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden shrink-0">
           {mainImage ? (
             <Image
               src={mainImage}

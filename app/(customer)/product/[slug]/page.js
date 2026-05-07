@@ -5,12 +5,12 @@
 // All other logic is unchanged.
 
 import { getProductBySlug, getAllProducts } from "@/lib/fetchers/serverProducts";
-import { notFound }                         from "next/navigation";
-import Breadcrumb                           from "@/components/customer/Breadcrumb";
-import ProductPageClient                    from "@/components/customer/ProductPageClient";
+import { notFound } from "next/navigation";
+import Breadcrumb from "@/components/customer/Breadcrumb";
+import ProductPageClient from "@/components/customer/ProductPageClient";
 import { getRelatedByCategory, getRelatedByCollection } from "@/lib/fetchers/relatedProducts";
-import RelatedProductsRow                   from "@/components/customer/RelatedProductsRow";
-import { getSiteConfig }                    from "@/lib/fetchers/siteConfig";
+import RelatedProductsRow from "@/components/customer/RelatedProductsRow";
+import { getSiteConfig } from "@/lib/fetchers/siteConfig";
 
 export const revalidate = 1800;
 
@@ -33,14 +33,14 @@ export async function generateMetadata({ params }) {
 
   const { product } = data;
   const categoryName = product.category?.[0]?.name || "Interior Materials";
-  const brand        = product.brand || "Interio97";
-  const material     = product.material?.length ? product.material.join(", ") : null;
-  const title        = [product.name, brand].filter(Boolean).join(" - ");
+  const brand = product.brand || "Interio97";
+  const material = product.material?.length ? product.material.join(", ") : null;
+  const title = [product.name, brand].filter(Boolean).join(" - ");
 
   const descParts = [
     `Buy ${product.name}`,
     categoryName ? `in ${categoryName}` : null,
-    material     ? `— made of ${material}` : null,
+    material ? `— made of ${material}` : null,
     product.retailPrice
       ? `Starting at ₹${product.retailDiscountPrice || product.retailPrice}`
       : null,
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }) {
   ].filter(Boolean);
 
   const description = descParts.join(". ").slice(0, 160);
-  const imageUrl    = product.images?.[0] || null;
+  const imageUrl = product.images?.[0] || null;
 
   return {
     title,
@@ -63,9 +63,9 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      url:    `https://www.interio97.in/product/${product.slug}`,
+      url: `https://www.interio97.in/product/${product.slug}`,
       images: imageUrl ? [{ url: imageUrl, alt: product.name }] : [],
-      type:   "website",
+      type: "website",
     },
     alternates: {
       canonical: `https://www.interio97.in/product/${product.slug}`,
@@ -75,28 +75,28 @@ export async function generateMetadata({ params }) {
 
 // ── JSON-LD: Product ──────────────────────────────────────────────────────
 function ProductJsonLd({ product }) {
-  const price        = product.retailDiscountPrice || product.retailPrice;
+  const price = product.retailDiscountPrice || product.retailPrice;
   const categoryName = product.category?.[0]?.name || "Interior Materials";
 
   const jsonLd = {
-    "@context":   "https://schema.org",
-    "@type":      "Product",
-    name:         product.name,
-    description:  product.description || `${product.name} — premium ${categoryName}`,
-    sku:          product.sku || product.slug,
-    brand:        { "@type": "Brand", name: product.brand || "Interio97" },
-    image:        product.images || [],
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description || `${product.name} — premium ${categoryName}`,
+    sku: product.sku || product.slug,
+    brand: { "@type": "Brand", name: product.brand || "Interio97" },
+    image: product.images || [],
     offers: {
-      "@type":        "Offer",
-      url:            `https://www.interio97.in/product/${product.slug}`,
-      priceCurrency:  "INR",
+      "@type": "Offer",
+      url: `https://www.interio97.in/product/${product.slug}`,
+      priceCurrency: "INR",
       price,
-      availability:   product.stock > 0
+      availability: product.stock > 0
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
       seller: { "@type": "Organization", name: "Interio97" },
     },
-    ...(product.material?.length  && { material: product.material.join(", ") }),
+    ...(product.material?.length && { material: product.material.join(", ") }),
     ...(product.category?.[0]?.name && { category: product.category[0].name }),
   };
 
@@ -115,17 +115,17 @@ function BreadcrumbJsonLd({ product }) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type":    "BreadcrumbList",
+    "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://www.interio97.in" },
       ...(categorySlug
         ? [
-            { "@type": "ListItem", position: 2, name: categoryName, item: `https://www.interio97.in/category/${categorySlug}` },
-            { "@type": "ListItem", position: 3, name: product.name,  item: `https://www.interio97.in/product/${product.slug}` },
-          ]
+          { "@type": "ListItem", position: 2, name: categoryName, item: `https://www.interio97.in/category/${categorySlug}` },
+          { "@type": "ListItem", position: 3, name: product.name, item: `https://www.interio97.in/product/${product.slug}` },
+        ]
         : [
-            { "@type": "ListItem", position: 2, name: product.name,  item: `https://www.interio97.in/product/${product.slug}` },
-          ]
+          { "@type": "ListItem", position: 2, name: product.name, item: `https://www.interio97.in/product/${product.slug}` },
+        ]
       ),
     ],
   };
@@ -152,7 +152,7 @@ export default async function ProductPage({ params }) {
 
   const { product, variants, colorVariants, patternVariants } = data;
 
-  const productId       = product._id.toString();
+  const productId = product._id.toString();
   const colorVariantIds = product.colorVariant
     ? [String(product.colorVariant._id || product.colorVariant)] : [];
   const patternVariantIds = product.patternVariant
@@ -165,7 +165,7 @@ export default async function ProductPage({ params }) {
     getRelatedByCategory({ categoryId, productId, limit: 12 }),
   ]);
 
-  const collectionIds    = new Set(relatedCollection.map((p) => p._id.toString()));
+  const collectionIds = new Set(relatedCollection.map((p) => p._id.toString()));
   const categoryFiltered = relatedCategory.filter((p) => !collectionIds.has(p._id.toString()));
 
   return (
@@ -173,31 +173,35 @@ export default async function ProductPage({ params }) {
       <ProductJsonLd product={product} />
       <BreadcrumbJsonLd product={product} />
 
-      <div className="bg-gray-50 min-h-screen py-2.5">
-        <Breadcrumb
-          items={[
-            {
-              label: product.category[0]?.name || "Products",
-              href:  product.category[0]
-                ? `/category/${product.category[0]?.slug}`
-                : "/products",
-            },
-            { label: product.name },
-          ]}
-        />
+      <div className="bg-gray-50 min-h-screen">
+        {/* Breadcrumb constrained slightly for readability, or remove max-w for total full width */}
+        <div className="w-full">
+          <Breadcrumb
+            items={[
+              {
+                label: product.category[0]?.name || "Products",
+                href: product.category[0] ? `/category/${product.category[0]?.slug}` : "/products",
+              },
+              { label: product.name },
+            ]}
+          />
+        </div>
 
-        {/* phone + whatsapp come from DB via ISR — no longer hardcoded */}
-        <ProductPageClient
-          product={product}
-          variants={variants}
-          colorVariants={colorVariants}
-          patternVariants={patternVariants}
-          phone={siteConfig.phone}
-          whatsapp={siteConfig.whatsapp}
-        />
+        <main className="w-full mx-auto px-4 py-6 lg:py-8 ">
+          <ProductPageClient
+            product={product}
+            variants={variants}
+            colorVariants={colorVariants}
+            patternVariants={patternVariants}
+            phone={siteConfig.phone}
+            whatsapp={siteConfig.whatsapp}
+          />
 
-        <RelatedProductsRow title="Similar Designs & Variants" products={relatedCollection} />
-        <RelatedProductsRow title="More from this Category"    products={categoryFiltered} />
+          <div className="mt-12 space-y-12">
+            <RelatedProductsRow title="Similar Designs & Variants" products={relatedCollection} />
+            <RelatedProductsRow title="More from this Category" products={categoryFiltered} />
+          </div>
+        </main>
       </div>
     </>
   );

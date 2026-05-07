@@ -3,6 +3,7 @@ import { getCategoryBySlug, getAllCategories } from "@/lib/fetchers/serverCatego
 import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import CategoryPageClient from "@/components/customer/CategoryPageClient";
+import Section from "@/components/ui/Section";
 
 export const revalidate = 1800;
 
@@ -143,7 +144,7 @@ export default async function CategoryPage({ params }) {
 
       <Breadcrumb items={[{ label: category?.name }]} />
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <Section className="py-6 lg:py-8">
         {products.length === 0 ? (
           <div className="bg-white rounded-md shadow-sm border border-gray-200 p-12 text-center">
             <div className="text-6xl mb-4">📦</div>
@@ -158,7 +159,7 @@ export default async function CategoryPage({ params }) {
             headerContent={headerContent}
           />
         )}
-      </section>
+      </Section>
     </>
   );
 }
