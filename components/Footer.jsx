@@ -8,10 +8,12 @@ import Link from "next/link";
 import { Twitter, Instagram, Linkedin, MapPin, Phone, Mail } from "lucide-react";
 
 const quickLinks = [
-  { label: "Home",       href: "/" },
-  { label: "Categories", href: "/category" },
-  { label: "About Us",   href: "/about" },
-  { label: "Contact",    href: "/contact" },
+  { label: "Home",                     href: "/" },
+  { label: "Categories",              href: "/category/all" },
+  { label: "Terms & Conditions",      href: "/terms-and-conditions" },
+  { label: "Privacy Policy",          href: "/privacy-policy" },
+  { label: "Shipping & Delivery",     href: "/shipping-delivery" },
+  { label: "Contact",                 href: "/contact" },
 ];
 
 const accountLinks = [
@@ -42,7 +44,7 @@ export default function Footer({ config = {} }) {
 
   return (
     <footer className="bg-white border-t-2 border-orange-200 mt-8">
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
           {/* ── Brand ── */}

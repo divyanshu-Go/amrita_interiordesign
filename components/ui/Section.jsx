@@ -9,7 +9,9 @@
 
 export default function Section({ children, className = "" }) {
   return (
-    <section className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
+    <section
+      className={`w-full mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-12 ${className}`}
+    >
       {children}
     </section>
   );

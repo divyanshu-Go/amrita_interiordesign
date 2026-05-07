@@ -20,7 +20,7 @@ export default async function PopularCategoriesSection() {
   const top = categories.slice(0, MAX_CATEGORIES);
 
   return (
-    <Section>
+    <Section className="max-w-7xl">
       <SectionHeading
         title="Popular Categories from"
         accent=" Interio97 "

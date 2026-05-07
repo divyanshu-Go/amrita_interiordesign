@@ -7,40 +7,40 @@ import Image from "next/image";
 import { toast } from "sonner";
 
 import ProductImageGallery from "./ProductImageGallery";
-import ProductDetails      from "./ProductDetails";
-import TrustBadges         from "./TrustBadges";
-import CartButton          from "./CartButton";
-import { useAuth }         from "@/app/providers/AuthProvider";
+import ProductDetails from "./ProductDetails";
+import TrustBadges from "./TrustBadges";
+import CartButton from "./CartButton";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 // ── Price resolution ──────────────────────────────────────────────────────
 function resolvePrice(product, isEnterprise) {
-  const original   = isEnterprise ? product.enterprisePrice         : product.retailPrice;
-  const discounted = isEnterprise ? product.enterpriseDiscountPrice  : product.retailDiscountPrice;
-  const perSqFt    = isEnterprise ? product.perSqFtPriceEnterprise   : product.perSqFtPriceRetail;
+  const original = isEnterprise ? product.enterprisePrice : product.retailPrice;
+  const discounted = isEnterprise ? product.enterpriseDiscountPrice : product.retailDiscountPrice;
+  const perSqFt = isEnterprise ? product.perSqFtPriceEnterprise : product.perSqFtPriceRetail;
 
   const hasDiscount = discounted && discounted < original;
-  const sellBy      = product.sellBy ?? "unit";
+  const sellBy = product.sellBy ?? "unit";
 
   if (product.showPerSqFtPrice) {
     return {
-      primaryPrice:    perSqFt,
-      primaryLabel:    "/ SqFt",
-      salePrice:       discounted || original,
-      salePriceLabel:  `/ ${sellBy}`,
-      strikePrice:     hasDiscount ? original : null,
-      discountPct:     hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-      savingsAmt:      hasDiscount ? original - discounted : 0,
+      primaryPrice: perSqFt,
+      primaryLabel: "/ SqFt",
+      salePrice: discounted || original,
+      salePriceLabel: `/ ${sellBy}`,
+      strikePrice: hasDiscount ? original : null,
+      discountPct: hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
+      savingsAmt: hasDiscount ? original - discounted : 0,
     };
   }
 
   return {
-    primaryPrice:   discounted || original,
-    primaryLabel:   `/ ${sellBy}`,
-    salePrice:      null,
+    primaryPrice: discounted || original,
+    primaryLabel: `/ ${sellBy}`,
+    salePrice: null,
     salePriceLabel: null,
-    strikePrice:    hasDiscount ? original : null,
-    discountPct:    hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-    savingsAmt:     hasDiscount ? original - discounted : 0,
+    strikePrice: hasDiscount ? original : null,
+    discountPct: hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
+    savingsAmt: hasDiscount ? original - discounted : 0,
   };
 }
 
@@ -55,15 +55,15 @@ export default function ProductPageClient({
   patternVariants,
   // phone and whatsapp come from the parent server component (fetched via ISR)
   // Fallback to empty string so the buttons are simply hidden if not configured
-  phone    = "",
+  phone = "",
   whatsapp = "",
 }) {
   const { userRole } = useAuth();
   const isEnterprise = userRole === "enterprise";
-  const price        = resolvePrice(product, isEnterprise);
+  const price = resolvePrice(product, isEnterprise);
 
   const [shareState, setShareState] = useState("idle");
-  const [copyState,  setCopyState]  = useState("idle");
+  const [copyState, setCopyState] = useState("idle");
 
   // ── Handlers ─────────────────────────────────────────────────────────
   async function handleShare() {
@@ -105,13 +105,12 @@ export default function ProductPageClient({
 
   // ── Render ───────────────────────────────────────────────────────────
   return (
-    <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+    <div className="">
 
       {/* ── Product section: image + info ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-5 sm:gap-8 mb-6">
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-8">
         {/* LEFT — image gallery */}
-        <div className="max-w-md w-full mx-auto sm:mx-0">
+        <div className="w-full flex justify-center">
           <ProductImageGallery images={product.images} productName={product.name} />
         </div>
 
@@ -142,7 +141,7 @@ export default function ProductPageClient({
           </h1>
 
           {/* ── Price box ── */}
-          <div className="bg-orange-50 rounded-xl p-3.5 border border-orange-200">
+          <div className="bg-orange-50 rounded-sm p-3.5 my-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <span className="text-xl font-bold text-gray-900">
@@ -207,6 +206,8 @@ export default function ProductPageClient({
             </span>
           )}
 
+
+          <div className="flex flex-col gap-3 py-4">
           <CartButton productId={product._id.toString()} stock={product.stock} userRole={userRole} />
 
           {/* Contact buttons — only rendered if numbers are configured */}
@@ -246,12 +247,13 @@ export default function ProductPageClient({
                 >
                   {copyState === "copied"
                     ? <Check className="w-3.5 h-3.5" />
-                    : <Copy  className="w-3.5 h-3.5" />
+                    : <Copy className="w-3.5 h-3.5" />
                   }
                 </button>
               )}
             </div>
           )}
+          </div>
 
         </div>
       </div>
@@ -275,11 +277,10 @@ function VariantRow({ label, variants, nameKey, currentSlug }) {
           const isActive = v.slug === currentSlug;
           return (
             <a key={v._id} href={`/product/${v.slug}`} className="flex flex-col items-center gap-1 group">
-              <div className={`w-10 h-10 rounded-lg overflow-hidden border transition-colors ${
-                isActive
+              <div className={`w-10 h-10 rounded-lg overflow-hidden border transition-colors ${isActive
                   ? "border-orange-500 ring-2 ring-orange-200"
                   : "border-gray-200 group-hover:border-orange-400"
-              }`}>
+                }`}>
                 {v.images?.[0] ? (
                   <Image src={v.images[0]} alt={v.name} width={40} height={40} className="w-full h-full object-cover" />
                 ) : (

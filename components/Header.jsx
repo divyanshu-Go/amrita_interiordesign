@@ -33,7 +33,7 @@ export default function Header({ config = {} }) {
 
   return (
     <header className="bg-white w-full fixed top-0 z-50 border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto w-full px-4">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12">
 
         {/* ── Row 1: Logo + Pincode + Profile + Cart ── */}
         <div className="flex items-center gap-3 py-3">
