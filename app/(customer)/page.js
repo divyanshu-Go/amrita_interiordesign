@@ -161,7 +161,7 @@ export default async function HomePage() {
 
 function SectionSkeleton() {
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
+    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
       <div className="flex flex-col items-center gap-2 mb-10">
         <div className="h-7 w-64 bg-gray-200 rounded-md" />
         <div className="h-4 w-40 bg-gray-100 rounded-md" />
