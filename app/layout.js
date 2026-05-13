@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${poppins.className} relative min-h-screen flex flex-col`}
+        className={`${poppins.className} min-h-screen flex flex-col`}
       >
         <AuthProvider>
           <ClientLayout>{children}</ClientLayout>
