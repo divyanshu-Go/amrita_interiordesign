@@ -307,7 +307,7 @@ export default function SearchResultsPageClient({ products, query, headerContent
       {/* ── SIDEBAR ───────────────────────────────────────────────────── */}
       <aside className="sm:col-span-4 md:col-span-3 col-span-12">
         {/* Mobile toggle */}
-        <div className="sm:hidden mb-4">
+        <div className="sm:hidden mb-4 ">
           <button
             onClick={() => setShowFilters((v) => !v)}
             className="w-full flex items-center justify-center gap-2 bg-white border-2 border-gray-200 rounded-md
@@ -340,7 +340,7 @@ export default function SearchResultsPageClient({ products, query, headerContent
       </aside>
 
       {/* ── PRODUCTS ──────────────────────────────────────────────────── */}
-      <main className="sm:col-span-8 md:col-span-9 col-span-12">
+      <main className="sm:col-span-8 md:col-span-9 col-span-12 ">
         {headerContent}
 
         <p className="text-sm text-gray-600 mb-4">

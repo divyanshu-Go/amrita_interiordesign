@@ -369,7 +369,7 @@ export default function CategoryPageClient({
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-gray-100 rounded-md animate-pulse aspect-[3/4]"
+                className="bg-gray-100 rounded-md animate-pulse aspect-3/4"
               />
             ))}
           </div>

@@ -170,9 +170,9 @@ export default function FilterSidebar({
       </div>
 
       {/* Scrollable content */}
-      <div className="overflow-y-auto max-h-[calc(100vh-13rem)] px-4 py-3">
+      <div className="overflow-y-auto max-h-[calc(100vh-13rem)] px-4 py-3 ">
         <div className="space-y-2">
-
+          
           {/* Sort By */}
           <FilterAccordionItem title="Sort By" defaultOpen={true}>
             <select
@@ -189,7 +189,7 @@ export default function FilterSidebar({
 
           {/* Price Range — dual thumb */}
           <FilterAccordionItem title="Price Range" defaultOpen={true}>
-            <div className="space-y-3">
+            <div className="space-y-3 ">
               {/* Dual-range slider */}
               <div className="relative h-4 flex items-center">
                 {/* Track background */}
