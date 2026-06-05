@@ -158,6 +158,10 @@ export async function GET(request) {
       mongoFilter.stock = { $gt: 0 };
     }
 
+    // Sub-type (marble-sheet specific)
+    const subType = searchParams.get("subType");
+    if (subType) mongoFilter.subType = subType;
+
     // ── Sort ──────────────────────────────────────────────────────────────
     let sortStage = {};
     switch (sortBy) {

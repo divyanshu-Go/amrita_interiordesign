@@ -1,20 +1,4 @@
 // components/customer/CategoryPageClient.js
-//
-// ── ARCHITECTURE ──────────────────────────────────────────────────────────
-// URL is the single source of truth. All filter/sort/page state lives in
-// URL search params. This means:
-//   • Page reload restores exact state
-//   • Browser back/forward works correctly
-//   • Shareable URLs with applied filters
-//   • No mismatch between UI and displayed products
-//
-// Data flow:
-//   1. Read URL params → pass to FilterSidebar (controls UI state)
-//   2. Fetch products from /api/products/by-category with those params
-//   3. FilterSidebar changes → updateURL() → triggers re-fetch
-//   4. Pagination changes → updateURL() → triggers re-fetch
-// ─────────────────────────────────────────────────────────────────────────
-
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -24,15 +8,12 @@ import { useAuth } from "@/app/providers/AuthProvider";
 import FilterSidebar from "./FilterSidebar";
 import ProductCardGrid from "./ProductCardGrid";
 import Pagination from "../ui/Pagination";
+import MarbleSheetSubTypeSelector from "./MarbleSheetSubTypeSelector"; // ← NEW
 
 const PRODUCTS_PER_PAGE = 24;
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-/**
- * Read all current filter values from URL search params.
- * Returns a normalized filter object the sidebar and API call both use.
- */
 function readFiltersFromURL(searchParams, priceRange) {
   return {
     page: parseInt(searchParams.get("page") || "1", 10),
@@ -68,13 +49,10 @@ function readFiltersFromURL(searchParams, priceRange) {
       ? searchParams.get("applications").split(",").filter(Boolean)
       : [],
     inStock: searchParams.get("inStock") === "true",
+    subType: searchParams.get("subType") || "", // ← NEW
   };
 }
 
-/**
- * Build a URL search params string from a filter object.
- * Omits defaults so URLs stay clean.
- */
 function buildSearchParams(filters, priceRange) {
   const params = new URLSearchParams();
 
@@ -82,7 +60,6 @@ function buildSearchParams(filters, priceRange) {
   if (filters.sortBy && filters.sortBy !== "newest")
     params.set("sortBy", filters.sortBy);
 
-  // Only include price if it differs from the category default range
   if (filters.minPrice !== undefined && filters.minPrice !== priceRange.min)
     params.set("minPrice", filters.minPrice);
   if (filters.maxPrice !== undefined && filters.maxPrice !== priceRange.max)
@@ -102,14 +79,13 @@ function buildSearchParams(filters, priceRange) {
   if (filters.applications?.length)
     params.set("applications", filters.applications.join(","));
   if (filters.inStock) params.set("inStock", "true");
+  if (filters.subType) params.set("subType", filters.subType); // ← NEW
 
   return params.toString();
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
 
-// Safe fallback shape — every array field defaults to [] so no .length crash
-// can ever happen even if the server returns a partial filterOptions object.
 const EMPTY_FILTER_OPTIONS = {
   colors: [],
   brands: [],
@@ -128,7 +104,6 @@ export default function CategoryPageClient({
   filterOptions: rawFilterOptions,
   categorySlug,
 }) {
-  // Merge with safe defaults — any missing/undefined field falls back to []
   const filterOptions = { ...EMPTY_FILTER_OPTIONS, ...rawFilterOptions };
 
   const router = useRouter();
@@ -136,8 +111,6 @@ export default function CategoryPageClient({
   const searchParams = useSearchParams();
   const { userRole, loading: authLoading } = useAuth();
 
-  // Pick price range based on user role.
-  // Falls back through the chain to a hardcoded safe default.
   const priceRange =
     (userRole === "enterprise"
       ? filterOptions.enterprisePriceRange
@@ -145,21 +118,16 @@ export default function CategoryPageClient({
     filterOptions.retailPriceRange ??
     { min: 0, max: 100000 };
 
-  // ── Products state ────────────────────────────────────────────────────
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
-
-  // ── Mobile sidebar ────────────────────────────────────────────────────
   const [showFilters, setShowFilters] = useState(false);
 
-  // Prevent concurrent fetches with AbortController
   const abortRef = useRef(null);
 
-  // ── Fetch products when URL params or userRole change ─────────────────
   const fetchProducts = useCallback(async () => {
-    if (authLoading) return; // wait until we know the role
+    if (authLoading) return;
 
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
@@ -200,6 +168,7 @@ export default function CategoryPageClient({
       if (filters.applications.length)
         apiParams.set("applications", filters.applications.join(","));
       if (filters.inStock) apiParams.set("inStock", "true");
+      if (filters.subType) apiParams.set("subType", filters.subType); // ← NEW
 
       const res = await fetch(`/api/products/by-category?${apiParams}`, {
         signal: controller.signal,
@@ -211,7 +180,7 @@ export default function CategoryPageClient({
       setProducts(data.products);
       setPagination(data.pagination);
     } catch (err) {
-      if (err.name === "AbortError") return; // intentionally cancelled
+      if (err.name === "AbortError") return;
       console.error("[CategoryPageClient] fetch error:", err);
       setFetchError("Failed to load products. Please try again.");
     } finally {
@@ -223,12 +192,6 @@ export default function CategoryPageClient({
     fetchProducts();
   }, [fetchProducts]);
 
-  // ── URL update helpers ────────────────────────────────────────────────
-
-  /**
-   * Called by FilterSidebar when any filter or sort changes.
-   * Resets to page 1 on filter change.
-   */
   const handleFilterChange = useCallback(
     (newFilters) => {
       const qs = buildSearchParams({ ...newFilters, page: 1 }, priceRange);
@@ -237,10 +200,6 @@ export default function CategoryPageClient({
     [router, pathname, priceRange]
   );
 
-  /**
-   * Called by Pagination when the user navigates pages.
-   * Preserves all existing filters.
-   */
   const handlePageChange = useCallback(
     (newPage) => {
       const current = readFiltersFromURL(searchParams, priceRange);
@@ -250,7 +209,16 @@ export default function CategoryPageClient({
     [router, pathname, searchParams, priceRange]
   );
 
-  // ── Derived state ─────────────────────────────────────────────────────
+  // ← NEW: subType selector handler — resets to page 1, preserves all other filters
+  const handleSubTypeChange = useCallback(
+    (value) => {
+      const current = readFiltersFromURL(searchParams, priceRange);
+      const qs = buildSearchParams({ ...current, subType: value, page: 1 }, priceRange);
+      router.push(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
+    },
+    [router, pathname, searchParams, priceRange]
+  );
+
   const currentFilters = readFiltersFromURL(searchParams, priceRange);
 
   const activeFilterCount = [
@@ -267,13 +235,11 @@ export default function CategoryPageClient({
     (currentFilters.maxPrice !== priceRange.max ? 1 : 0) +
     (currentFilters.minPrice !== priceRange.min ? 1 : 0);
 
-  // ── Render ────────────────────────────────────────────────────────────
   return (
     <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
 
       {/* ── LEFT SIDEBAR ────────────────────────────────────────────────── */}
       <aside className="sm:col-span-4 md:col-span-3 col-span-12">
-        {/* Mobile toggle */}
         <div className="sm:hidden mb-4">
           <button
             onClick={() => setShowFilters((v) => !v)}
@@ -341,6 +307,14 @@ export default function CategoryPageClient({
             </div>
           </div>
         </section>
+
+        {/* ← NEW: Sub-type selector — only renders for marble-sheet */}
+        {categorySlug === "marble-sheet" && (
+          <MarbleSheetSubTypeSelector
+            currentSubType={currentFilters.subType}
+            onSelect={handleSubTypeChange}
+          />
+        )}
 
         {/* Results count */}
         {!fetchLoading && pagination && (
@@ -416,7 +390,6 @@ export default function CategoryPageClient({
               ))}
             </div>
 
-            {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
               <div className="mt-8">
                 <Pagination

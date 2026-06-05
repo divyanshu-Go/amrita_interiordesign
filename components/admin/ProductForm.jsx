@@ -189,6 +189,7 @@ export default function ProductForm({
       ? product.application.map((a) => a._id || a)
       : [],
     coverageArea: product?.coverageArea || "",
+    subType: product?.subType || "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -262,6 +263,7 @@ export default function ProductForm({
         category: Array.isArray(formData.category)
           ? formData.category
           : [formData.category],
+        subType: formData.subType || null,
       };
 
       if (isEdit) {
@@ -417,6 +419,26 @@ export default function ProductForm({
               placeholder="48 × 8 inch"
             />
           </div>
+
+          {/* Sub-type — only shown when marble-sheet category is selected */}
+{formData.category.some((id) =>
+  categories.find((c) => c._id === id && c.slug === "marble-sheet")
+) && (
+  <div className="pt-4 border-t border-gray-200">
+    <SelectField
+      label="Sub Type"
+      required
+      name="subType"
+      value={formData.subType}
+      onChange={handleChange}
+      options={[
+        { value: "", label: "Select sub-type" },
+        { value: "self-adhesive", label: "Self Adhesive" },
+        { value: "non-adhesive", label: "Non Adhesive" },
+      ]}
+    />
+  </div>
+)}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
             <InputField

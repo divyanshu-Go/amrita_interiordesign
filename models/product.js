@@ -80,6 +80,13 @@ const ProductSchema = new Schema(
     application: [{ type: Schema.Types.ObjectId, ref: "Application" }],
 
     coverageArea: String,
+
+    subType: {
+      type: String,
+      enum: ["self-adhesive", "non-adhesive"],
+      default: null,
+      index: true,
+    },
   },
   { timestamps: true }
 );
