@@ -1,3 +1,4 @@
+// account/sections/cart/CartLoader.jsx
 export default function CartLoader() {
   return (
     <div className="space-y-6 animate-pulse">

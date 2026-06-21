@@ -1,3 +1,5 @@
+// app/api/auth/login/route.js
+
 import { setAuthCookie } from "@/lib/auth/cookies";
 import { verifyPassword } from "@/lib/auth/password";
 import { generateToken } from "@/lib/auth/token";
