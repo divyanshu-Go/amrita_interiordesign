@@ -7,6 +7,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
 import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
+import { useAuth } from "@/app/providers/AuthProvider"; // ADD THIS
+
 
 const ROLE_LINKS = [
   { role: "user", label: "User", href: "/login/user" },
@@ -20,6 +22,8 @@ export const LoginForm = ({ defaultRole = "user" }) => {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { refreshUser } = useAuth(); // ADD THIS
 
   const validateForm = () => {
     const newErrors = {};
@@ -57,12 +61,9 @@ export const LoginForm = ({ defaultRole = "user" }) => {
       // ── Cart merge: runs before redirect, after cookie is set ──────────
       // auth_token cookie is already set by the API response at this point
       const guestCart = getGuestCart();
-      console.log("[LoginForm] ENTRY", guestCart);
       if (guestCart.items.length > 0) {
         try {
-          console.log("[LoginForm] ENTRY Merging guest cart");
           await mergeGuestCart(guestCart.items);
-          console.log("[LoginForm] ENTRY Clearing guest cart from localStorage");
           clearGuestCart();
         } catch (mergeErr) {
           // Non-fatal: log and continue — user still gets logged in
@@ -72,6 +73,12 @@ export const LoginForm = ({ defaultRole = "user" }) => {
       // ───────────────────────────────────────────────────────────────────
 
       setMessage("Login successful! Redirecting...");
+
+      // ── CRITICAL: refresh auth state before navigating ──
+      await refreshUser();
+      // ───────────────────────────────────────────────────
+
+
       if (data.user.role === "admin") {
         router.push("/admin");
       } else if (data.user.role === "enterprise_active") {
@@ -80,8 +87,10 @@ export const LoginForm = ({ defaultRole = "user" }) => {
         router.push("/cart"); // important: go to cart after login
       }
 
-      // 🔑 Force revalidation (CRITICAL)
+      // router.refresh() can stay — it keeps RSC cache fresh (e.g. server-side role checks)
       router.refresh();
+
+
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -124,8 +133,8 @@ export const LoginForm = ({ defaultRole = "user" }) => {
         )}
         {message && (
           <div className={`text-sm px-3 py-2 rounded ${message.includes("pending") ? "bg-yellow-100 text-yellow-700" :
-              message.includes("rejected") ? "bg-red-100 text-red-700" :
-                "bg-green-100 text-green-700"
+            message.includes("rejected") ? "bg-red-100 text-red-700" :
+              "bg-green-100 text-green-700"
             }`}>
             {message}
           </div>

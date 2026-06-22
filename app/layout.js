@@ -6,14 +6,10 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 
-// ── BEFORE: loaded all 9 weights (100–900) = ~600KB of font files
-// ── AFTER:  only the 3 weights actually used in Tailwind classes
-//            (font-normal=400, font-medium=500, font-semibold=600)
-//            saves ~300–400 KB on every page load
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  display: "swap", // show text in fallback font while Poppins loads (faster FCP)
+  display: "swap",
 });
 
 export const metadata = {
