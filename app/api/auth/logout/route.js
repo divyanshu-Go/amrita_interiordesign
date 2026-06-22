@@ -1,3 +1,4 @@
+// app/api/auth/logout/route.js
 import { NextResponse } from "next/server";
 import { removeAuthCookie } from "@/lib/auth/cookies";
 

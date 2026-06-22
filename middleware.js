@@ -74,39 +74,47 @@ async function verifyJWT(token) {
 // ── Middleware ────────────────────────────────────────────────────────────
 
 export async function middleware(request) {
-  const { pathname } = request.nextUrl;
 
-  // 1. Decode JWT if present
+  
+  const { pathname } = request.nextUrl;
+  console.log("[middleware] action?", request.headers.get("next-action"), pathname)
+
+  // Server Action requests carry this header. Never redirect these —
+  // doing so corrupts the action's response and breaks the action protocol.
+  const isServerAction = request.headers.has("next-action");
+
   const tokenCookie = request.cookies.get(TOKEN_COOKIE);
   const user = tokenCookie?.value
     ? await verifyJWT(tokenCookie.value)
     : null;
 
-  // 2. Admin gate
-  if (ADMIN_REQUIRED.some((p) => pathname.startsWith(p))) {
-    if (!user) {
-      return NextResponse.redirect(new URL("/login/admin", request.url));
+  if (!isServerAction) {
+    // 2. Admin gate
+    if (ADMIN_REQUIRED.some((p) => pathname.startsWith(p))) {
+      if (!user) {
+        return NextResponse.redirect(new URL("/login/admin", request.url));
+      }
+      if (user.role !== "admin") {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
     }
-    if (user.role !== "admin") {
-      return NextResponse.redirect(new URL("/", request.url));
+
+    // 3. Auth gate (any logged-in user)
+    const needsAuth =
+      AUTH_REQUIRED.some((p) => pathname.startsWith(p)) ||
+      pathname.startsWith("/pay/") ||
+      pathname.startsWith("/orders/");
+
+    if (needsAuth && !user) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
     }
-  }
 
-  // 3. Auth gate (any logged-in user)
-  const needsAuth =
-    AUTH_REQUIRED.some((p) => pathname.startsWith(p)) ||
-    pathname.startsWith("/pay/") ||
-    pathname.startsWith("/orders/");
-
-  if (needsAuth && !user) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // 4. Guest-only gate
-  if (GUEST_ONLY.some((p) => pathname.startsWith(p)) && user) {
-    return NextResponse.redirect(new URL("/account", request.url));
+    // 4. Guest-only gate
+    if (GUEST_ONLY.some((p) => pathname.startsWith(p)) && user) {
+      return NextResponse.redirect(new URL("/account", request.url));
+    }
   }
 
   // 5. Forward decoded user to server components via request headers

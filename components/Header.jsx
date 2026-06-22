@@ -127,7 +127,7 @@ export default function Header({ config = {} }) {
 
             {/* Cart */}
             <Link
-              href="/account?tab=cart"
+              href="/cart"
               className="relative p-2 rounded-lg hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all group"
               title="Cart"
             >

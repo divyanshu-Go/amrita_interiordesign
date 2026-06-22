@@ -1,26 +1,33 @@
+// components/LoginForm.jsx
 "use client";
 
 import { useRouter } from "next/navigation";
 import { AuthButton, FormInput } from "./AuthUtils/AuthFunctions";
 import { useState } from "react";
 import Link from "next/link";
+import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
+import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
+import { useAuth } from "@/app/providers/AuthProvider"; // ADD THIS
+
 
 const ROLE_LINKS = [
-  { role: "user",       label: "User",       href: "/login/user" },
-  { role: "admin",      label: "Admin",      href: "/login/admin" },
+  { role: "user", label: "User", href: "/login/user" },
+  { role: "admin", label: "Admin", href: "/login/admin" },
   { role: "enterprise", label: "Enterprise", href: "/login/enterprise" },
 ];
 
 export const LoginForm = ({ defaultRole = "user" }) => {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "", role: defaultRole });
-  const [errors, setErrors]     = useState({});
-  const [message, setMessage]   = useState("");
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const { refreshUser } = useAuth(); // ADD THIS
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.email)    newErrors.email    = "Email is required";
+    if (!formData.email) newErrors.email = "Email is required";
     if (!formData.password) newErrors.password = "Password is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -51,12 +58,39 @@ export const LoginForm = ({ defaultRole = "user" }) => {
         return;
       }
 
+      // ── Cart merge: runs before redirect, after cookie is set ──────────
+      // auth_token cookie is already set by the API response at this point
+      const guestCart = getGuestCart();
+      if (guestCart.items.length > 0) {
+        try {
+          await mergeGuestCart(guestCart.items);
+          clearGuestCart();
+        } catch (mergeErr) {
+          // Non-fatal: log and continue — user still gets logged in
+          console.warn("Cart merge failed:", mergeErr);
+        }
+      }
+      // ───────────────────────────────────────────────────────────────────
+
       setMessage("Login successful! Redirecting...");
-      setTimeout(() => {
-        if (data.user.role === "admin")                  window.location.href = "/admin";
-        else if (data.user.role === "enterprise_active") window.location.href = "/account";
-        else                                             window.location.href = "/";
-      }, 1500);
+
+      // ── CRITICAL: refresh auth state before navigating ──
+      await refreshUser();
+      // ───────────────────────────────────────────────────
+
+
+      if (data.user.role === "admin") {
+        router.push("/admin");
+      } else if (data.user.role === "enterprise_active") {
+        router.push("/account");
+      } else {
+        router.push("/cart"); // important: go to cart after login
+      }
+
+      // router.refresh() can stay — it keeps RSC cache fresh (e.g. server-side role checks)
+      router.refresh();
+
+
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -65,7 +99,7 @@ export const LoginForm = ({ defaultRole = "user" }) => {
   };
 
   const currentLabel = ROLE_LINKS.find((r) => r.role === defaultRole)?.label;
-  const otherRoles   = ROLE_LINKS.filter((r) => r.role !== defaultRole);
+  const otherRoles = ROLE_LINKS.filter((r) => r.role !== defaultRole);
 
   return (
     <div className="mx-auto my-12 w-full max-w-lg p-6 rounded-lg border border-gray-200 shadow-sm bg-white">
@@ -98,11 +132,10 @@ export const LoginForm = ({ defaultRole = "user" }) => {
           </div>
         )}
         {message && (
-          <div className={`text-sm px-3 py-2 rounded ${
-            message.includes("pending")  ? "bg-yellow-100 text-yellow-700" :
-            message.includes("rejected") ? "bg-red-100 text-red-700"       :
-                                           "bg-green-100 text-green-700"
-          }`}>
+          <div className={`text-sm px-3 py-2 rounded ${message.includes("pending") ? "bg-yellow-100 text-yellow-700" :
+            message.includes("rejected") ? "bg-red-100 text-red-700" :
+              "bg-green-100 text-green-700"
+            }`}>
             {message}
           </div>
         )}

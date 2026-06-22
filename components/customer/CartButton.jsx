@@ -1,7 +1,4 @@
 // components/customer/CartButton.jsx
-// FIX: Now checks useAuth() before calling the server action.
-// Unauthenticated users get an immediate toast with a Login button —
-// no server round-trip needed, no production crash possible.
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -10,49 +7,53 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { addToCart, updateCartItem, removeFromCart } from "@/lib/actions/cart";
+import {
+  getGuestCart,
+  addToGuestCart,
+  updateGuestCartItem,
+  removeFromGuestCart,
+} from "@/lib/guestCart";
 
-export default function CartButton({ productId, stock }) {
-  const router       = useRouter();
+export default function CartButton({ productId, stock, sellBy = "piece" }) {
+  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
 
-  const [state,   setState]   = useState("checking");
-  const [qty,     setQty]     = useState(0);
+  const [state, setState] = useState("checking");
+  const [qty, setQty] = useState(0);
   const [qtyBump, setQtyBump] = useState(false);
 
-  // ── On mount: check if already in cart (only if logged in) ──────────────
+  // ── On mount: read cart state from correct source ──────────────────────
   useEffect(() => {
-    // Wait for auth to resolve before checking cart
     if (authLoading) return;
 
-    // Not logged in → go straight to idle, no fetch needed
-    if (!user) {
-      setState("idle");
-      return;
-    }
-
-    let cancelled = false;
-
-    async function checkCart() {
-      try {
-        const res = await fetch("/api/cart");
-        if (!res.ok) { if (!cancelled) setState("idle"); return; }
-
-        const { cart } = await res.json();
-        const existing = cart?.items?.find(
-          (i) => i.product?._id?.toString() === productId?.toString()
-        );
-
-        if (!cancelled) {
-          if (existing) { setQty(existing.quantity); setState("stepper"); }
-          else setState("idle");
+    if (user) {
+      // Logged-in: check server cart
+      let cancelled = false;
+      async function checkServerCart() {
+        try {
+          const res = await fetch("/api/cart");
+          if (!res.ok) { if (!cancelled) setState("idle"); return; }
+          const { cart } = await res.json();
+          const existing = cart?.items?.find(
+            (i) => i.product?._id?.toString() === productId?.toString()
+          );
+          if (!cancelled) {
+            if (existing) { setQty(existing.quantity); setState("stepper"); }
+            else setState("idle");
+          }
+        } catch {
+          if (!cancelled) setState("idle");
         }
-      } catch {
-        if (!cancelled) setState("idle");
       }
+      checkServerCart();
+      return () => { cancelled = true; };
+    } else {
+      // Guest: check localStorage instantly — no fetch needed
+      const guestCart = getGuestCart();
+      const existing = guestCart.items.find((i) => i.productId === productId);
+      if (existing) { setQty(existing.quantity); setState("stepper"); }
+      else setState("idle");
     }
-
-    checkCart();
-    return () => { cancelled = true; };
   }, [productId, user, authLoading]);
 
   const triggerBump = useCallback(() => {
@@ -60,26 +61,17 @@ export default function CartButton({ productId, stock }) {
     setTimeout(() => setQtyBump(false), 300);
   }, []);
 
-  // ── Add to cart ──────────────────────────────────────────────────────────
+  // ── Add to cart — works for everyone ──────────────────────────────────
   async function handleAdd() {
     if (state !== "idle") return;
-
-    // FIX: Gate on auth state from context — instant, no server round-trip
-    if (!user) {
-      toast.error("Please log in to add items to your cart", {
-        description: "You need an account to save items.",
-        action: {
-          label: "Log in",
-          onClick: () => router.push("/login"),
-        },
-        duration: 5000,
-      });
-      return;
-    }
-
     setState("adding");
+
     try {
-      await addToCart(productId, 1);
+      if (user) {
+        await addToCart(productId, 1);
+      } else {
+        addToGuestCart(productId, 1, sellBy);
+      }
       setState("added");
       setQty(1);
       setTimeout(() => setState("stepper"), 900);
@@ -89,7 +81,7 @@ export default function CartButton({ productId, stock }) {
     }
   }
 
-  // ── Increment ────────────────────────────────────────────────────────────
+  // ── Increment ──────────────────────────────────────────────────────────
   async function handleIncrement() {
     if (state === "updating" || qty >= stock) return;
     const next = qty + 1;
@@ -97,7 +89,11 @@ export default function CartButton({ productId, stock }) {
     setQty(next);
     triggerBump();
     try {
-      await updateCartItem(productId, next);
+      if (user) {
+        await updateCartItem(productId, next);
+      } else {
+        updateGuestCartItem(productId, next);
+      }
     } catch (err) {
       setQty(qty);
       toast.error(err.message || "Failed to update cart");
@@ -106,14 +102,18 @@ export default function CartButton({ productId, stock }) {
     }
   }
 
-  // ── Decrement / remove ───────────────────────────────────────────────────
+  // ── Decrement / remove ─────────────────────────────────────────────────
   async function handleDecrement() {
     if (state === "updating") return;
     setState("updating");
 
     if (qty <= 1) {
       try {
-        await removeFromCart(productId);
+        if (user) {
+          await removeFromCart(productId);
+        } else {
+          removeFromGuestCart(productId);
+        }
         setQty(0);
         setState("idle");
       } catch (err) {
@@ -125,7 +125,11 @@ export default function CartButton({ productId, stock }) {
       setQty(next);
       triggerBump();
       try {
-        await updateCartItem(productId, next);
+        if (user) {
+          await updateCartItem(productId, next);
+        } else {
+          updateGuestCartItem(productId, next);
+        }
       } catch (err) {
         setQty(qty);
         toast.error(err.message || "Failed to update cart");
@@ -135,12 +139,12 @@ export default function CartButton({ productId, stock }) {
     }
   }
 
-  // ── Skeleton while auth or cart is loading ───────────────────────────────
+  // ── Skeleton ───────────────────────────────────────────────────────────
   if (authLoading || state === "checking") {
     return <div className="w-full h-[42px] bg-gray-100 rounded-lg animate-pulse" />;
   }
 
-  // ── Add / Adding / Added ─────────────────────────────────────────────────
+  // ── Add / Adding / Added ───────────────────────────────────────────────
   if (state === "idle" || state === "adding" || state === "added") {
     return (
       <button
@@ -168,11 +172,9 @@ export default function CartButton({ productId, stock }) {
     );
   }
 
-  // ── Stepper (50/50 grid) ─────────────────────────────────────────────────
+  // ── Stepper (50/50 grid) ───────────────────────────────────────────────
   return (
     <div className="grid grid-cols-2 gap-2 w-full">
-
-      {/* LEFT — qty stepper */}
       <div className="flex items-center border-2 border-orange-500 rounded-lg overflow-hidden">
         <button
           onClick={handleDecrement}
@@ -210,9 +212,8 @@ export default function CartButton({ productId, stock }) {
         </button>
       </div>
 
-      {/* RIGHT — view cart */}
       <button
-        onClick={() => router.push("/account?tab=cart")}
+        onClick={() => router.push("/cart")}
         className="flex items-center justify-center gap-1.5
                    bg-gray-900 hover:bg-gray-700 active:scale-[0.98]
                    text-white text-xs font-semibold rounded-lg

@@ -17,6 +17,7 @@ import AccountLoader from "@/components/Loaders/AccountLoader";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export default function ProfileView() {
   const { user, setUser, loading } = useAccount();
@@ -25,6 +26,8 @@ export default function ProfileView() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { refreshUser } = useAuth();
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     businessName: user?.enterpriseProfile?.businessName || "",
@@ -46,8 +49,10 @@ export default function ProfileView() {
   const handleLogout = async () => {
     try {
       await axios.post("/api/auth/logout");
+      await refreshUser();          // cookie is gone → 401 → user becomes null
       toast.success("Logged out successfully");
-      window.location.href = "/"
+      router.push("/");
+      router.refresh();             // keeps RSC cache in sync
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Logout failed");
@@ -88,6 +93,7 @@ export default function ProfileView() {
       });
 
       setUser(updated);
+      await refreshUser();
       setSuccess(true);
       setIsEditing(false);
       setTimeout(() => setSuccess(false), 3000);
@@ -217,11 +223,10 @@ export default function ProfileView() {
               </div>
               <div className="px-3 py-2">
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    user.emailVerified
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${user.emailVerified
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-700"
-                  }`}
+                    }`}
                 >
                   {user.emailVerified ? (
                     <>

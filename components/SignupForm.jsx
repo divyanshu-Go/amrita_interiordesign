@@ -1,13 +1,16 @@
+// components/SignupForm.jsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthButton, FormInput } from "./AuthUtils/AuthFunctions";
+import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
+import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
 import { toast } from "sonner";
 
 const ROLE_LINKS = [
-  { role: "user",       label: "User",       href: "/signup/user" },
+  { role: "user", label: "User", href: "/signup/user" },
   { role: "enterprise", label: "Enterprise", href: "/signup/enterprise" },
 ];
 
@@ -22,7 +25,7 @@ export const SignupForm = ({ defaultRole = "user" }) => {
     phone: "",
   });
 
-  const [errors, setErrors]     = useState({});
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   const isEnterprise = defaultRole === "enterprise";
@@ -50,7 +53,7 @@ export const SignupForm = ({ defaultRole = "user" }) => {
 
     if (isEnterprise) {
       if (!formData.businessName) newErrors.businessName = "Business name is required";
-      if (!formData.gstNumber)    newErrors.gstNumber    = "GST number is required";
+      if (!formData.gstNumber) newErrors.gstNumber = "GST number is required";
       if (!formData.phone) {
         newErrors.phone = "Phone number is required";
       } else if (!/^[0-9]{10}$/.test(formData.phone)) {
@@ -87,6 +90,24 @@ export const SignupForm = ({ defaultRole = "user" }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Signup failed");
 
+      // ── Cart merge: runs after signup succeeds, before redirect ──────────
+      // For enterprise signups, account is pending approval — no auth_token
+      // cookie is set yet, so skip the merge (nothing to attach it to / would
+      // just throw "Not authenticated"). Regular user signups DO get logged
+      // in immediately, so merge applies there.
+      if (!isEnterprise) {
+        const guestCart = getGuestCart();
+        if (guestCart.items.length > 0) {
+          try {
+            await mergeGuestCart(guestCart.items);
+            clearGuestCart();
+          } catch (mergeErr) {
+            console.warn("Cart merge failed:", mergeErr);
+          }
+        }
+      }
+      // ───────────────────────────────────────────────────────────────────
+
       if (isEnterprise) {
         toast.success("Account created. Awaiting admin approval.");
         window.location.href = `/login/notice?msg=${encodeURIComponent(
@@ -111,7 +132,7 @@ export const SignupForm = ({ defaultRole = "user" }) => {
   });
 
   const currentLabel = ROLE_LINKS.find((r) => r.role === defaultRole)?.label;
-  const otherRoles   = ROLE_LINKS.filter((r) => r.role !== defaultRole);
+  const otherRoles = ROLE_LINKS.filter((r) => r.role !== defaultRole);
 
   return (
     <div className="mx-auto my-12 w-full max-w-lg p-6 rounded-lg border border-gray-200 shadow-sm bg-white">
@@ -125,9 +146,9 @@ export const SignupForm = ({ defaultRole = "user" }) => {
 
           {/* Common fields */}
           <div className="w-full space-y-3">
-            <FormInput label="Name"             type="text"     {...field("name")} />
-            <FormInput label="Email"            type="email"    {...field("email")} />
-            <FormInput label="Password"         type="password" {...field("password")} />
+            <FormInput label="Name" type="text"     {...field("name")} />
+            <FormInput label="Email" type="email"    {...field("email")} />
+            <FormInput label="Password" type="password" {...field("password")} />
             <FormInput label="Confirm Password" type="password" {...field("confirmPassword")} />
             <p className="text-xs text-gray-500">Password must be at least 8 characters.</p>
           </div>
@@ -136,8 +157,8 @@ export const SignupForm = ({ defaultRole = "user" }) => {
           {isEnterprise && (
             <div className="w-full space-y-3">
               <FormInput label="Business Name" type="text" {...field("businessName")} />
-              <FormInput label="GST Number"    type="text" {...field("gstNumber")} />
-              <FormInput label="Phone Number"  type="text" {...field("phone")} />
+              <FormInput label="GST Number" type="text" {...field("gstNumber")} />
+              <FormInput label="Phone Number" type="text" {...field("phone")} />
             </div>
           )}
         </div>
