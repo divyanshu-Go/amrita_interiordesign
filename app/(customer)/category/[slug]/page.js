@@ -9,6 +9,8 @@ import { notFound } from "next/navigation";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import CategoryPageClient from "@/components/customer/CategoryPageClient";
 import Section from "@/components/ui/Section";
+import { Suspense } from "react";
+
 
 
 export const revalidate = 1800;
@@ -272,13 +274,24 @@ export default async function CategoryPage({ params }) {
         <SeoIntro text={category.seoIntro} />
 
 
-        {/* Client component — unchanged, handles all user interaction */}
-        <CategoryPageClient
-          category={category}
-          filterOptions={filterOptions}
-          categorySlug={slug}
-          ssrProducts={ssrProductList}   // ← NEW
-        />
+        {/* Client component wrapped in Suspense — required by Next.js for useSearchParams() */}
+        {/* The fallback is minimal — SSR products above already show real content */}
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-gray-100 rounded-md animate-pulse aspect-[3/4]" />
+              ))}
+            </div>
+          }
+        >
+          <CategoryPageClient
+            category={category}
+            filterOptions={filterOptions}
+            categorySlug={slug}
+            ssrProducts={ssrProductList}
+          />
+        </Suspense>
 
         {/* SEO footer — server rendered, Google reads this */}
         <SeoFooter category={category} />
