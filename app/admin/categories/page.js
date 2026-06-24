@@ -1,3 +1,4 @@
+// app/admin/categories/page.js
 import Link from "next/link";
 import { getAllCategories } from "@/lib/fetchers/serverCategories";
 import CategoriesTable from "@/components/admin/CategoriesTable";
