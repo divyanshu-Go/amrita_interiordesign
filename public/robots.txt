@@ -1,6 +1,7 @@
 # *
 User-agent: *
 Allow: /
+Allow: /api/products/by-category
 Disallow: /admin
 Disallow: /admin/
 Disallow: /api/
