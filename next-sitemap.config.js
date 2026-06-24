@@ -33,13 +33,7 @@ import mongoose from "mongoose";
 // Add more patterns here if you ever add new dev/test naming conventions.
 const DEV_SLUG_PATTERNS = [
   "test",       // testprop, testtt, test0, testingprice, etc.
-  "cache",      // category/cache
-  "divyanshu",  // divyanshuhsa, /category/divyanshu
-  "addingtest",
-  "allpricest",
-  "finaladd",
-  "ddsx",
-  "pvcsl",      // pvcSl01 — dev SKU test
+  "divya",  // divyanshuhsa, /category/divyanshu
 ];
 
 function isDevSlug(slug) {

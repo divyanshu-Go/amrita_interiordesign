@@ -103,6 +103,7 @@ export default function CategoryPageClient({
   category,
   filterOptions: rawFilterOptions,
   categorySlug,
+  ssrProducts = [],          // ← NEW
 }) {
   const filterOptions = { ...EMPTY_FILTER_OPTIONS, ...rawFilterOptions };
 
@@ -118,9 +119,9 @@ export default function CategoryPageClient({
     filterOptions.retailPriceRange ??
     { min: 0, max: 100000 };
 
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(ssrProducts);
   const [pagination, setPagination] = useState(null);
-  const [fetchLoading, setFetchLoading] = useState(true);
+  const [fetchLoading, setFetchLoading] = useState(ssrProducts.length === 0);
   const [fetchError, setFetchError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -129,11 +130,34 @@ export default function CategoryPageClient({
   const fetchProducts = useCallback(async () => {
     if (authLoading) return;
 
+    // If SSR already provided products and this is the initial load
+    // (page 1, no filters active), skip the fetch to avoid a flash.
+    const filters = readFiltersFromURL(searchParams, priceRange);
+    const isDefaultState =
+      filters.page === 1 &&
+      filters.sortBy === "newest" &&
+      filters.colors.length === 0 &&
+      filters.brands.length === 0 &&
+      filters.sizes.length === 0 &&
+      filters.thicknesses.length === 0 &&
+      filters.materials.length === 0 &&
+      filters.patterns.length === 0 &&
+      filters.finishes.length === 0 &&
+      filters.applications.length === 0 &&
+      !filters.inStock &&
+      !filters.subType;
+
+    if (ssrProducts.length > 0 && isDefaultState) {
+      // Keep products visible, suppress skeleton, but continue the fetch below.
+      // setFetchLoading stays false so skeleton never shows.
+    } else {
+      setFetchLoading(true);
+    }
+
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setFetchLoading(true);
     setFetchError(null);
 
     try {
