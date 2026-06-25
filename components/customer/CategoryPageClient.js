@@ -127,6 +127,14 @@ export default function CategoryPageClient({
 
   const abortRef = useRef(null);
 
+  // Hide the SSR grid once the client component hydrates.
+// The SSR grid exists only for Google — once JS runs,
+// the client grid takes over.
+useEffect(() => {
+  const ssrGrid = document.getElementById("ssr-product-grid");
+  if (ssrGrid) ssrGrid.style.display = "none";
+}, []);
+
   const fetchProducts = useCallback(async () => {
     if (authLoading) return;
 

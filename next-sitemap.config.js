@@ -155,10 +155,7 @@ const config = {
     policies: [
       {
         userAgent: "*",
-        allow: [
-          "/",
-          "/api/products/by-category",  // ← needed for client-side rendering
-        ],
+        allow: ["/"],
         disallow: [
           "/admin",
           "/admin/",
