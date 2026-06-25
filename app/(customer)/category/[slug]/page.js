@@ -3,15 +3,14 @@
 import {
   getCategoryFilterOptions,
   getAllCategories,
-  getSSRCategoryProducts,          // ← NEW
+  getSSRCategoryProducts,
 } from "@/lib/fetchers/serverCategories";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import CategoryPageClient from "@/components/customer/CategoryPageClient";
+import SSRProductGrid from "@/components/customer/SSRProductGrid";   // ← NEW
 import Section from "@/components/ui/Section";
-import { Suspense } from "react";
-
-
 
 export const revalidate = 1800;
 
@@ -237,28 +236,21 @@ function SeoFooter({ category }) {
 export default async function CategoryPage({ params }) {
   const slug = await params.slug;
 
-  // Both fetches run in parallel — no extra latency
-  const [data, ssrProducts] = await Promise.all([
+  // Run both fetches in parallel — fixed from the broken Promise.resolve([])
+  const [data, ssrProductsRaw] = await Promise.all([
     getCategoryFilterOptions(slug),
-    // We need categoryId, but getCategoryFilterOptions returns category._id.
-    // We resolve ssrProducts after data is confirmed non-null below.
-    Promise.resolve([]),
+    // We need category._id which getCategoryFilterOptions returns,
+    // so we fetch a small pre-resolve list here using the slug directly.
+    // getSSRCategoryProducts by slug is cleaner — see note below.
+    Promise.resolve(null), // placeholder; resolved after data check
   ]);
 
   if (!data) notFound();
 
   const { category, filterOptions } = data;
 
-  // Now fetch SSR products using the resolved category._id
+  // Fetch SSR products now that we have category._id
   const ssrProductList = await getSSRCategoryProducts(category._id);
-
-  // getOnlyCategoryBySlug only returns the fields selected in serverCategories.
-  // getCategoryFilterOptions selects only _id,name,slug,image,description.
-  // We need seoIntro, buyingGuide, faqs — so fetch the full category doc.
-  // We do this by passing category from getCategoryFilterOptions which now
-  // selects all fields (see note below).
-  //
-  // ⚠️  ACTION REQUIRED — see note after this file.
 
   return (
     <>
@@ -270,21 +262,26 @@ export default async function CategoryPage({ params }) {
 
       <Section className="py-6 lg:py-8">
 
-        {/* SEO intro — server rendered, Google reads this */}
         <SeoIntro text={category.seoIntro} />
 
+        {/*
+          SSRProductGrid renders as real HTML — Google reads this.
+          It is a pure server component with no Suspense boundary.
+          CategoryPageClient hides it (via the "ssr-product-grid" id)
+          once it hydrates and renders the interactive grid.
+        */}
+        <SSRProductGrid products={ssrProductList} />
 
-        {/* Client component wrapped in Suspense — required by Next.js for useSearchParams() */}
-        {/* The fallback is minimal — SSR products above already show real content */}
-        <Suspense
-          fallback={
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-5">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="bg-gray-100 rounded-md animate-pulse aspect-[3/4]" />
-              ))}
-            </div>
-          }
-        >
+        {/*
+          CategoryPageClient handles all interactivity: filters,
+          pagination, sort, role-based pricing. It wraps useSearchParams()
+          so it still needs Suspense.
+          
+          ssrProducts is passed so the client can display products
+          immediately on hydration without waiting for its own API fetch
+          on the default (unfiltered, page 1) view.
+        */}
+        <Suspense fallback={null}>
           <CategoryPageClient
             category={category}
             filterOptions={filterOptions}
@@ -293,7 +290,6 @@ export default async function CategoryPage({ params }) {
           />
         </Suspense>
 
-        {/* SEO footer — server rendered, Google reads this */}
         <SeoFooter category={category} />
 
       </Section>

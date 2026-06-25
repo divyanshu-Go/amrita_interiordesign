@@ -155,11 +155,11 @@ const config = {
     policies: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/"],
         disallow: [
           "/admin",
           "/admin/",
-          "/api/",
+          "/api/",          // blocks all /api/ ...
           "/account",
           "/checkout",
           "/login",
