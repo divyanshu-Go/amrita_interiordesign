@@ -11,20 +11,23 @@ import {
   Palette,
   Blocks,
   GalleryHorizontal,
-  Settings, // ← new
+  Settings,
+  Zap,
 } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   const navItems = [
-    { name: "Dashboard",   path: "/admin",              icon: LayoutDashboard  },
-    { name: "Categories",  path: "/admin/categories",   icon: FolderOpen       },
-    { name: "Products",    path: "/admin/products",     icon: Package          },
-    { name: "Variants",    path: "/admin/variants",     icon: Palette          },
-    { name: "Applications",path: "/admin/applications", icon: Blocks           },
-    { name: "Carousel",    path: "/admin/carousel",     icon: GalleryHorizontal},
-    { name: "Site Config", path: "/admin/site-config",  icon: Settings         }, // ← new
+    { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
+    { name: "Categories", path: "/admin/categories", icon: FolderOpen },
+    { name: "Products", path: "/admin/products", icon: Package },
+    { name: "Variants", path: "/admin/variants", icon: Palette },
+    { name: "Applications", path: "/admin/applications", icon: Blocks },
+    { name: "Carousel", path: "/admin/carousel", icon: GalleryHorizontal },
+    { name: "Site Config", path: "/admin/site-config", icon: Settings }, // ← new
+    { name: "Quick Add", path: "/admin/quick-add", icon: Zap },
+    { name: "Category Defaults", path: "/admin/category-defaults", icon: Settings }
   ];
 
   return (
@@ -49,11 +52,10 @@ export default function Sidebar() {
               key={item.path}
               href={item.path}
               prefetch
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${
-                isActive
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-medium ${isActive
                   ? "bg-orange-600 text-white shadow-lg"
                   : "text-gray-300 hover:bg-gray-800 hover:text-white"
-              }`}
+                }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               <span>{item.name}</span>
