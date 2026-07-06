@@ -124,18 +124,34 @@ export default function CategoryDefaultsClient({ categories, applications = [] }
   const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
-    if (!selected) return;
-    getCategoryDefaults(selected._id).then((data) => {
-      setFormData({
-        ...EMPTY_DEFAULTS,
-        ...(data || {}),
-        material: Array.isArray(data?.material) ? data.material.join(", ") : "",
-        pattern: Array.isArray(data?.pattern) ? data.pattern.join(", ") : "",
-        finish: Array.isArray(data?.finish) ? data.finish.join(", ") : "",
-        application: data?.application?.map((a) => a._id || a) || [],
-      });
+  if (!selected) return;
+  getCategoryDefaults(selected._id).then((data) => {
+    setFormData({
+      ...EMPTY_DEFAULTS,
+      brand: data?.brand ?? "",
+      description: data?.description ?? "",
+      retailPrice: data?.retailPrice ?? 0,
+      retailDiscountPrice: data?.retailDiscountPrice ?? "",
+      enterprisePrice: data?.enterprisePrice ?? 0,
+      enterpriseDiscountPrice: data?.enterpriseDiscountPrice ?? "",
+      stock: data?.stock ?? 0,
+      thickness: data?.thickness ?? "",
+      size: data?.size ?? "",
+      sellBy: data?.sellBy ?? "piece",
+      showPerSqFtPrice: data?.showPerSqFtPrice ?? false,
+      perSqFtPriceRetail: data?.perSqFtPriceRetail ?? "",
+      perSqFtPriceEnterprise: data?.perSqFtPriceEnterprise ?? "",
+      material: Array.isArray(data?.material) ? data.material.join(", ") : "",
+      pattern: Array.isArray(data?.pattern) ? data.pattern.join(", ") : "",
+      finish: Array.isArray(data?.finish) ? data.finish.join(", ") : "",
+      coverageArea: data?.coverageArea ?? "",
+      subType: data?.subType ?? "",
+      isFeatured: data?.isFeatured ?? false,
+      isPopular: data?.isPopular ?? false,
+      application: data?.application?.map((a) => a._id || a) || [],
     });
-  }, [selected]);
+  });
+}, [selected]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
