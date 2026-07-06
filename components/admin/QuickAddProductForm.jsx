@@ -152,23 +152,43 @@ export default function QuickAddProductForm({
   const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
-    async function loadDefaults() {
-      const saved = await getCategoryDefaults(category._id).catch(() => null);
-      if (cancelled) return;
-      setFormData({
-        ...VARIABLE_DEFAULTS,
-        ...NON_VARIABLE_FALLBACK,
-        ...(saved || {}),
-        material: Array.isArray(saved?.material) ? saved.material.join(", ") : "",
-        pattern: Array.isArray(saved?.pattern) ? saved.pattern.join(", ") : "",
-        finish: Array.isArray(saved?.finish) ? saved.finish.join(", ") : "",
-        application: saved?.application?.map((a) => a._id || a) || [],
-      });
-    }
-    loadDefaults();
-    return () => { cancelled = true; };
-  }, [category._id]);
+  let cancelled = false;
+  async function loadDefaults() {
+    const saved = await getCategoryDefaults(category._id).catch(() => null);
+    if (cancelled) return;
+
+    // Explicitly pick only real default fields — never spread `saved` directly,
+    // it carries Mongo metadata (_id, category, createdAt, updatedAt, __v)
+    // that must never reach the Product payload.
+    setFormData({
+      ...VARIABLE_DEFAULTS,
+      ...NON_VARIABLE_FALLBACK,
+      brand: saved?.brand ?? NON_VARIABLE_FALLBACK.brand,
+      description: saved?.description ?? NON_VARIABLE_FALLBACK.description,
+      retailPrice: saved?.retailPrice ?? NON_VARIABLE_FALLBACK.retailPrice,
+      retailDiscountPrice: saved?.retailDiscountPrice ?? "",
+      enterprisePrice: saved?.enterprisePrice ?? NON_VARIABLE_FALLBACK.enterprisePrice,
+      enterpriseDiscountPrice: saved?.enterpriseDiscountPrice ?? "",
+      stock: saved?.stock ?? NON_VARIABLE_FALLBACK.stock,
+      thickness: saved?.thickness ?? "",
+      size: saved?.size ?? "",
+      sellBy: saved?.sellBy ?? NON_VARIABLE_FALLBACK.sellBy,
+      showPerSqFtPrice: saved?.showPerSqFtPrice ?? false,
+      perSqFtPriceRetail: saved?.perSqFtPriceRetail ?? "",
+      perSqFtPriceEnterprise: saved?.perSqFtPriceEnterprise ?? "",
+      material: Array.isArray(saved?.material) ? saved.material.join(", ") : "",
+      pattern: Array.isArray(saved?.pattern) ? saved.pattern.join(", ") : "",
+      finish: Array.isArray(saved?.finish) ? saved.finish.join(", ") : "",
+      coverageArea: saved?.coverageArea ?? "",
+      subType: saved?.subType ?? "",
+      isFeatured: saved?.isFeatured ?? false,
+      isPopular: saved?.isPopular ?? false,
+      application: saved?.application?.map((a) => a._id || a) || [],
+    });
+  }
+  loadDefaults();
+  return () => { cancelled = true; };
+}, [category._id]);
 
   if (!formData) {
     return <p className="text-sm text-gray-500">Loading category defaults...</p>;
