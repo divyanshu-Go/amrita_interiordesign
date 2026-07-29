@@ -151,20 +151,3 @@ export default async function ApplicationPage({ params }) {
     </>
   );
 }
-
-/*
- * ── ACTION REQUIRED ───────────────────────────────────────────────────────
- * generateStaticParams calls getAllApplications() from applicationProducts.js
- * Add this export if it doesn't exist:
- *
- * export async function getAllApplications() {
- *   await DbConnect();
- *   try {
- *     const apps = await Application.find({}, "slug name").lean();
- *     return JSON.parse(JSON.stringify(apps));
- *   } catch {
- *     return [];
- *   }
- * }
- * ─────────────────────────────────────────────────────────────────────────
- */
