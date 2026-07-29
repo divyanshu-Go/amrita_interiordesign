@@ -1,22 +1,4 @@
 // components/customer/Breadcrumb.js
-//
-// ── WHAT CHANGED & WHY ────────────────────────────────────────────────────
-// BEFORE: "use client" — had zero justification.
-//   No hooks. No state. No effects. No browser APIs.
-//   Link and ChevronRight both work in server components.
-//   truncate() from lib/utils is a plain string function, not a hook.
-//
-// AFTER: No "use client" = server component.
-//   Breadcrumb appears on EVERY product page, category page, search page,
-//   and application page. Removing "use client" means the nav HTML is
-//   server-rendered on all those pages. The lucide ChevronRight icon and
-//   all nav links are no longer shipped in the client JS bundle.
-//
-// BONUS SEO: Breadcrumb is now server-rendered HTML that Google can read
-// directly without executing JavaScript. Combined with the BreadcrumbList
-// JSON-LD we added to product/category pages, this gives Google two
-// signals about your site structure.
-// ─────────────────────────────────────────────────────────────────────────
 
 import Link          from "next/link";
 import { ChevronRight } from "lucide-react";

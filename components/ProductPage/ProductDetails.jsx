@@ -2,7 +2,7 @@
 import {
   FileText, Palette, Ruler, Layers, Sparkles, SquareCheck,
 } from "lucide-react";
-import ApplicationsGallery from "./ApplicationsGallery";
+import ApplicationsGallery from "../customer/ApplicationsGallery";
 
 const buildAttributes = (product) => [
   { label: "Color",         value: product.color,                                        icon: Palette,     show: !!product.color },

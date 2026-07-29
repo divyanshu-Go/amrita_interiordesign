@@ -1,4 +1,4 @@
-import { getProductBySlug } from "@/lib/fetchers/serverProducts";
+import { getProductBySlug } from "@/lib/serversideFetchers/products";
 import { getAllCategories } from "@/lib/fetchers/serverCategories";
 import ProductForm from "@/components/admin/ProductForm";
 import { notFound } from "next/navigation";
@@ -18,7 +18,7 @@ export default async function EditProductPage({ params }) {
     notFound();
   }
 
-  const { product, variants } = data;
+  const { product } = data;
 
   return (
     <div>

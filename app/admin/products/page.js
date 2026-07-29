@@ -1,7 +1,7 @@
 // app/admin/products/page.js
 
 import Link from "next/link";
-import { getAllProducts } from "@/lib/fetchers/serverProducts";
+import { getAllProducts } from "@/lib/serversideFetchers/products";
 import ProductsTable from "@/components/admin/ProductsTable";
 import { Plus } from "lucide-react";
 import { getAllCategories } from "@/lib/fetchers/serverCategories";

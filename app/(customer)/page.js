@@ -11,7 +11,7 @@ import PopularProducts            from "@/components/customer/PopularProducts";
 import { getTrendingCategories }    from "@/lib/fetchers/serverCategories";
 import { getInspiredCarousel }      from "@/lib/fetchers/inspiredCarousel";
 import { getProductsByApplication } from "@/lib/fetchers/productsByApplication";
-import { getPopularProducts }       from "@/lib/fetchers/serverProducts";
+import { getPopularProducts }       from "@/lib/serversideFetchers/products";
 
 // ── Homepage Metadata ─────────────────────────────────────────────────────
 // WHY: Homepage had no metadata — inherited root fallback title unchanged.
