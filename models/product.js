@@ -1,24 +1,4 @@
 // models/product.js
-//
-// ── WHAT CHANGED & WHY ────────────────────────────────────────────────────
-// Added compound and single-field indexes on the most queried fields.
-//
-// BEFORE — missing indexes caused full collection scans on:
-//   • Product.find({ isPopular: true })        → getPopularProducts()
-//   • Product.find({ category: id })           → getCategoryBySlug() — CRITICAL
-//   • Product.find({ colorVariant: id })       → getRelatedByCollection()
-//   • Product.find({ patternVariant: id })     → getRelatedByCollection()
-//   • Category.find({ isTrending: true })      → getTrendingCategories()
-//
-// A full collection scan means MongoDB reads EVERY document to find matches.
-// With 1,000 products: fine. With 10,000: slow. With 100,000: broken.
-// Indexes make these queries O(log n) instead of O(n).
-//
-// WHY THIS MATTERS FOR SEO:
-//   With ISR (revalidate=1800), pages rebuild every 30 min.
-//   A slow build = Vercel times out = stale pages served to Google.
-//   Fast queries = fast builds = Google always gets fresh content.
-// ─────────────────────────────────────────────────────────────────────────
 
 import mongoose, { Schema } from "mongoose";
 

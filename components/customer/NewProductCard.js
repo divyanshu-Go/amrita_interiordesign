@@ -1,13 +1,19 @@
-// components/customer/ProductCardGrid.jsx
+// components/customer/NewProductCard.jsx
 //
-
-"use client";
+// ── WHY THIS IS A SERVER COMPONENT ──────────────────────────────────────
+// The old ProductCardGrid was a Client Component ONLY because it called
+// useAuth() to get userRole for pricing. That role is now passed in as a
+// plain prop, resolved once by the page from the middleware's trusted
+// x-user-role header. There is nothing left in this component that needs
+// the browser — no state, no effects, no event handlers — so it renders
+// entirely on the server, in the initial HTML, correctly priced, for
+// every visitor including Googlebot.
+// ─────────────────────────────────────────────────────────────────────────
 
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/app/providers/AuthProvider";
 
-// ── Price resolution ──────────────────────────────────────────────────────
+// Same pricing logic as the old ProductCardGrid — unchanged, just relocated.
 function resolvePrice(product, isEnterprise) {
   const original = isEnterprise ? product.enterprisePrice : product.retailPrice;
   const discounted = isEnterprise ? product.enterpriseDiscountPrice : product.retailDiscountPrice;
@@ -41,18 +47,17 @@ function resolvePrice(product, isEnterprise) {
 
 const fmt = (n) => Number(n).toLocaleString("en-IN");
 
-// ─────────────────────────────────────────────────────────────────────────
-
-export default function ProductCardGrid({ product }) {
-  // Auth is handled internally — no need to thread userRole from parent
-  const { userRole, user } = useAuth();
-  const isEnterprise = userRole === "enterprise" && user?.enterpriseStatus === "verified";
+export default function NewProductCard({ product, userRole = "user" }) {
+  const isEnterprise = userRole === "enterprise";
   const price = resolvePrice(product, isEnterprise);
   const mainImage = product.images?.[0] || null;
-  
+
   return (
-    <Link href={`/product/${product.slug}`} className="block min-w-44 bg-white  border border-gray-100  hover:border-orange-100 hover:shadow-md transition-all duration-200">
-      <article className="grouprounded-sm  overflow-hidden flex flex-col">
+    <Link
+      href={`/product/${product.slug}`}
+      className="block min-w-44 bg-white border border-gray-100 hover:border-orange-100 hover:shadow-md transition-all duration-200"
+    >
+      <article className="group rounded-sm overflow-hidden flex flex-col">
 
         {/* ── Image ── */}
         <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden shrink-0">

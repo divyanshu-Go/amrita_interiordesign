@@ -1,4 +1,103 @@
+/* globals.css */
+
 @import "tailwindcss";
+
+
+
+/* ============================================================
+   Interio97 Design System — Tailwind v4 Theme
+   This @theme block replaces tailwind.config.js entirely.
+   Every variable here auto-generates a matching utility class.
+   Never hardcode these values in components — use the classes.
+   ============================================================ */
+@theme {
+  /* Colors — Orange (brand/primary) */
+  --color-primary-50: #FFF6ED;
+  --color-primary-100: #FFEAD5;
+  --color-primary-300: #FDBA74;
+  --color-primary-500: #F97316;
+  --color-primary-600: #EA580C;
+  --color-primary-800: #9A3412;
+ 
+  /* Colors — Gray (warm neutral) */
+  --color-neutral-50: #FAFAF9;
+  --color-neutral-100: #F5F5F4;
+  --color-neutral-300: #D6D3D1;
+  --color-neutral-500: #78716C;
+  --color-neutral-700: #44403C;
+  --color-neutral-900: #1C1917;
+ 
+  /* Colors — Semantic (status) */
+  --color-success: #16A34A;
+  --color-success-bg: #F0FDF4;
+  --color-warning: #D97706;
+  --color-warning-bg: #FFFBEB;
+  --color-error: #DC2626;
+  --color-error-bg: #FEF2F2;
+  --color-info: #2563EB;
+  --color-info-bg: #EFF6FF;
+ 
+  /* Typography */
+  --font-sans: 'Poppins', system-ui, sans-serif;
+ 
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.75rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 3.5rem;
+ 
+  /* Spacing (8px base unit) */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-24: 6rem;
+ 
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+ 
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(28, 25, 23, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(28, 25, 23, 0.1), 0 2px 4px -2px rgba(28, 25, 23, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(28, 25, 23, 0.1), 0 4px 6px -4px rgba(28, 25, 23, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(28, 25, 23, 0.1), 0 8px 10px -6px rgba(28, 25, 23, 0.1);
+ 
+  /* Breakpoints (defaults shown explicitly for clarity — same as Tailwind's built-ins) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+ 
+
+
+/* ============================================================
+    Global Styles
+    ============================================================ */
+
+
+
 
 :root {
   --background: rgb(255, 255, 255);
