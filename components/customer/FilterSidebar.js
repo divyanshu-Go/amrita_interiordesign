@@ -1,21 +1,4 @@
 // components/customer/FilterSidebar.js
-//
-// ── KEY DESIGN DECISIONS ──────────────────────────────────────────────────
-//
-// 1. CONTROLLED COMPONENT — no internal filter state.
-//    All values come from `currentFilters` (read from URL by the parent).
-//    Changes are sent up via `onFilterChange`.
-//    This eliminates state/URL mismatch entirely.
-//
-// 2. FILTER OPTIONS NEVER DISAPPEAR.
-//    `filterOptions` comes from the server (getCategoryFilterOptions) and
-//    represents ALL possible values for the category — not just the currently
-//    visible products. So selecting "Red" doesn't remove "Blue" from the list.
-//    This is the correct UX for an e-commerce sidebar.
-//
-// 3. PRICE RANGE: dual-thumb slider using two range inputs layered on top
-//    of each other. Min/max both in URL; priceRange is the category's bounds.
-// ─────────────────────────────────────────────────────────────────────────
 
 "use client";
 
