@@ -4,9 +4,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import {
   getCategoryPageData,
-  getCategoryMeta,
-} from "@/lib/fetchers/newCategoryFetcher";
-import { getAllCategories } from "@/lib/fetchers/serverCategories"; // unrelated to the bug, still fine
+} from "@/lib/serversideFetchers/categoryPage";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import NewFilterSidebar from "@/components/customer/NewFilterSidebar";
 import NewProductGrid from "@/components/customer/NewProductGrid";
@@ -15,113 +13,9 @@ import Section from "@/components/ui/Section";
 
 export const revalidate = 1800;
 
-// ── generateStaticParams — unchanged from before ─────────────────────────
-export async function generateStaticParams() {
-  try {
-    const categories = await getAllCategories();
-    return categories.filter((c) => c.slug).map((c) => ({ slug: c.slug }));
-  } catch {
-    return [];
-  }
-}
+// TODO (SEO): generateStaticParams, generateMetadata, and JSON-LD
 
-// ── generateMetadata — same logic, new (lighter) fetcher ─────────────────
-export async function generateMetadata({ params }) {
-  const { slug } = await params;
-  const category = await getCategoryMeta(slug);
 
-  if (!category) return { title: "Category Not Found" };
-
-  const title = `${category.name} - Buy Online at Best Price`;
-  const description = category.seoIntro
-    ? category.seoIntro.slice(0, 155)
-    : category.description
-      ? category.description.slice(0, 155)
-      : `Shop ${category.name} online at Interio97. Fast delivery across Delhi NCR.`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      category.name,
-      `buy ${category.name} online`,
-      `${category.name} price India`,
-      `${category.name} Delhi NCR`,
-      "interior design materials",
-      "Interio97",
-    ].join(", "),
-    openGraph: {
-      title,
-      description,
-      url: `https://www.interio97.in/category/${category.slug}`,
-      images: category.image ? [{ url: category.image, alt: category.name }] : [],
-    },
-    alternates: {
-      canonical: `https://www.interio97.in/category/${category.slug}`,
-    },
-  };
-}
-
-// ── JSON-LD components — unchanged, just relocated ────────────────────────
-
-function BreadcrumbJsonLd({ category }) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://www.interio97.in" },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: category.name,
-        item: `https://www.interio97.in/category/${category.slug}`,
-      },
-    ],
-  };
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-  );
-}
-
-// NOTE: now built from the REAL products array (same one the grid renders),
-// not a separate 8-item SSR-only fetch. This is the honest version —
-// what Google reads in JSON-LD is exactly what's in the visible HTML.
-function ItemListJsonLd({ products, category, page }) {
-  if (!products.length) return null;
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: `${category.name} Products${page > 1 ? ` - Page ${page}` : ""}`,
-    url: `https://www.interio97.in/category/${category.slug}${page > 1 ? `?page=${page}` : ""}`,
-    numberOfItems: products.length,
-    itemListElement: products.map((product, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `https://www.interio97.in/product/${product.slug}`,
-      name: product.name,
-    })),
-  };
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-  );
-}
-
-function FaqJsonLd({ faqs }) {
-  if (!faqs?.length) return null;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: { "@type": "Answer", text: faq.answer },
-    })),
-  };
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-  );
-}
 
 function SeoIntro({ text }) {
   if (!text?.trim()) return null;
@@ -191,9 +85,6 @@ export default async function CategoryPage({ params, searchParams }) {
 
   return (
     <>
-      <BreadcrumbJsonLd category={category} />
-      <ItemListJsonLd products={products} category={category} page={pagination.page} />
-      <FaqJsonLd faqs={category.faqs} />
 
       <Breadcrumb items={[{ label: category.name }]} />
 
