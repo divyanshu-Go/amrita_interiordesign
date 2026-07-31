@@ -4,14 +4,10 @@ export const revalidate = 1800;
 import { Suspense } from "react";
 import HeroSection                from "@/components/HomePage/HeroSection";
 import PopularCategoriesSection   from "@/components/HomePage/PopularCategoriesSection";
-import ProductByApplicationSection from "@/components/HomePage/ProductByApplicationSection";
 import GetInspiredCarousel        from "@/components/customer/GetInspiredCarousel";
 import TrendingCollections        from "@/components/customer/TrendingCollections";
-import PopularProducts            from "@/components/customer/PopularProducts";
 import { getTrendingCategories }    from "@/lib/fetchers/serverCategories";
 import { getInspiredCarousel }      from "@/lib/fetchers/inspiredCarousel";
-import { getProductsByApplication } from "@/lib/fetchers/productsByApplication";
-import { getPopularProducts }       from "@/lib/serversideFetchers/products";
 
 // ── Homepage Metadata ─────────────────────────────────────────────────────
 // WHY: Homepage had no metadata — inherited root fallback title unchanged.
@@ -104,15 +100,11 @@ function WebSiteJsonLd() {
 
 export default async function HomePage() {
   const [
-    { applications, map },
     carousel,
     trendingCategories,
-    popularProducts,
   ] = await Promise.all([
-    getProductsByApplication(),
     getInspiredCarousel(),
     getTrendingCategories(),
-    getPopularProducts(),
   ]);
 
   return (
@@ -127,10 +119,6 @@ export default async function HomePage() {
 
         <Suspense fallback={<SectionSkeleton />}>
           <PopularCategoriesSection />
-        </Suspense>
-
-        <Suspense fallback={<SectionSkeleton />}>
-          <ProductByApplicationSection applications={applications} map={map} />
         </Suspense>
 
         {carousel?.isActive && carousel.slides?.length > 0 && (
@@ -149,11 +137,6 @@ export default async function HomePage() {
           </Suspense>
         )}
 
-        {popularProducts.length > 0 && (
-          <Suspense fallback={<SectionSkeleton />}>
-            <PopularProducts products={popularProducts} />
-          </Suspense>
-        )}
       </div>
     </>
   );

@@ -1,58 +1,47 @@
-// components/customer/ProductCardGrid.jsx
+// components/customer/NewProductCard.jsx
 //
-
-"use client";
+// ── WHY THIS IS A SERVER COMPONENT ──────────────────────────────────────
+// userRole and enterpriseStatus are resolved once, server-side, from
+// trusted request headers (set by middleware after JWT verification) and
+// passed down as plain props. There is nothing here that needs the
+// browser — no state, no effects, no event handlers — so this renders
+// fully in the initial HTML, correctly priced, for every visitor
+// including Googlebot.
+//
+// ── PRICING LOGIC LIVES IN ONE PLACE ──────────────────────────────────────
+// resolvePrice/fmtINR come from lib/pricing/resolvePrice.js — the same
+// module the product detail page uses. Previously this component had its
+// own inline copy of the same logic; that duplication is gone now, so
+// listing pages and the detail page can never drift out of sync on how
+// a price is computed.
+//
+// ── enterpriseStatus NOTE ────────────────────────────────────────────────
+// Not yet forwarded by middleware (JWT doesn't carry it yet). Defaulting
+// to "unverified" means every visitor safely sees retail pricing until
+// that middleware change ships — matching old behavior for unverified
+// enterprise accounts. Once middleware forwards x-user-enterprise-status,
+// pass it in here and enterprise pricing turns on automatically.
+// ─────────────────────────────────────────────────────────────────────────
 
 import Link from "next/link";
 import Image from "next/image";
-import { useAuth } from "@/app/providers/AuthProvider";
+import { resolvePrice, fmtINR } from "@/lib/pricing/resolvePrice";
 
-// ── Price resolution ──────────────────────────────────────────────────────
-function resolvePrice(product, isEnterprise) {
-  const original = isEnterprise ? product.enterprisePrice : product.retailPrice;
-  const discounted = isEnterprise ? product.enterpriseDiscountPrice : product.retailDiscountPrice;
-  const perSqFt = isEnterprise ? product.perSqFtPriceEnterprise : product.perSqFtPriceRetail;
-
-  const hasDiscount = discounted && discounted < original;
-  const sellBy = product.sellBy ?? "unit";
-
-  if (product.showPerSqFtPrice) {
-    return {
-      primaryPrice: perSqFt,
-      primaryLabel: "/ SqFt",
-      strikePrice: hasDiscount ? original : null,
-      salePrice: hasDiscount ? discounted : original,
-      salePriceLabel: `/ ${sellBy}`,
-      discountPct: hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-      savingsAmt: hasDiscount ? original - discounted : 0,
-    };
-  }
-
-  return {
-    primaryPrice: discounted || original,
-    primaryLabel: `/ ${sellBy}`,
-    strikePrice: hasDiscount ? original : null,
-    salePrice: null,
-    salePriceLabel: null,
-    discountPct: hasDiscount ? Math.round(((original - discounted) / original) * 100) : 0,
-    savingsAmt: hasDiscount ? original - discounted : 0,
-  };
-}
-
-const fmt = (n) => Number(n).toLocaleString("en-IN");
-
-// ─────────────────────────────────────────────────────────────────────────
-
-export default function ProductCardGrid({ product }) {
-  // Auth is handled internally — no need to thread userRole from parent
-  const { userRole, user } = useAuth();
-  const isEnterprise = userRole === "enterprise" && user?.enterpriseStatus === "verified";
+export default function NewProductCard({
+  product,
+  userRole = "user",
+  enterpriseStatus = "unverified",
+}) {
+  const isEnterprise = userRole === "enterprise" && enterpriseStatus === "verified";
   const price = resolvePrice(product, isEnterprise);
   const mainImage = product.images?.[0] || null;
-  
+
   return (
-    <Link href={`/product/${product.slug}`} className="block min-w-44 bg-white  border border-gray-100  hover:border-orange-100 hover:shadow-md transition-all duration-200">
-      <article className="grouprounded-sm  overflow-hidden flex flex-col">
+    <Link
+      href={`/product/${product.slug}`}
+      className="block min-w-44 bg-white border border-gray-100 hover:border-orange-100 hover:shadow-md transition-all duration-200"
+    >
+      <article className="group rounded-sm overflow-hidden flex flex-col">
 
         {/* ── Image ── */}
         <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden shrink-0">
@@ -93,7 +82,7 @@ export default function ProductCardGrid({ product }) {
           <div className="mt-auto pt-1 space-y-0.5">
             <div className="flex items-baseline gap-1.5 flex-wrap">
               <span className="text-sm font-semibold text-gray-900">
-                ₹{fmt(price.primaryPrice)}
+                ₹{fmtINR(price.primaryPrice)}
                 <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                   {price.primaryLabel}
                 </span>
@@ -101,7 +90,7 @@ export default function ProductCardGrid({ product }) {
 
               {price.salePrice && (
                 <span className="text-xs text-gray-700 font-medium">
-                  ₹{fmt(price.salePrice)}
+                  ₹{fmtINR(price.salePrice)}
                   <span className="text-[10px] font-normal text-gray-500 ml-0.5">
                     {price.salePriceLabel}
                   </span>
@@ -110,14 +99,14 @@ export default function ProductCardGrid({ product }) {
 
               {price.strikePrice && (
                 <span className="text-[11px] text-gray-400 line-through">
-                  ₹{fmt(price.strikePrice)}
+                  ₹{fmtINR(price.strikePrice)}
                 </span>
               )}
             </div>
 
             {price.savingsAmt > 0 && (
               <span className="inline-block text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                Save ₹{fmt(price.savingsAmt)}
+                Save ₹{fmtINR(price.savingsAmt)}
               </span>
             )}
 

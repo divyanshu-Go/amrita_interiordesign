@@ -19,6 +19,7 @@ import RelatedProductsRow from "@/components/ProductPage/RelatedProductsRow";
 
 export const revalidate = 1800;
 
+
 // TODO (SEO): generateStaticParams, generateMetadata, and JSON-LD
 // (Product/Category/Breadcrumb/FAQ) were removed temporarily during
 // SSR refactor. Rebuild these before launch — needed for Google
@@ -36,7 +37,9 @@ export default async function ProductPage({ params }) {
   // decoded from the JWT, instead of re-fetching auth client-side.
   const headersList = await headers();
   const userRole = headersList.get("x-user-role") || "user";
-  const isEnterprise = userRole === "enterprise";
+  const enterpriseStatus = headersList.get("x-user-enterprise-status") || "unverified";
+  const isEnterprise = userRole === "enterprise" && enterpriseStatus === "verified";
+
 
   const [data, siteConfig] = await Promise.all([
     getProductBySlug(slug),
@@ -126,8 +129,10 @@ export default async function ProductPage({ params }) {
           <TrustBadges />
 
           <div className="mt-12 space-y-12">
-            <RelatedProductsRow title="Similar Designs & Variants" products={relatedCollection} />
-            <RelatedProductsRow title="More from this Category" products={categoryFiltered} />
+            <RelatedProductsRow title="Similar Designs & Variants" products={relatedCollection} userRole={userRole}
+              enterpriseStatus={enterpriseStatus} />
+            <RelatedProductsRow title="More from this Category" products={categoryFiltered} userRole={userRole}
+              enterpriseStatus={enterpriseStatus} />
           </div>
         </main>
       </div>
