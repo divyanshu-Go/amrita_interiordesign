@@ -10,7 +10,7 @@ export default async function ClientLayout({ children }) {
   return (
     <div className="relative min-h-screen flex flex-col">
       <Header config={config} />
-      <main className="mt-32 sm:mt-18 flex-1">
+      <main className="mt-40 lg:mt-28 flex-1">
         {children}
       </main>
       <Footer config={config} />

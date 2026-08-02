@@ -8,6 +8,7 @@ import { AuthButton, FormInput } from "./AuthUtils/AuthFunctions";
 import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
 import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
 import { toast } from "sonner";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const ROLE_LINKS = [
   { role: "user", label: "User", href: "/signup/user" },
@@ -27,6 +28,8 @@ export const SignupForm = ({ defaultRole = "user" }) => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const { login } = useAuth();
 
   const isEnterprise = defaultRole === "enterprise";
 
@@ -108,16 +111,27 @@ export const SignupForm = ({ defaultRole = "user" }) => {
       }
       // ───────────────────────────────────────────────────────────────────
 
+      // 1. Regular user signups get logged in immediately.
+      // Skip login() for enterprise signups since they are pending admin approval.
+      if (!isEnterprise && data.user) {
+        login(data.user);
+      }
+
+      // 2. Enterprise redirect using router.push()
       if (isEnterprise) {
         toast.success("Account created. Awaiting admin approval.");
-        window.location.href = `/login/notice?msg=${encodeURIComponent(
-          "Your enterprise account has been created successfully. An admin needs to verify your account before you can access enterprise-level features.",
-        )}`;
+        router.push(
+          `/login/notice?msg=${encodeURIComponent(
+            "Your enterprise account has been created successfully. An admin needs to verify your account before you can access enterprise-level features."
+          )}`
+        );
         return;
       }
 
+      // 3. Regular user redirect
       toast.success("Account created successfully");
-      window.location.href = "/";
+      router.push("/");
+
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {

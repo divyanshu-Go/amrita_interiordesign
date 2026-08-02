@@ -1,37 +1,4 @@
 // middleware.js
-//
-// ── WHAT THIS DOES ────────────────────────────────────────────────────────
-//
-// Runs on EVERY request before the page renders (Vercel Edge Network).
-// Three jobs:
-//
-//  1. ROUTE PROTECTION
-//     • /admin/* → admin role only → else redirect to /login/admin
-//     • /account, /checkout, /pay/*, /orders/* → logged in only → else /login
-//     • /login, /signup → already logged in → redirect to /account
-//
-//  2. USER CONTEXT INJECTION
-//     Decodes the JWT and forwards user info (id, role, name) as
-//     request headers (x-user-id, x-user-role, x-user-name).
-//     Server components and API routes read these headers instead
-//     of re-verifying the token on every request.
-//
-//  3. SEO PROTECTION
-//     Adds X-Robots-Tag: noindex on pages that should never appear in
-//     Google (admin, auth, account, checkout, orders, pay).
-//
-// EDGE RUNTIME: no Node.js APIs, no mongoose, no DB.
-// JWT verification uses jose (edge-compatible).
-//
-// NOTE: this file no longer special-cases Next.js Server Actions
-// (the old "next-action" header check). That check existed only to
-// protect Server Actions running on protected routes (/account,
-// /checkout, /pay/*, /orders/*) from being redirected mid-action. Since
-// no Server Actions run on those routes, the check was unused complexity
-// and has been removed. If you ever add a "use server" function to a
-// page under those paths, revisit this — a redirect mid-action can break
-// the action's response format.
-// ─────────────────────────────────────────────────────────────────────────
 
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
@@ -114,22 +81,20 @@ export async function middleware(request) {
   }
 
   // 4. Forward decoded user to server components via request headers.
-  // THIS is where x-user-role comes from — set here, once, per request,
-  // right after JWT verification above. Pages just read it via headers(),
-  // no re-verification needed.
   const requestHeaders = new Headers(request.headers);
   if (user) {
-    requestHeaders.set("x-user-id", user._id ?? "");
+    requestHeaders.set("x-user-id", user._id ?? user.id ?? "");
     requestHeaders.set("x-user-role", user.role ?? "user");
     requestHeaders.set("x-user-name", user.name ?? "");
-    // Not added yet — uncomment once the JWT payload includes
-    // enterpriseStatus (see project notes on NewProductCard.jsx):
-    // requestHeaders.set("x-user-enterprise-status", user.enterpriseStatus ?? "unverified");
+    requestHeaders.set(
+      "x-user-enterprise-status",
+      user.enterpriseStatus ?? "unverified"
+    );
   } else {
     requestHeaders.delete("x-user-id");
     requestHeaders.delete("x-user-role");
     requestHeaders.delete("x-user-name");
-    // requestHeaders.delete("x-user-enterprise-status");
+    requestHeaders.delete("x-user-enterprise-status");
   }
 
   const response = NextResponse.next({

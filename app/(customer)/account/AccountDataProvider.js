@@ -19,7 +19,7 @@ export default function AccountDataProvider({ children }) {
   const [addresses, setAddresses] = useState(null);
   const [cart, setCart] = useState(null);
   const [orders, setOrders] = useState(null);
-const [orderDetails, setOrderDetails] = useState({});
+  const [orderDetails, setOrderDetails] = useState({});
 
 
 
@@ -40,7 +40,8 @@ const [orderDetails, setOrderDetails] = useState({});
     const res = await fetch("/api/user/profile");
 
     if (res.status === 401) {
-      window.location.href = "/login";
+      setUser(null);
+      setLoading((l) => ({ ...l, user: false }));
       return;
     }
 
@@ -79,26 +80,26 @@ const [orderDetails, setOrderDetails] = useState({});
     setLoading((l) => ({ ...l, orders: false }));
   }
 
-async function loadOrderDetail(orderId) {
-  if (orderDetails[orderId]) return;
+  async function loadOrderDetail(orderId) {
+    if (orderDetails[orderId]) return;
 
-  setLoading((l) => ({ ...l, orders: true }));
+    setLoading((l) => ({ ...l, orders: true }));
 
-  const res = await fetch(`/api/orders/${orderId}`);
-  if (!res.ok) {
+    const res = await fetch(`/api/orders/${orderId}`);
+    if (!res.ok) {
+      setLoading((l) => ({ ...l, orders: false }));
+      throw new Error("Failed to fetch order details");
+    }
+
+    const data = await res.json();
+
+    setOrderDetails((prev) => ({
+      ...prev,
+      [orderId]: data.order,
+    }));
+
     setLoading((l) => ({ ...l, orders: false }));
-    throw new Error("Failed to fetch order details");
   }
-
-  const data = await res.json();
-
-  setOrderDetails((prev) => ({
-    ...prev,
-    [orderId]: data.order,
-  }));
-
-  setLoading((l) => ({ ...l, orders: false }));
-}
 
 
 
