@@ -1,11 +1,26 @@
 // components/customer/RelatedProductsRow.jsx
 //
+// Stays a Server Component — no "use client" needed here. ScrollRow (the
+// horizontal-scroll wrapper) is a Client Component, but it only needs
+// interactivity for the arrow buttons/autoplay/swipe; the cards inside it
+// are passed in as `children`, so they can — and should — stay Server
+// Components. This is why NewProductCard doesn't need "use client":
+// passing a Server Component as another component's children is a normal,
+// supported Next.js pattern.
+//
+// userRole/enterpriseStatus are passed down from the page (already
+// resolved from trusted request headers) — no useAuth() call here.
+// ─────────────────────────────────────────────────────────────────────────
 
+import ScrollRow from "@/components/ui/ScrollRow";
+import NewProductCard from "@/components/CategoryPage/NewProductCard";
 
-import ScrollRow       from "@/components/ui/ScrollRow";
-import ProductCardGrid from "@/components/customer/ProductCardGrid";
-
-export default function RelatedProductsRow({ title, products = [] }) {
+export default function RelatedProductsRow({
+  title,
+  products = [],
+  userRole = "user",
+  enterpriseStatus = "unverified",
+}) {
   if (!products.length) return null;
 
   return (
@@ -20,8 +35,11 @@ export default function RelatedProductsRow({ title, products = [] }) {
             key={product._id}
             className="flex-shrink-0 w-[48%] sm:w-[38%] md:w-[26%] lg:w-[20%]"
           >
-            {/* ProductCardGrid is "use client" and handles userRole internally */}
-            <ProductCardGrid product={product} />
+            <NewProductCard
+              product={product}
+              userRole={userRole}
+              enterpriseStatus={enterpriseStatus}
+            />
           </div>
         ))}
       </ScrollRow>

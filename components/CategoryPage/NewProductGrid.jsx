@@ -1,11 +1,9 @@
 // components/customer/NewProductGrid.jsx
 //
 // ── WHY THIS IS A SERVER COMPONENT ──────────────────────────────────────
-// This component only maps an array it already received to a grid of
-// cards. There is no fetching, no loading state, and no error state here
-// — those concerns belong to the page (the page either has products or
-// it doesn't, by the time this renders). Keeping this dumb and simple is
-// what makes it easy to maintain: one job, one file.
+// This only maps an array it already received to a grid of cards. No
+// fetching, no loading state, no error state — those belong to the page
+// (the page either has products or it doesn't, by the time this renders).
 // ─────────────────────────────────────────────────────────────────────────
 
 import NewProductCard from "./NewProductCard";

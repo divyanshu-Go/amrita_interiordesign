@@ -6,9 +6,9 @@ import {
   getCategoryPageData,
 } from "@/lib/serversideFetchers/categoryPage";
 import Breadcrumb from "@/components/customer/Breadcrumb";
-import NewFilterSidebar from "@/components/customer/NewFilterSidebar";
-import NewProductGrid from "@/components/customer/NewProductGrid";
-import NewPaginationLinks from "@/components/customer/NewPaginationLinks";
+import NewFilterSidebar from "@/components/CategoryPage/NewFilterSidebar";
+import NewProductGrid from "@/components/CategoryPage/NewProductGrid";
+import NewPaginationLinks from "@/components/CategoryPage/NewPaginationLinks";
 import Section from "@/components/ui/Section";
 
 export const revalidate = 1800;

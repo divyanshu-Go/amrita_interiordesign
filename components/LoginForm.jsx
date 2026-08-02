@@ -23,7 +23,7 @@ export const LoginForm = ({ defaultRole = "user" }) => {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { refreshUser } = useAuth(); // ADD THIS
+  const { login } = useAuth();
 
   const validateForm = () => {
     const newErrors = {};
@@ -58,41 +58,35 @@ export const LoginForm = ({ defaultRole = "user" }) => {
         return;
       }
 
-      // ── Cart merge: runs before redirect, after cookie is set ──────────
-      // auth_token cookie is already set by the API response at this point
+      // ── Cart merge ──
       const guestCart = getGuestCart();
-      if (guestCart.items.length > 0) {
+      if (guestCart.items?.length > 0) {
         try {
           await mergeGuestCart(guestCart.items);
           clearGuestCart();
         } catch (mergeErr) {
-          // Non-fatal: log and continue — user still gets logged in
           console.warn("Cart merge failed:", mergeErr);
         }
       }
-      // ───────────────────────────────────────────────────────────────────
 
       setMessage("Login successful! Redirecting...");
 
-      // ── CRITICAL: refresh auth state before navigating ──
-      await refreshUser();
-      // ───────────────────────────────────────────────────
+      // 1. Update global AuthContext state (this calls router.refresh() inside AuthProvider)
+      login(data.user);
 
-
+      // 2. Perform clean client-side navigation based on exact role
       if (data.user.role === "admin") {
         router.push("/admin");
-      } else if (data.user.role === "enterprise_active") {
+      } else if (data.user.role === "enterprise") {
         router.push("/account");
       } else {
-        router.push("/cart"); // important: go to cart after login
+        router.push("/cart");
       }
 
-      // router.refresh() can stay — it keeps RSC cache fresh (e.g. server-side role checks)
-      router.refresh();
-
+      // REMOVED: router.refresh() at the end was race-conditioning router.push()
 
     } catch (error) {
-      setErrors({ submit: error.message });
+      setErrors({ submit: error.message || "Something went wrong" });
     } finally {
       setIsLoading(false);
     }

@@ -5,6 +5,7 @@ import ClientLayout from "@/components/ClientLayout";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
+import { headers } from "next/headers";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,13 +34,31 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+
+  const headersList = await headers();
+
+  const userId = headersList.get("x-user-id");
+  const userName = headersList.get("x-user-name");
+  const userRole = headersList.get("x-user-role");
+  const enterpriseStatus = headersList.get("x-user-enterprise-status");
+
+  const initialUser = userId
+    ? {
+      id: userId,
+      name: userName,
+      role: userRole,
+      enterpriseStatus: enterpriseStatus || "unverified",
+    }
+    : null;
+
+
   return (
     <html lang="en">
       <body
         className={`${poppins.className} min-h-screen flex flex-col`}
       >
-        <AuthProvider>
+        <AuthProvider initialUser={initialUser}>
           <ClientLayout>{children}</ClientLayout>
           <Toaster richColors position="top-center" />
         </AuthProvider>

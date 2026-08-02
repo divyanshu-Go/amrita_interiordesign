@@ -1,3 +1,4 @@
+// app/(customer)/account/sections/ProfileView.jsx
 "use client";
 
 import { useAccount } from "../AccountDataProvider";
@@ -26,7 +27,7 @@ export default function ProfileView() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const { refreshUser } = useAuth();
+  const { logout } = useAuth();
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -34,8 +35,6 @@ export default function ProfileView() {
     gstNumber: user?.enterpriseProfile?.gstNumber || "",
     phone: user?.enterpriseProfile?.phone || "",
   });
-
-  console.log(user);
 
   // Show skeleton while loading
   if (loading.user || !user) {
@@ -48,11 +47,8 @@ export default function ProfileView() {
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/auth/logout");
-      await refreshUser();          // cookie is gone → 401 → user becomes null
       toast.success("Logged out successfully");
-      router.push("/");
-      router.refresh();             // keeps RSC cache in sync
+      await logout(); // Handles cookie deletion, state reset, and redirection
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Logout failed");
@@ -224,8 +220,8 @@ export default function ProfileView() {
               <div className="px-3 py-2">
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${user.emailVerified
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-700"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700"
                     }`}
                 >
                   {user.emailVerified ? (

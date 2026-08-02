@@ -1,51 +1,42 @@
 // app/providers/AuthProvider.jsx
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+export function AuthProvider({ children, initialUser = null }) {
+  const [user, setUser] = useState(initialUser);
+  const router = useRouter();
 
-  const fetchUser = useCallback(async () => {
+  // Called from LoginForm / SignupForm after successful auth API response
+  const login = (userData) => {
+    setUser(userData);
+    router.refresh(); // Refreshes Next.js Server Component cache & headers
+  };
+
+  // Called when user clicks logout button
+  const logout = async () => {
     try {
-      const res = await fetch("/api/user/profile", {
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        setUser(null);
-        return;
-      }
-
-      const json = await res.json();
-      setUser(json.user || null);
+      await fetch("/api/auth/logout", { method: "POST" });
     } catch (err) {
-      console.error("AuthProvider: failed to fetch user", err);
-      setUser(null);
+      console.error("Logout API failed:", err);
     } finally {
-      setLoading(false);
+      setUser(null);
+      router.refresh();
+      router.push("/login");
     }
-  }, []);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+  };
 
   const value = {
     user,
     userRole: user?.role || "user",
-    loading,
-    refreshUser: fetchUser, // call after login/logout
+    login,
+    logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
