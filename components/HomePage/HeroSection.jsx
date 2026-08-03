@@ -1,108 +1,223 @@
-// components/HomePage/HeroSection.jsx
 "use client";
 
-
-// ─────────────────────────────────────────────────────────────────────────
-
-import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Flame } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Droplet,
+  ShieldCheck,
+  Truck,
+  Award,
+  Layers,
+  Palette,
+  Sofa,
+  Headphones,
+} from "lucide-react";
 
-// Simple fade-up — used for all entry animations
-const fadeUp = (delay = 0) => ({
-  initial:    { opacity: 0, y: 16 },
-  animate:    { opacity: 1, y: 0  },
-  transition: { duration: 0.55, ease: "easeOut", delay },
-});
+const slides = [
+  {
+    badge: "NEW COLLECTION 2025",
+    heading: "Transform Your Space",
+    highlight: "Instantly",
+    description:
+      "Marble, PVC, WPC & louvers — every premium interior material under one roof.",
+    primaryCta: { label: "Explore Products", href: "/category/interior-design" },
+    secondaryCta: { label: "View Collections", href: "/collections" },
+    image: "/hero/interior-design.jpg",
+  },
+  {
+    badge: "WATERPROOF & LOW MAINTENANCE",
+    heading: "PVC Panels That",
+    highlight: "Just Work",
+    description:
+      "Sleek, waterproof wall panels built for modern homes — zero upkeep, maximum style.",
+    primaryCta: { label: "Shop PVC Panels", href: "/category/pvc-panels" },
+    secondaryCta: { label: "See Designs", href: "/category/pvc-panels#designs" },
+    image: "/hero/pvc-panels.jpg",
+  },
+  {
+    badge: "DURABLE WOOD-LIKE FINISH",
+    heading: "WPC, Elegantly",
+    highlight: "Engineered",
+    description:
+      "The warmth of wood with the strength of composite — built to last, styled to impress.",
+    primaryCta: { label: "Shop WPC Panels", href: "/category/wpc-panels" },
+    secondaryCta: { label: "View Collections", href: "/collections" },
+    image: "/hero/wpc-panels.jpg",
+  },
+  {
+    badge: "PREMIUM WALL DÉCOR",
+    heading: "Louvers With A",
+    highlight: "Modern Edge",
+    description:
+      "Sleek, contemporary louvers that add depth and character to any space.",
+    primaryCta: { label: "Shop Louvers", href: "/category/louvers" },
+    secondaryCta: { label: "Explore Designs", href: "/category/louvers#designs" },
+    image: "/hero/louvers.jpg",
+  },
+];
+
+const featureItems = [
+  { icon: Droplet, title: "Waterproof", subtitle: "Built to Last" },
+  { icon: ShieldCheck, title: "Premium Quality", subtitle: "Superior Materials" },
+  { icon: Truck, title: "Fast Delivery", subtitle: "Across Delhi" },
+  { icon: Award, title: "Best Prices", subtitle: "Direct from Factory" },
+];
+
+const statItems = [
+  { icon: Layers, title: "1000+", subtitle: "Premium Products" },
+  { icon: Palette, title: "500+", subtitle: "Unique Designs" },
+  { icon: Sofa, title: "Trending", subtitle: "Latest Collection" },
+  { icon: Truck, title: "Across Delhi", subtitle: "Delivery Available" },
+  { icon: Headphones, title: "Expert Support", subtitle: "7 Days Assistance" },
+];
+
+const AUTO_SLIDE_INTERVAL = 6000;
 
 export default function HeroSection() {
+  const [active, setActive] = useState(0);
+
+  const next = useCallback(() => {
+    setActive((prev) => (prev + 1) % slides.length);
+  }, []);
+
+  const prev = useCallback(() => {
+    setActive((prev) => (prev - 1 + slides.length) % slides.length);
+  }, []);
+
+  const goTo = useCallback((index) => {
+    setActive(index);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(next, AUTO_SLIDE_INTERVAL);
+    return () => clearInterval(timer);
+  }, [next]);
+
+  const slide = slides[active];
+
   return (
-    <section className="relative w-full bg-white overflow-hidden">
-      <div
-        className="relative w-full overflow-hidden"
-        style={{
-          minHeight: "320px",
-          background:
-            "linear-gradient(135deg, #92400e 0%, #ea580c 33%, #c2410c 66%, #7c2d12 100%)",
-        }}
-      >
-        {/* ── Content ── */}
+    <section className="relative w-full h-[620px] sm:h-[650px] lg:h-[720px] overflow-hidden bg-neutral-900 font-sans">
+      {/* Background Images */}
+      {slides.map((s, index) => (
         <div
-          className="relative z-10 flex items-center justify-center px-6 text-center"
-          style={{ minHeight: "320px" }}
+          key={s.heading}
+          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+            index === active ? "opacity-100 z-0" : "opacity-0 -z-10"
+          }`}
         >
-          <div className="max-w-3xl mx-auto">
+          <Image
+            src={s.image}
+            alt={s.heading}
+            fill
+            priority={index === 0}
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/95 via-neutral-900/80 to-neutral-900/60 md:bg-gradient-to-r md:from-neutral-900/95 md:via-neutral-900/75 md:to-transparent" />
+        </div>
+      ))}
 
-            {/* Badge */}
-            <motion.div
-              {...fadeUp(0)}
-              className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-white/15 border border-orange-300/40 backdrop-blur-sm"
+      {/* Main Content Overlay */}
+      <div className="relative z-10 h-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center pb-24 sm:pb-28">
+        <div className="max-w-xl">
+          {/* Badge */}
+          <span className="inline-block border border-primary-500/60 bg-primary-500/10 backdrop-blur-sm text-primary-300 text-[10px] sm:text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full mb-3 sm:mb-4">
+            {slide.badge}
+          </span>
+
+          {/* Heading */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-2 sm:mb-3">
+            {slide.heading}{" "}
+            <span className="text-primary-500">{slide.highlight}</span>
+          </h1>
+          <div className="w-12 h-1 bg-primary-500 rounded-full mb-4" />
+
+          {/* Description */}
+          <p className="text-xs sm:text-sm md:text-base text-neutral-200 mb-6 max-w-md leading-relaxed">
+            {slide.description}
+          </p>
+
+          {/* Features */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            {featureItems.map(({ icon: Icon, title, subtitle }) => (
+              <div key={title} className="flex flex-col gap-0.5">
+                <Icon className="w-4 h-4 text-primary-500" strokeWidth={2.2} />
+                <span className="text-[11px] font-bold text-white uppercase tracking-wide mt-1">
+                  {title}
+                </span>
+                <span className="text-[10px] text-neutral-300">{subtitle}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <Link
+              href={slide.primaryCta.href}
+              className="inline-flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white text-xs sm:text-sm font-semibold px-6 py-3 rounded-md transition-colors w-full sm:w-auto shadow-md"
             >
-              <Sparkles className="w-4 h-4 text-orange-200" />
-              <span className="text-sm font-medium text-orange-100">
-                New Collection 2025
-              </span>
-            </motion.div>
-
-            {/* Heading — single element, one animation instead of 32 */}
-            <motion.h1
-              {...fadeUp(0.15)}
-              className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight flex items-center justify-center flex-wrap gap-x-2"
+              {slide.primaryCta.label}
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href={slide.secondaryCta.href}
+              className="inline-flex items-center justify-center bg-black/20 backdrop-blur-sm border border-white/30 hover:border-white text-white text-xs sm:text-sm font-semibold px-6 py-3 rounded-md transition-colors w-full sm:w-auto"
             >
-              Transform Your Space Instantly
-              <Flame className="w-6 h-6 text-orange-300 flex-shrink-0" />
-            </motion.h1>
-
-            {/* Subtitle */}
-            <motion.p
-              {...fadeUp(0.28)}
-              className="text-orange-100 text-sm md:text-base mb-6 max-w-2xl mx-auto"
-            >
-              Premium flooring, wallpaper &amp; decor handpicked for modern living
-            </motion.p>
-
-            {/* CTA */}
-            <motion.div {...fadeUp(0.38)}>
-              <Link href="/category/all">
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-orange-700 via-orange-600 to-yellow-600 text-white font-semibold rounded-lg transition-all group"
-                >
-                  Explore Products
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-              </Link>
-            </motion.div>
-
+              {slide.secondaryCta.label}
+            </Link>
           </div>
         </div>
+      </div>
 
-        {/* ── Static CSS wave — replaces 3 morphing framer-motion SVG paths ──
-            Looks virtually identical, uses zero JS, renders instantly.        ── */}
-        <div
-          aria-hidden="true"
-          className="absolute bottom-0 left-0 w-full overflow-hidden leading-none"
-          style={{ height: "80px" }}
-        >
-          <svg
-            viewBox="0 0 1200 80"
-            preserveAspectRatio="none"
-            className="w-full h-full"
+      {/* Navigation Arrows */}
+      <button
+        onClick={prev}
+        aria-label="Previous slide"
+        className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 transition-colors"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={next}
+        aria-label="Next slide"
+        className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-black/40 hover:bg-black/70 text-white border border-white/20 transition-colors"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
+
+      {/* Slide Indicators */}
+      <div className="absolute bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+        {slides.map((s, index) => (
+          <button
+            key={s.heading}
+            onClick={() => goTo(index)}
+            aria-label={`Go to slide ${index + 1}`}
+            className="p-1"
           >
-            <path
-              d="M 0,40 Q 300,10 600,40 T 1200,40 L 1200,80 L 0,80 Z"
-              fill="rgba(234,88,12,0.18)"
+            <span
+              className={`block h-1.5 rounded-full transition-all ${
+                index === active ? "w-6 bg-primary-500" : "w-2 bg-white/40 hover:bg-white/70"
+              }`}
             />
-            <path
-              d="M 0,55 Q 300,25 600,55 T 1200,55 L 1200,80 L 0,80 Z"
-              fill="rgba(249,115,22,0.12)"
-            />
-            <path
-              d="M 0,65 Q 300,45 600,65 T 1200,65 L 1200,80 L 0,80 Z"
-              fill="rgba(245,158,11,0.08)"
-            />
-          </svg>
+          </button>
+        ))}
+      </div>
+
+      {/* Bottom Stats Bar */}
+      <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-6 sm:right-6 z-20">
+        <div className="bg-neutral-900/80 backdrop-blur-md border border-neutral-800 rounded-lg px-4 py-2.5 sm:py-3 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
+          {statItems.map(({ icon: Icon, title, subtitle }) => (
+            <div key={title} className="flex-shrink-0 flex items-center gap-2.5">
+              <Icon className="w-4 h-4 text-primary-500 flex-shrink-0" strokeWidth={2} />
+              <div className="flex flex-col leading-none">
+                <span className="text-xs font-bold text-white">{title}</span>
+                <span className="text-[10px] text-neutral-400 mt-0.5">{subtitle}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

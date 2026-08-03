@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import {
@@ -41,7 +42,6 @@ export default function Header({ config = {} }) {
     }
   };
 
-  // Clean WhatsApp number to ensure valid link format
   const cleanWhatsapp = whatsapp ? whatsapp.replace(/\D/g, "") : "";
   const whatsappUrl = cleanWhatsapp
     ? `https://wa.me/${cleanWhatsapp}`
@@ -90,16 +90,19 @@ export default function Header({ config = {} }) {
 
       {/* ── Layer 2: Main Navigation Bar ── */}
       <div className="w-full max-w-[1600px] mx-auto px-4 lg:px-8 py-3">
-        <div className="flex flex-wrap lg:flex-nowrap items-center justify-around gap-3 lg:gap-6">
+        <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 lg:gap-6">
           {/* Brand Logo & Name */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <img
+            <Image
               src={logoUrl || "/logo.png"}
               alt="Interio97"
+              width={36}
+              height={36}
               className="w-9 h-9 object-contain"
+              priority
             />
             <div className="flex flex-col justify-center leading-none">
-              <span className="text-xl font-extrabold tracking-wider text-neutral-900">
+              <span className="text-xl font-extrabold tracking-wide text-neutral-900">
                 Interio<span className="text-primary-500">97</span>
               </span>
               {tagline && (
@@ -148,10 +151,10 @@ export default function Header({ config = {} }) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 rounded-md bg-success hover:opacity-90 text-white flex items-center justify-center transition-opacity shadow-sm flex-shrink-0"
+              className="w-10 h-10 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center transition-colors shadow-sm flex-shrink-0"
               title="Chat on WhatsApp"
             >
-              <FaWhatsapp className="w-[18px] h-[18px]"/>
+              <FaWhatsapp className="w-5 h-5" />
             </a>
           </div>
 
@@ -182,15 +185,20 @@ export default function Header({ config = {} }) {
           <nav className="flex items-center justify-start lg:justify-center gap-1 lg:gap-2 w-full overflow-x-auto no-scrollbar py-1">
             {categories.map((cat) => {
               const Icon = cat.icon;
-              const isActive = pathname === cat.href;
+              const isActive =
+                cat.href === "/"
+                  ? pathname === "/"
+                  : pathname?.startsWith(cat.href);
+
               return (
                 <Link
                   key={cat.label}
                   href={cat.href}
-                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 lg:px-4 px-3 py-2 text-[10px] lg:text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${isActive
+                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 lg:px-4 px-3 py-2 text-[10px] lg:text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${
+                    isActive
                       ? "border-primary-500 text-primary-600"
                       : "border-transparent text-neutral-700 hover:text-primary-600 hover:border-primary-100"
-                    }`}
+                  }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{cat.label}</span>
