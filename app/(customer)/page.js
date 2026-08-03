@@ -2,12 +2,12 @@
 export const revalidate = 1800;
 
 import { Suspense } from "react";
-import HeroSection                from "@/components/HomePage/HeroSection";
-import PopularCategoriesSection   from "@/components/HomePage/PopularCategoriesSection";
+import PopularCategoriesSection   from "@/components/PopularCategoriesSection";
 import GetInspiredCarousel        from "@/components/customer/GetInspiredCarousel";
 import TrendingCollections        from "@/components/customer/TrendingCollections";
 import { getTrendingCategories }    from "@/lib/fetchers/serverCategories";
 import { getInspiredCarousel }      from "@/lib/fetchers/inspiredCarousel";
+import HeroSection from "@/components/HomePage/HeroSection";
 
 // ── Homepage Metadata ─────────────────────────────────────────────────────
 // WHY: Homepage had no metadata — inherited root fallback title unchanged.
@@ -113,7 +113,7 @@ export default async function HomePage() {
       <WebSiteJsonLd />
 
       <div className="bg-white space-y-4">
-        {/* // Hero Section */}
+        <HeroSection/>
 
         <Suspense fallback={<SectionSkeleton />}>
           <PopularCategoriesSection />

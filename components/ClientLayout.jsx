@@ -1,7 +1,7 @@
 // components/ClientLayout.jsx
 
 import Footer          from "./Footer";
-import Header          from "./Header";
+import Header          from "./HomePage/Header";
 import { getSiteConfig } from "@/lib/fetchers/siteConfig";
 
 export default async function ClientLayout({ children }) {
