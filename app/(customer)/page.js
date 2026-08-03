@@ -113,9 +113,7 @@ export default async function HomePage() {
       <WebSiteJsonLd />
 
       <div className="bg-white space-y-4">
-        <div className="w-full mx-auto ">
-          <HeroSection />
-        </div>
+        {/* // Hero Section */}
 
         <Suspense fallback={<SectionSkeleton />}>
           <PopularCategoriesSection />

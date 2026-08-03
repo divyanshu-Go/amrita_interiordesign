@@ -99,11 +99,11 @@ export default function Header({ config = {} }) {
               className="w-9 h-9 object-contain"
             />
             <div className="flex flex-col justify-center leading-none">
-              <span className="text-xl font-extrabold tracking-wide text-neutral-900">
+              <span className="text-xl font-extrabold tracking-wider text-neutral-900">
                 Interio<span className="text-primary-500">97</span>
               </span>
               {tagline && (
-                <span className="text-[7px] text-neutral-500 font-medium tracking-wide">
+                <span className="text-[7px] text-neutral-500 font-semibold tracking-wide">
                   {tagline}
                 </span>
               )}
