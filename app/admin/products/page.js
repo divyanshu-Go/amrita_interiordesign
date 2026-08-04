@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getAllProducts } from "@/lib/serversideFetchers/products";
 import ProductsTable from "@/components/admin/ProductsTable";
 import { Plus } from "lucide-react";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
+import { getAllCategories } from "@/lib/serversideFetchers/categories";
 
 export const dynamic = "force-dynamic";
 

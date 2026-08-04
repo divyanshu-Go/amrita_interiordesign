@@ -1,5 +1,5 @@
 // app/admin/categories/[slug]/page.js
-import { getOnlyCategoryBySlug } from "@/lib/fetchers/serverCategories";
+import { getOnlyCategoryBySlug } from "@/lib/serversideFetchers/categories";
 import CategoryForm from "@/components/admin/CategoryForm";
 import { notFound } from "next/navigation";
 import CategoryProducts from "@/components/admin/CategoryProducts";

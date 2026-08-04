@@ -1,6 +1,6 @@
 // app/admin/products/quick-add/page.js
 import QuickAddClient from "@/components/admin/QuickAddClient";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
+import { getAllCategories } from "@/lib/serversideFetchers/categories";
 import { getAllColorVariantsServer } from "@/lib/serversideFetchers/colorVariants";
 import { getAllPatternVariantsServer } from "@/lib/serversideFetchers/patternVariants";
 import { getAllApplicationsServer } from "@/lib/serversideFetchers/applications";
