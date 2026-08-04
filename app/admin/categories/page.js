@@ -1,6 +1,6 @@
 // app/admin/categories/page.js
 import Link from "next/link";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
+import { getAllCategories } from "@/lib/serversideFetchers/categories";
 import CategoriesTable from "@/components/admin/CategoriesTable";
 import { Plus } from "lucide-react";
 

@@ -1,7 +1,7 @@
 // app/admin/products/new/page.js
 
 import ProductForm from "@/components/admin/ProductForm";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
+import { getAllCategories } from "@/lib/serversideFetchers/categories";
 import { getAllApplicationsServer } from "@/lib/serversideFetchers/applications";
 import { getAllColorVariantsServer } from "@/lib/serversideFetchers/colorVariants";
 import { getAllPatternVariantsServer } from "@/lib/serversideFetchers/patternVariants";

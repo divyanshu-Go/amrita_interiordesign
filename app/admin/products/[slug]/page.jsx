@@ -1,5 +1,5 @@
 import { getProductBySlug } from "@/lib/serversideFetchers/products";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
+import { getAllCategories } from "@/lib/serversideFetchers/categories";
 import ProductForm from "@/components/admin/ProductForm";
 import { notFound } from "next/navigation";
 import Link from "next/link";

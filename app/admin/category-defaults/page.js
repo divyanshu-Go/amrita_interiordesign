@@ -1,6 +1,6 @@
 // app/admin/category-defaults/page.js
 import CategoryDefaultsClient from "@/components/admin/CategoryDefaultsClient";
-import { getAllCategories } from "@/lib/fetchers/serverCategories";
+import { getAllCategories } from "@/lib/serversideFetchers/categories";
 import { getAllApplicationsServer } from "@/lib/serversideFetchers/applications";
 
 
