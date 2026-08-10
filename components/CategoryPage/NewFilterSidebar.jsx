@@ -1,47 +1,23 @@
 // components/customer/NewFilterSidebar.jsx
-//
-// ── WHY THIS IS THE ONLY CLIENT COMPONENT ────────────────────────────────
-// Everything here is either (a) reading the URL, or (b) writing a new URL
-// when the user interacts with a filter. There is no product fetching —
-// changing the URL triggers a normal Next.js navigation, and the page
-// (a Server Component) re-renders with fresh data. This component never
-// touches product data directly.
-//
-// ── WHY ONE CONFIG ARRAY INSTEAD OF EIGHT JSX BLOCKS ─────────────────────
-// Every checkbox-style filter (color, brand, material, pattern, finish,
-// application, size, thickness) behaves identically: show a list of
-// checkable options, toggle one on click, write the resulting array to
-// the URL. The only differences between them are which field they read
-// from filterOptions/currentFilters, and how to turn a raw value into a
-// human label. FILTER_FIELDS below is the single place that describes
-// those differences. Adding a new filterable field means adding one line
-// to that array — not writing a new JSX block.
-// ─────────────────────────────────────────────────────────────────────────
 
 "use client";
 
 import { useCallback, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { PRODUCT_ATTRIBUTES, getColorLabel } from "@/config/productAttributes";
 
-// ── Config: every checkbox-style filter field, in display order ──────────
-// `key` must match both the filterOptions field name and the URL param
-// name. `label` is the accordion title. `optionLabel` turns one raw
-// option value into display text — most fields show it as-is; a couple
-// need light formatting (thickness gets "mm", applications are objects).
 const FILTER_FIELDS = [
   { key: "materials", label: "Material" },
   { key: "patterns", label: "Pattern" },
   { key: "finishes", label: "Finish" },
-  { key: "applications", label: "Application" }, // options are { name, slug }
+  { key: "applications", label: "Application" },
   { key: "colors", label: "Color" },
   { key: "sizes", label: "Size" },
   { key: "thicknesses", label: "Thickness", optionLabel: (v) => `${v}mm` },
   { key: "brands", label: "Brand" },
 ];
 
-// Turns one raw option (a string, a number, or a { name, slug } object)
-// into a stable { value, label } pair for rendering + URL storage.
 function normalizeOption(rawOption, optionLabel) {
   if (rawOption && typeof rawOption === "object") {
     return { value: rawOption.slug, label: rawOption.name };
@@ -49,8 +25,6 @@ function normalizeOption(rawOption, optionLabel) {
   const label = optionLabel ? optionLabel(rawOption) : String(rawOption);
   return { value: String(rawOption), label };
 }
-
-// ── URL <-> filters ────────────────────────────────────────────────────────
 
 function readFiltersFromURL(searchParams, priceRange) {
   const filters = {
@@ -84,7 +58,6 @@ function buildQueryString(filters, priceRange) {
     if (values?.length) params.set(field.key, values.join(","));
   }
 
-  // Deliberately never sets "page" — any filter change starts over at page 1.
   return params.toString();
 }
 
@@ -100,8 +73,6 @@ function countActiveFilters(filters, priceRange) {
     (filters.maxPrice !== priceRange.max ? 1 : 0)
   );
 }
-
-// ── Small presentational pieces ─────────────────────────────────────────────
 
 function AccordionItem({ title, children, defaultOpen = false }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -121,8 +92,6 @@ function AccordionItem({ title, children, defaultOpen = false }) {
   );
 }
 
-// One generic checkbox group — used for every field in FILTER_FIELDS.
-// No per-field variant of this exists anywhere else in the file.
 function CheckboxGroup({ options, optionLabel, selectedValues, onToggle }) {
   return (
     <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
@@ -141,6 +110,45 @@ function CheckboxGroup({ options, optionLabel, selectedValues, onToggle }) {
               {label}
             </span>
           </label>
+        );
+      })}
+    </div>
+  );
+}
+
+// Visual Swatch Group for Customer Color Filter
+function ColorSwatchGroup({ options = [], selectedValues = [], onToggle }) {
+  return (
+    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
+      {options.map((hex) => {
+        const isSelected = selectedValues.includes(hex);
+        const label = getColorLabel(hex);
+
+        return (
+          <button
+            key={hex}
+            type="button"
+            title={label ? `${label} (${hex})` : hex}
+            onClick={() => onToggle(hex)}
+            className={`w-6 h-6 rounded-full border border-gray-300 transition-all flex items-center justify-center cursor-pointer ${
+              isSelected
+                ? "ring-2 ring-orange-500 ring-offset-2 scale-110 shadow-xs"
+                : "hover:scale-105 opacity-90 hover:opacity-100"
+            }`}
+            style={{ backgroundColor: hex }}
+          >
+            {isSelected && (
+              <span
+                className={`text-[10px] font-bold ${
+                  hex.toLowerCase() === "#ffffff" || hex.toLowerCase() === "#f5f5dc"
+                    ? "text-gray-900"
+                    : "text-white"
+                }`}
+              >
+                ✓
+              </span>
+            )}
+          </button>
         );
       })}
     </div>
@@ -170,7 +178,7 @@ function PriceRangeSlider({ minPrice, maxPrice, priceRange, onChange }) {
             const val = parseFloat(e.target.value);
             if (val < maxPrice) onChange({ minPrice: val });
           }}
-          className="absolute w-full h-1.5 appearance-none bg-transparent cursor-pointer accent-orange-500 [&::-webkit-slider-thumb]:relative [&::-webkit-slider-thumb]:z-10"
+          className="absolute w-full h-1.5 appearance-none bg-transparent cursor-pointer accent-orange-500"
         />
         <input
           type="range"
@@ -197,8 +205,6 @@ function PriceRangeSlider({ minPrice, maxPrice, priceRange, onChange }) {
     </div>
   );
 }
-
-// ── Main component ──────────────────────────────────────────────────────────
 
 export default function NewFilterSidebar({ filterOptions, priceRange }) {
   const router = useRouter();
@@ -238,11 +244,10 @@ export default function NewFilterSidebar({ filterOptions, priceRange }) {
 
   return (
     <>
-      {/* Mobile toggle — pure UI state, unrelated to filters/URL */}
       <div className="sm:hidden mb-4">
         <button
           onClick={() => setShowFilters((v) => !v)}
-          className="w-full flex items-center justify-center gap-2 bg-white border-2 border-gray-200 rounded-md px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 transition-all duration-200 shadow-sm"
+          className="w-full flex items-center justify-center gap-2 bg-white border-2 border-gray-200 rounded-md px-4 py-3 text-sm font-semibold text-gray-700 hover:border-orange-300 transition-all duration-200 shadow-xs"
         >
           {showFilters ? (
             <>
@@ -262,9 +267,7 @@ export default function NewFilterSidebar({ filterOptions, priceRange }) {
       </div>
 
       <div className={`${showFilters ? "block" : "hidden"} sm:block sm:sticky sm:top-24`}>
-        <div className="bg-white rounded-md border border-gray-200 shadow-sm overflow-hidden">
-
-          {/* Header */}
+        <div className="bg-white rounded-md border border-gray-200 shadow-xs overflow-hidden">
           <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3">
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
@@ -274,8 +277,7 @@ export default function NewFilterSidebar({ filterOptions, priceRange }) {
               {activeCount > 0 && (
                 <button
                   onClick={handleClear}
-                  className="inline-flex items-center gap-1 text-sm text-gray-700 bg-white border border-gray-200 px-2 py-1 rounded-md hover:bg-gray-50 transition-shadow focus:outline-none focus:ring-2 focus:ring-orange-100"
-                  aria-label={`Clear ${activeCount} filters`}
+                  className="inline-flex items-center gap-1 text-sm text-gray-700 bg-white border border-gray-200 px-2 py-1 rounded-md hover:bg-gray-50 transition-shadow focus:outline-none focus:ring-2 focus:ring-orange-100 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                   <span className="text-xs font-medium">Clear</span>
@@ -287,15 +289,13 @@ export default function NewFilterSidebar({ filterOptions, priceRange }) {
             </div>
           </div>
 
-          {/* Scrollable content */}
           <div className="overflow-y-auto max-h-[calc(100vh-13rem)] px-4 py-3">
             <div className="space-y-2">
-
               <AccordionItem title="Sort By" defaultOpen>
                 <select
                   value={currentFilters.sortBy}
                   onChange={(e) => applyFilters({ sortBy: e.target.value })}
-                  className="w-full px-2 py-2 text-xs border border-gray-200 rounded-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-100 transition-all bg-white"
+                  className="w-full px-2 py-2 text-xs border border-gray-200 rounded-xs focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-100 transition-all bg-white"
                 >
                   <option value="newest">Newest First</option>
                   <option value="priceLowHigh">Price: Low to High</option>
@@ -313,21 +313,26 @@ export default function NewFilterSidebar({ filterOptions, priceRange }) {
                 />
               </AccordionItem>
 
-              {/* One generic loop replaces eight hand-written blocks.
-                  Adding a new filterable field is one line in FILTER_FIELDS
-                  above — nothing changes here. */}
               {FILTER_FIELDS.map((field) => {
                 const options = filterOptions?.[field.key];
                 if (!options?.length) return null;
 
                 return (
                   <AccordionItem key={field.key} title={field.label}>
-                    <CheckboxGroup
-                      options={options}
-                      optionLabel={field.optionLabel}
-                      selectedValues={currentFilters[field.key] || []}
-                      onToggle={(value) => toggleFieldValue(field.key, value)}
-                    />
+                    {field.key === "colors" ? (
+                      <ColorSwatchGroup
+                        options={options}
+                        selectedValues={currentFilters.colors || []}
+                        onToggle={(hex) => toggleFieldValue("colors", hex)}
+                      />
+                    ) : (
+                      <CheckboxGroup
+                        options={options}
+                        optionLabel={field.optionLabel}
+                        selectedValues={currentFilters[field.key] || []}
+                        onToggle={(value) => toggleFieldValue(field.key, value)}
+                      />
+                    )}
                   </AccordionItem>
                 );
               })}
@@ -345,7 +350,6 @@ export default function NewFilterSidebar({ filterOptions, priceRange }) {
                   </span>
                 </label>
               </AccordionItem>
-
             </div>
           </div>
         </div>

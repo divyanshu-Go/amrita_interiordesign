@@ -1,10 +1,10 @@
-//  app/api/products/[slug]/route.js
+// app/api/products/[slug]/route.js
 
 import { NextResponse } from "next/server";
 import DbConnect from "@/lib/Db/DbConnect";
 import Product from "@/models/product";
 
-// ✅ GET Single Product + Variants
+// GET Single Product + Variants
 export async function GET(req, { params }) {
   try {
     await DbConnect();
@@ -19,13 +19,6 @@ export async function GET(req, { params }) {
         { status: 404 }
       );
 
-    let variants = [];
-    if (product.variantGroupId) {
-      variants = await Product.find({
-        variantGroupId: product.variantGroupId,
-        _id: { $ne: product._id },
-      });
-    }
     // fetch all products with same colorVariant
     let colorVariants = [];
     if (product.colorVariant) {
@@ -45,7 +38,7 @@ export async function GET(req, { params }) {
 
     return NextResponse.json({
       success: true,
-      data: { product, variants, colorVariants, patternVariants },
+      data: { product, colorVariants, patternVariants },
     });
   } catch (error) {
     return NextResponse.json(
@@ -55,7 +48,7 @@ export async function GET(req, { params }) {
   }
 }
 
-// ✅ UPDATE Product
+// UPDATE Product
 export async function PUT(req, { params }) {
   try {
     await DbConnect();
@@ -84,7 +77,7 @@ export async function PUT(req, { params }) {
   }
 }
 
-// ✅ DELETE Product
+// DELETE Product
 export async function DELETE(req, { params }) {
   try {
     await DbConnect();
