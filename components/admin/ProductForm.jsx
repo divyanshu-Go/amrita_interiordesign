@@ -6,136 +6,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createProduct, updateProduct } from "@/lib/fetchers/products";
 import MultiImageUpload from "./MultiImageUpload";
+import { PRODUCT_ATTRIBUTES } from "@/config/productAttributes";
+import {
+  SectionHeader,
+  InputField,
+  SelectField,
+  ColorSwatchSelector,
+  ControlledMultiSelect,
+} from "./ProductFormControls";
 
-// Section Header Component
-const SectionHeader = ({ number, title }) => (
-  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-3">
-    <span className="w-6 h-6 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center text-xs font-bold">
-      {number}
-    </span>
-    {title}
-  </h2>
-);
-
-// Input Field Component
-const InputField = ({
-  label,
-  required,
-  helperText,
-  type = "text",
-  ...props
-}) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-      {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </label>
-    <input
-      type={type}
-      {...props}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition text-sm"
-    />
-    {helperText && <p className="text-xs text-gray-500 mt-1">{helperText}</p>}
-  </div>
-);
-
-// Select Field Component
-const SelectField = ({ label, required, options, ...props }) => (
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-      {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </label>
-    <select
-      {...props}
-      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition text-sm"
-    >
-      {options?.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-  </div>
-);
-
-// Tag Input Component
-const TagInput = ({
-  label,
-  required,
-  selectedIds,
-  items,
-  onAdd,
-  onRemove,
-  addButtonLabel,
-}) => {
-  const [showSelect, setShowSelect] = useState(false);
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md bg-gray-50 min-h-10 mb-2">
-        {selectedIds.length === 0 ? (
-          <span className="text-gray-400 text-xs self-center">
-            None selected
-          </span>
-        ) : (
-          selectedIds.map((id) => {
-            const item = items.find((i) => i._id === id);
-            return (
-              <div
-                key={id}
-                className="flex items-center gap-1 bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full text-xs font-medium"
-              >
-                {item?.name || "Unknown"}
-                <button
-                  type="button"
-                  onClick={() => onRemove(id)}
-                  className="ml-0.5 hover:text-orange-900 font-bold cursor-pointer"
-                >
-                  ×
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
-      {showSelect && (
-        <select
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 mb-2 text-sm"
-          onChange={(e) => {
-            if (e.target.value) {
-              onAdd(e.target.value);
-              setShowSelect(false);
-            }
-          }}
-          autoFocus
-        >
-          <option value="">Select option</option>
-          {items
-            .filter((item) => !selectedIds.includes(item._id))
-            .map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.name}
-              </option>
-            ))}
-        </select>
-      )}
-      <button
-        type="button"
-        onClick={() => setShowSelect(!showSelect)}
-        className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-md transition font-medium"
-      >
-        {showSelect ? "Hide" : addButtonLabel}
-      </button>
-    </div>
-  );
-};
-
-// Main Product Form Component
 export default function ProductForm({
   product = null,
   categories = [],
@@ -163,10 +42,12 @@ export default function ProductForm({
     enterprisePrice: product?.enterprisePrice || "",
     enterpriseDiscountPrice: product?.enterpriseDiscountPrice || "",
     stock: product?.stock || 0,
-    color: product?.color || "",
-    thickness: product?.thickness || "",
+    color: Array.isArray(product?.color)
+      ? product.color
+      : product?.color
+        ? [product.color]
+        : [], thickness: product?.thickness || "",
     size: product?.size || "",
-    variantGroupId: product?.variantGroupId || "",
     tags: product?.tags?.join(", ") || "",
     isFeatured: product?.isFeatured || false,
     isPopular: product?.isPopular || false,
@@ -176,15 +57,9 @@ export default function ProductForm({
     showPerSqFtPrice: product?.showPerSqFtPrice || false,
     perSqFtPriceRetail: product?.perSqFtPriceRetail || "",
     perSqFtPriceEnterprise: product?.perSqFtPriceEnterprise || "",
-    material: Array.isArray(product?.material)
-      ? product.material.join(", ")
-      : product?.material || "",
-    pattern: Array.isArray(product?.pattern)
-      ? product.pattern.join(", ")
-      : product?.pattern || "",
-    finish: Array.isArray(product?.finish)
-      ? product.finish.join(", ")
-      : product?.finish || "",
+    material: Array.isArray(product?.material) ? product.material : [],
+    pattern: Array.isArray(product?.pattern) ? product.pattern : [],
+    finish: Array.isArray(product?.finish) ? product.finish : [],
     application: Array.isArray(product?.application)
       ? product.application.map((a) => a._id || a)
       : [],
@@ -211,27 +86,55 @@ export default function ProductForm({
     }
   };
 
+  const handleArrayToggle = (fieldName, option) => {
+    setFormData((prev) => {
+      const current = prev[fieldName] || [];
+      const updated = current.includes(option)
+        ? current.filter((item) => item !== option)
+        : [...current, option];
+      return { ...prev, [fieldName]: updated };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Price Validation Check
+    const retail = Number(formData.retailPrice);
+    const retailDisc = formData.retailDiscountPrice
+      ? Number(formData.retailDiscountPrice)
+      : null;
+    const enterprise = Number(formData.enterprisePrice);
+    const enterpriseDisc = formData.enterpriseDiscountPrice
+      ? Number(formData.enterpriseDiscountPrice)
+      : null;
+
+    if (retailDisc !== null && retailDisc > retail) {
+      setError("Retail Discount Price cannot be greater than Regular Retail Price.");
+      return;
+    }
+
+    if (enterpriseDisc !== null && enterpriseDisc > enterprise) {
+      setError("Enterprise Discount Price cannot be greater than Regular Enterprise Price.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const payload = {
         ...formData,
+        color: formData.color, 
         images: formData.images,
         tags: formData.tags
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
-        retailPrice: Number(formData.retailPrice),
-        retailDiscountPrice: formData.retailDiscountPrice
-          ? Number(formData.retailDiscountPrice)
-          : undefined,
-        enterprisePrice: Number(formData.enterprisePrice),
-        enterpriseDiscountPrice: formData.enterpriseDiscountPrice
-          ? Number(formData.enterpriseDiscountPrice)
-          : undefined,
+        retailPrice: retail,
+        retailDiscountPrice: retailDisc ?? undefined,
+        enterprisePrice: enterprise,
+        enterpriseDiscountPrice: enterpriseDisc ?? undefined,
         stock: Number(formData.stock),
         thickness: formData.thickness ? Number(formData.thickness) : undefined,
         colorVariant: formData.colorVariant || null,
@@ -244,25 +147,12 @@ export default function ProductForm({
         perSqFtPriceEnterprise: formData.perSqFtPriceEnterprise
           ? Number(formData.perSqFtPriceEnterprise)
           : undefined,
-        material: formData.material
-          .split(",")
-          .map((x) => x.trim())
-          .filter(Boolean),
-        pattern: formData.pattern
-          .split(",")
-          .map((x) => x.trim())
-          .filter(Boolean),
-        finish: formData.finish
-          .split(",")
-          .map((x) => x.trim())
-          .filter(Boolean),
+        material: formData.material,
+        pattern: formData.pattern,
+        finish: formData.finish,
         coverageArea: formData.coverageArea,
-        application: Array.isArray(formData.application)
-          ? formData.application
-          : [],
-        category: Array.isArray(formData.category)
-          ? formData.category
-          : [formData.category],
+        application: formData.application,
+        category: formData.category,
         subType: formData.subType || null,
       };
 
@@ -282,7 +172,6 @@ export default function ProductForm({
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Error Alert */}
         {error && (
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-700 font-medium text-sm">Error</p>
@@ -327,31 +216,26 @@ export default function ProductForm({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
+            <SelectField
               label="Brand"
               name="brand"
               value={formData.brand}
               onChange={handleChange}
-              placeholder="e.g., LuxeInteriors"
+              options={[
+                { value: "", label: "Select Brand" },
+                ...PRODUCT_ATTRIBUTES.BRANDS.map((b) => ({ value: b, label: b })),
+              ]}
             />
-            <TagInput
+            </div>
+
+            <div>
+            <ControlledMultiSelect
               label="Categories"
-              required
-              selectedIds={formData.category}
-              items={categories}
-              onAdd={(id) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  category: [...new Set([...prev.category, id])],
-                }))
-              }
-              onRemove={(id) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  category: prev.category.filter((cid) => cid !== id),
-                }))
-              }
-              addButtonLabel="Add Category"
+              options={categories}
+              valueKey="_id"
+              labelKey="name"
+              selectedValues={formData.category}
+              onToggle={(id) => handleArrayToggle("category", id)}
             />
           </div>
 
@@ -374,49 +258,64 @@ export default function ProductForm({
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
           <SectionHeader number="2" title="Specifications" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <InputField
-              label="Material"
-              name="material"
-              value={formData.material}
-              onChange={handleChange}
-              placeholder="HDF, PVC, Bamboo"
-            />
-            <InputField
-              label="Pattern"
-              name="pattern"
-              value={formData.pattern}
-              onChange={handleChange}
-              placeholder="Oak, Marble, Granite"
-            />
-            <InputField
-              label="Finish"
-              name="finish"
-              value={formData.finish}
-              onChange={handleChange}
-              placeholder="Matte, Glossy, Textured"
-            />
-            <InputField
-              label="Color"
-              name="color"
-              value={formData.color}
-              onChange={handleChange}
-              placeholder="Brown, Grey"
-            />
-            <InputField
+          <ColorSwatchSelector
+            label="Color"
+            selectedHexes={formData.color}
+            onToggle={(hex) => handleArrayToggle("color", hex)}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SelectField
               label="Thickness (mm)"
-              type="number"
               name="thickness"
               value={formData.thickness}
               onChange={handleChange}
-              placeholder="8"
+              options={[
+                { value: "", label: "Select Thickness" },
+                ...PRODUCT_ATTRIBUTES.THICKNESSES.map((t) => ({
+                  value: t,
+                  label: `${t} mm`,
+                })),
+              ]}
             />
-            <InputField
+            <SelectField
               label="Size"
               name="size"
               value={formData.size}
               onChange={handleChange}
-              placeholder="48 × 8 inch"
+              options={[
+                { value: "", label: "Select Size" },
+                ...PRODUCT_ATTRIBUTES.SIZES.map((s) => ({ value: s, label: s })),
+              ]}
+            />
+          </div>
+
+          <div className="space-y-4 pt-2">
+            <ControlledMultiSelect
+              label="Material"
+              options={PRODUCT_ATTRIBUTES.MATERIALS}
+              selectedValues={formData.material}
+              onToggle={(opt) => handleArrayToggle("material", opt)}
+            />
+            <ControlledMultiSelect
+              label="Pattern"
+              options={PRODUCT_ATTRIBUTES.PATTERNS}
+              selectedValues={formData.pattern}
+              onToggle={(opt) => handleArrayToggle("pattern", opt)}
+            />
+            <ControlledMultiSelect
+              label="Finish"
+              options={PRODUCT_ATTRIBUTES.FINISHES}
+              selectedValues={formData.finish}
+              onToggle={(opt) => handleArrayToggle("finish", opt)}
+            />
+            <ControlledMultiSelect
+              label="Applications"
+              options={applications}
+              valueKey="_id"
+              labelKey="name"
+              selectedValues={formData.application}
+              onToggle={(id) => handleArrayToggle("application", id)}
             />
           </div>
 
@@ -475,34 +374,12 @@ export default function ProductForm({
               ]}
             />
           </div>
-
-          <div className="pt-4 border-t border-gray-200">
-            <TagInput
-              label="Applications"
-              selectedIds={formData.application}
-              items={applications}
-              onAdd={(id) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  application: [...new Set([...prev.application, id])],
-                }))
-              }
-              onRemove={(id) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  application: prev.application.filter((aid) => aid !== id),
-                }))
-              }
-              addButtonLabel="Add Application"
-            />
-          </div>
         </div>
 
         {/* SECTION 3: PRICING & INVENTORY */}
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-4">
           <SectionHeader number="3" title="Pricing & Inventory" />
 
-          {/* Sell By & SqFt */}
           <div className="pb-4 border-b border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               <SelectField
@@ -555,95 +432,60 @@ export default function ProductForm({
             )}
           </div>
 
-          {/* Retail Pricing */}
           <div className="pb-4 border-b border-gray-200">
             <h3 className="text-sm font-semibold text-gray-800 mb-4">
               Retail Pricing
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Regular Price <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                  <input
-                    type="number"
-                    name="retailPrice"
-                    value={formData.retailPrice}
-                    onChange={handleChange}
-                    required
-                    step="0.01"
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Discount Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                  <input
-                    type="number"
-                    name="retailDiscountPrice"
-                    value={formData.retailDiscountPrice}
-                    onChange={handleChange}
-                    step="0.01"
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
+              <InputField
+                label="Regular Price"
+                required
+                type="number"
+                name="retailPrice"
+                value={formData.retailPrice}
+                onChange={handleChange}
+                step="0.01"
+                placeholder="0.00"
+              />
+              <InputField
+                label="Discount Price"
+                type="number"
+                name="retailDiscountPrice"
+                value={formData.retailDiscountPrice}
+                onChange={handleChange}
+                step="0.01"
+                placeholder="0.00"
+              />
             </div>
           </div>
 
-          {/* Enterprise Pricing */}
           <div className="pb-4 border-b border-gray-200">
             <h3 className="text-sm font-semibold text-gray-800 mb-4">
               Enterprise Pricing
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Regular Price <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                  <input
-                    type="number"
-                    name="enterprisePrice"
-                    value={formData.enterprisePrice}
-                    onChange={handleChange}
-                    required
-                    step="0.01"
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Discount Price
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                  <input
-                    type="number"
-                    name="enterpriseDiscountPrice"
-                    value={formData.enterpriseDiscountPrice}
-                    onChange={handleChange}
-                    step="0.01"
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 text-sm"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
+              <InputField
+                label="Regular Price"
+                required
+                type="number"
+                name="enterprisePrice"
+                value={formData.enterprisePrice}
+                onChange={handleChange}
+                step="0.01"
+                placeholder="0.00"
+              />
+              <InputField
+                label="Discount Price"
+                type="number"
+                name="enterpriseDiscountPrice"
+                value={formData.enterpriseDiscountPrice}
+                onChange={handleChange}
+                step="0.01"
+                placeholder="0.00"
+              />
             </div>
           </div>
 
-          {/* Stock */}
           <InputField
             label="Stock Quantity"
             required
@@ -672,23 +514,14 @@ export default function ProductForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InputField
-              label="Variant Group ID"
-              name="variantGroupId"
-              value={formData.variantGroupId}
-              onChange={handleChange}
-              placeholder="GROUP-12345"
-            />
-            <InputField
-              label="Tags"
-              name="tags"
-              value={formData.tags}
-              onChange={handleChange}
-              helperText="Comma-separated for searchability"
-              placeholder="premium, eco-friendly, modern"
-            />
-          </div>
+          <InputField
+            label="Tags"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            helperText="Comma-separated for searchability"
+            placeholder="premium, eco-friendly, modern"
+          />
 
           <label className="flex items-center gap-2">
             <input
@@ -721,7 +554,7 @@ export default function ProductForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-md font-semibold transition-colors disabled:opacity-50 text-sm"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-md font-semibold transition-colors disabled:opacity-50 text-sm cursor-pointer"
           >
             {isSubmitting
               ? "Saving..."
@@ -732,7 +565,7 @@ export default function ProductForm({
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition text-sm font-medium"
+            className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition text-sm font-medium cursor-pointer"
           >
             Cancel
           </button>

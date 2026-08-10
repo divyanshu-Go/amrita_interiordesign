@@ -5,7 +5,7 @@ import mongoose, { Schema } from "mongoose";
 const ProductSchema = new Schema(
   {
     name:  { type: String, required: true },
-    slug:  { type: String, unique: true, required: true }, // auto-indexed by unique:true
+    slug:  { type: String, unique: true, required: true },
     sku:   { type: String, unique: true },
 
     category: [{ type: Schema.Types.ObjectId, ref: "Category", required: true }],
@@ -20,28 +20,26 @@ const ProductSchema = new Schema(
     enterpriseDiscountPrice:  Number,
     stock:                    { type: Number, default: 0 },
 
-    color:     String,
+    color:     [String],
     thickness: Number,
     size:      String,
-
-    variantGroupId: { type: String, index: true }, // already indexed ✓
 
     colorVariant: {
       type: Schema.Types.ObjectId,
       ref: "ColorVariant",
       default: null,
-      index: true, // ← ADDED: getRelatedByCollection() queries this
+      index: true,
     },
     patternVariant: {
       type: Schema.Types.ObjectId,
       ref: "PatternVariant",
       default: null,
-      index: true, // ← ADDED: getRelatedByCollection() queries this
+      index: true,
     },
 
     tags:       [String],
     isFeatured: { type: Boolean, default: false },
-    isPopular:  { type: Boolean, default: false, index: true }, // ← ADDED: getPopularProducts()
+    isPopular:  { type: Boolean, default: false, index: true },
 
     sellBy: {
       type:    String,
@@ -71,17 +69,7 @@ const ProductSchema = new Schema(
   { timestamps: true }
 );
 
-// ── Compound index for category page queries ──────────────────────────────
-// getCategoryBySlug() does: Product.find({ category: id })
-// This is the most common query on the site — every category page triggers it.
-// A dedicated index makes it fast regardless of collection size.
 ProductSchema.index({ category: 1 });
-
-// ── Compound index for related products queries ───────────────────────────
-// getRelatedByCollection() queries colorVariant OR patternVariant.
-// Single-field indexes on each (added above inline) cover these.
-// This compound index additionally speeds up queries that filter by
-// both fields simultaneously if you add that in future.
 ProductSchema.index({ colorVariant: 1, patternVariant: 1 });
 
 export default mongoose.models.Product || mongoose.model("Product", ProductSchema);

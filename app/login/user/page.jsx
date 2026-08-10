@@ -1,5 +1,5 @@
 
-import { LoginForm } from "@/components/LoginForm";
+import { LoginForm } from "@/components/AuthPage/LoginForm";
 
 export default function UserLoginPage() {
   return <LoginForm defaultRole="user" />;

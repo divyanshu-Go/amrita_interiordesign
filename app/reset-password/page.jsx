@@ -4,7 +4,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AuthButton, FormInput } from "@/components/AuthUtils/AuthFunctions";
+import { AuthButton, FormInput } from "@/components/AuthPage/AuthField";
 
 export default function ResetPasswordPage() {
   const params = useSearchParams();

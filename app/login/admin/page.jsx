@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/LoginForm";
+import { LoginForm } from "@/components/AuthPage/LoginForm";
 
 export default function AdminLoginPage() {
   return <LoginForm defaultRole="admin" />;

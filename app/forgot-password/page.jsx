@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { AuthButton, FormInput } from "@/components/AuthUtils/AuthFunctions";
+import { AuthButton, FormInput } from "@/components/AuthPage/AuthField";
 import { isValidEmail } from "@/lib/validators/emailValidator";
 
 export default function ForgotPasswordPage() {

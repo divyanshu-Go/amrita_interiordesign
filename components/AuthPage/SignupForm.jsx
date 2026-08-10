@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AuthButton, FormInput } from "./AuthUtils/AuthFunctions";
+import { AuthButton, FormInput } from "./AuthField";
 import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
 import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
 import { toast } from "sonner";

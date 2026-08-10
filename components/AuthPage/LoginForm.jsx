@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AuthButton, FormInput } from "./AuthUtils/AuthFunctions";
+import { AuthButton, FormInput } from "./AuthField";
 import { useState } from "react";
 import Link from "next/link";
 import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
