@@ -26,11 +26,10 @@ const InputField = ({
     <input
       type={type}
       {...props}
-      className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none transition-colors ${
-        error
-          ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-          : "border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-      }`}
+      className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none transition-colors ${error
+        ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+        : "border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+        }`}
     />
     {error ? (
       <p className="text-xs text-red-600 mt-1">{error}</p>
@@ -47,11 +46,10 @@ const TextareaField = ({ label, helperText, error, ...props }) => (
     </label>
     <textarea
       {...props}
-      className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none transition-colors resize-none ${
-        error
-          ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-          : "border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
-      }`}
+      className={`w-full px-3 py-2 text-sm border rounded-md focus:outline-none transition-colors resize-none ${error
+        ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+        : "border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+        }`}
     />
     {helperText && <p className="text-xs text-gray-500 mt-1">{helperText}</p>}
   </div>
@@ -75,15 +73,16 @@ export default function CategoryForm({ category = null }) {
   const isEdit = !!category;
 
   const [formData, setFormData] = useState({
-    name:            category?.name            || "",
-    slug:            category?.slug            || "",
-    description:     category?.description     || "",
-    image:           category?.image           || "",
-    isTrending:      category?.isTrending      || false,
-    trendingTagline: category?.trendingTagline  || "",
+    name: category?.name || "",
+    slug: category?.slug || "",
+    description: category?.description || "",
+    image: category?.image || "",
+    startingPrice: category?.startingPrice || "",
+    isTrending: category?.isTrending || false,
+    trendingTagline: category?.trendingTagline || "",
     // SEO fields
-    seoIntro:        category?.seoIntro        || "",
-    buyingGuide:     category?.buyingGuide     || "",
+    seoIntro: category?.seoIntro || "",
+    buyingGuide: category?.buyingGuide || "",
   });
 
   // FAQs managed separately — array of { question, answer }
@@ -94,8 +93,8 @@ export default function CategoryForm({ category = null }) {
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors]             = useState({});
-  const [toast, setToast]               = useState(null);
+  const [errors, setErrors] = useState({});
+  const [toast, setToast] = useState(null);
 
   // ── Handlers ────────────────────────────────────────────────────────────
 
@@ -140,6 +139,9 @@ export default function CategoryForm({ category = null }) {
       newErrors.slug = "Slug can only contain lowercase letters, numbers, and hyphens";
     }
 
+    if (formData.startingPrice !== "" && Number(formData.startingPrice) < 0)
+      newErrors.startingPrice = "Starting price cannot be negative";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -155,6 +157,7 @@ export default function CategoryForm({ category = null }) {
     // Merge faqs into the payload — strip empty entries before saving
     const payload = {
       ...formData,
+      startingPrice: formData.startingPrice === "" ? 0 : Number(formData.startingPrice),
       faqs: faqs.filter((f) => f.question.trim() && f.answer.trim()),
     };
 
@@ -220,6 +223,18 @@ export default function CategoryForm({ category = null }) {
             rows={2}
             placeholder="2-3 lines shown under the category name on the page"
             helperText="Shown in the category header card"
+          />
+
+          <InputField
+            label="Starting Price"
+            type="number"
+            min="0"
+            name="startingPrice"
+            value={formData.startingPrice}
+            onChange={handleChange}
+            error={errors.startingPrice}
+            placeholder="e.g., 259"
+            helperText="Shown as 'Starting from ₹X' on the category card"
           />
 
           <div>

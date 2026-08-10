@@ -52,7 +52,7 @@ export default function Header({ config = {} }) {
   const categories = [
     { label: "Home", href: "/", icon: Home },
     { label: "PVC Panels", href: "/category/pvc-panels", icon: Grid },
-    { label: "WPC Panels", href: "/category/wpc-panels", icon: Layers },
+    { label: "WPC Panels", href: "/category/louvers", icon: Layers },
     { label: "Wallpapers", href: "/category/wallpapers", icon: FileText },
     { label: "Flooring", href: "/category/flooring", icon: Boxes },
     { label: "Louvers", href: "/category/louvers", icon: Menu },
@@ -96,9 +96,9 @@ export default function Header({ config = {} }) {
             <Image
               src={logoUrl || "/logo.png"}
               alt="Interio97"
-              width={36}
-              height={36}
-              className="w-9 h-9 object-contain"
+              width={40}
+              height={40}
+              className="object-contain"
               priority
             />
             <div className="flex flex-col justify-center leading-none">
@@ -159,25 +159,28 @@ export default function Header({ config = {} }) {
           </div>
 
           {/* Login + Cart */}
-          <div className="order-3 lg:order-none flex items-center gap-1.5 flex-shrink-0 ml-auto lg:ml-0">
+          {/* Login + Cart */}
+          <div className="order-3 lg:order-none flex items-center gap-2 flex-shrink-0 ml-auto lg:ml-0">
             <Link
               href={user ? "/account" : "/login"}
-              className="flex flex-col items-center justify-center gap-0.5 w-10 h-10 rounded-md text-neutral-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+              className="inline-flex items-center justify-center p-2.5 rounded-md bg-primary-50 border border-primary-300/50 text-primary-600 hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-colors"
               title={user ? "My Account" : "Login"}
             >
-              <User2 className="w-[18px] h-[18px]" strokeWidth={2.5} />
-
+              <User2 className="w-[16px] h-[16px]" strokeWidth={2.5} />
             </Link>
             <Link
               href="/cart"
-              className="flex flex-col items-center justify-center gap-0.5 w-10 h-10 rounded-md text-neutral-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+              className="inline-flex items-center justify-center p-2.5 rounded-md bg-primary-50 border border-primary-300/50 text-primary-600 hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition-colors"
               title="Cart"
             >
-              <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={2.5} />
+              <ShoppingCart className="w-[16px] h-[16px]" strokeWidth={2.5} />
             </Link>
           </div>
         </div>
       </div>
+
+
+
 
       {/* ── Layer 3: Category Links Navigation ── */}
       <div className="border-t border-neutral-100 bg-white">
@@ -194,11 +197,10 @@ export default function Header({ config = {} }) {
                 <Link
                   key={cat.label}
                   href={cat.href}
-                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 lg:px-4 px-3 py-2 text-[10px] lg:text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${
-                    isActive
+                  className={`flex-shrink-0 flex items-center justify-center gap-1.5 lg:px-4 px-3 py-2 text-[10px] lg:text-xs font-semibold whitespace-nowrap border-b-2 transition-colors ${isActive
                       ? "border-primary-500 text-primary-600"
                       : "border-transparent text-neutral-700 hover:text-primary-600 hover:border-primary-100"
-                  }`}
+                    }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{cat.label}</span>

@@ -25,7 +25,8 @@ const slides = [
       "Marble, PVC, WPC & louvers — every premium interior material under one roof.",
     primaryCta: { label: "Explore Products", href: "/category/interior-design" },
     secondaryCta: { label: "View Collections", href: "/collections" },
-    image: "/hero/interior-design.jpg",
+    desktopImage: "/hero/interior-design.jpg",
+    mobileImage: "/hero/interior-design-mobile.jpg",
   },
   {
     badge: "WATERPROOF & LOW MAINTENANCE",
@@ -35,7 +36,8 @@ const slides = [
       "Sleek, waterproof wall panels built for modern homes — zero upkeep, maximum style.",
     primaryCta: { label: "Shop PVC Panels", href: "/category/pvc-panels" },
     secondaryCta: { label: "See Designs", href: "/category/pvc-panels#designs" },
-    image: "/hero/pvc-panels.jpg",
+    desktopImage: "/hero/pvc-panels.jpg",
+    mobileImage: "/hero/pvc-panels-mobile.jpg",
   },
   {
     badge: "DURABLE WOOD-LIKE FINISH",
@@ -45,7 +47,8 @@ const slides = [
       "The warmth of wood with the strength of composite — built to last, styled to impress.",
     primaryCta: { label: "Shop WPC Panels", href: "/category/wpc-panels" },
     secondaryCta: { label: "View Collections", href: "/collections" },
-    image: "/hero/wpc-panels.jpg",
+    desktopImage: "/hero/wpc-panels.jpg",
+    mobileImage: "/hero/wpc-panels-mobile.jpg",
   },
   {
     badge: "PREMIUM WALL DÉCOR",
@@ -55,7 +58,8 @@ const slides = [
       "Sleek, contemporary louvers that add depth and character to any space.",
     primaryCta: { label: "Shop Louvers", href: "/category/louvers" },
     secondaryCta: { label: "Explore Designs", href: "/category/louvers#designs" },
-    image: "/hero/louvers.jpg",
+    desktopImage: "/hero/louvers.jpg",
+    mobileImage: "/hero/louvers-mobile.jpg",
   },
 ];
 
@@ -99,72 +103,88 @@ export default function HeroSection() {
   const slide = slides[active];
 
   return (
-    <section className="relative w-full h-[620px] sm:h-[650px] lg:h-[720px] overflow-hidden bg-neutral-900 font-sans">
+    <section className="relative w-full aspect-[4/3] md:aspect-[16/9] min-h-[460px] md:min-h-0 overflow-hidden bg-neutral-900 font-sans">
       {/* Background Images */}
       {slides.map((s, index) => (
         <div
           key={s.heading}
-          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-            index === active ? "opacity-100 z-0" : "opacity-0 -z-10"
-          }`}
+          className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${index === active ? "opacity-100 z-0" : "opacity-0 -z-10"
+            }`}
         >
-          <Image
-            src={s.image}
-            alt={s.heading}
-            fill
-            priority={index === 0}
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/95 via-neutral-900/80 to-neutral-900/60 md:bg-gradient-to-r md:from-neutral-900/95 md:via-neutral-900/75 md:to-transparent" />
+          {/* Mobile Image (4:3) - Stuck to Top */}
+          <div className="block md:hidden absolute top-0 left-0 w-full h-full">
+            <Image
+              src={s.mobileImage}
+              alt={s.heading}
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              className="object-cover object-top" /* Stuck to the top edge */
+            />
+          </div>
+
+          {/* Desktop Image (16:9) - Stuck to Top */}
+          <div className="hidden md:block absolute top-0 left-0 w-full h-full">
+            <Image
+              src={s.desktopImage}
+              alt={s.heading}
+              fill
+              priority={index === 0}
+              sizes="100vw"
+              className="object-cover object-top" /* Stuck to the top edge */
+            />
+          </div>
+
+          {/* Gradient Overlay for Readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/90 via-neutral-900/75 to-neutral-900/95 md:bg-gradient-to-r md:from-neutral-900/95 md:via-neutral-900/75 md:to-transparent" />
         </div>
       ))}
 
       {/* Main Content Overlay */}
-      <div className="relative z-10 h-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center pb-24 sm:pb-28">
+      <div className="relative z-10 h-full max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-16 flex flex-col justify-center pt-2 pb-16 sm:pb-28">
         <div className="max-w-xl">
           {/* Badge */}
-          <span className="inline-block border border-primary-500/60 bg-primary-500/10 backdrop-blur-sm text-primary-300 text-[10px] sm:text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full mb-3 sm:mb-4">
+          <span className="inline-block border border-primary-500/60 bg-primary-500/10 backdrop-blur-sm text-primary-300 text-[9px] sm:text-xs font-semibold tracking-wider uppercase px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full mb-1.5 sm:mb-4">
             {slide.badge}
           </span>
 
           {/* Heading */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-2 sm:mb-3">
+          <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white mb-1 sm:mb-3">
             {slide.heading}{" "}
             <span className="text-primary-500">{slide.highlight}</span>
           </h1>
-          <div className="w-12 h-1 bg-primary-500 rounded-full mb-4" />
+          <div className="w-8 sm:w-12 h-0.5 sm:h-1 bg-primary-500 rounded-full mb-2 sm:mb-4" />
 
           {/* Description */}
-          <p className="text-xs sm:text-sm md:text-base text-neutral-200 mb-6 max-w-md leading-relaxed">
+          <p className="text-[11px] sm:text-sm md:text-base text-neutral-200 mb-3 sm:mb-6 max-w-md leading-snug sm:leading-relaxed">
             {slide.description}
           </p>
 
           {/* Features */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-6">
             {featureItems.map(({ icon: Icon, title, subtitle }) => (
               <div key={title} className="flex flex-col gap-0.5">
-                <Icon className="w-4 h-4 text-primary-500" strokeWidth={2.2} />
-                <span className="text-[11px] font-bold text-white uppercase tracking-wide mt-1">
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-500" strokeWidth={2.2} />
+                <span className="text-[9px] sm:text-[11px] font-bold text-white uppercase tracking-wide mt-0.5">
                   {title}
                 </span>
-                <span className="text-[10px] text-neutral-300">{subtitle}</span>
+                <span className="text-[8px] sm:text-[10px] text-neutral-300">{subtitle}</span>
               </div>
             ))}
           </div>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          {/* Left-Aligned Buttons */}
+          <div className="flex flex-row items-center justify-start gap-2 sm:gap-3">
             <Link
               href={slide.primaryCta.href}
-              className="inline-flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white text-xs sm:text-sm font-semibold px-6 py-3 rounded-md transition-colors w-full sm:w-auto shadow-md"
+              className="inline-flex items-center justify-center gap-1.5 bg-primary-500 hover:bg-primary-600 text-white text-[11px] sm:text-sm font-semibold px-3.5 py-2 sm:px-6 sm:py-3 rounded-md transition-colors shadow-md flex-shrink-0"
             >
               {slide.primaryCta.label}
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Link>
             <Link
               href={slide.secondaryCta.href}
-              className="inline-flex items-center justify-center bg-black/20 backdrop-blur-sm border border-white/30 hover:border-white text-white text-xs sm:text-sm font-semibold px-6 py-3 rounded-md transition-colors w-full sm:w-auto"
+              className="inline-flex items-center justify-center bg-black/20 backdrop-blur-sm border border-white/30 hover:border-white text-white text-[11px] sm:text-sm font-semibold px-3.5 py-2 sm:px-6 sm:py-3 rounded-md transition-colors flex-shrink-0"
             >
               {slide.secondaryCta.label}
             </Link>
@@ -189,7 +209,7 @@ export default function HeroSection() {
       </button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5">
+      <div className="absolute bottom-[44px] sm:bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1">
         {slides.map((s, index) => (
           <button
             key={s.heading}
@@ -198,23 +218,26 @@ export default function HeroSection() {
             className="p-1"
           >
             <span
-              className={`block h-1.5 rounded-full transition-all ${
-                index === active ? "w-6 bg-primary-500" : "w-2 bg-white/40 hover:bg-white/70"
-              }`}
+              className={`block h-1 rounded-full transition-all ${index === active ? "w-5 sm:w-6 bg-primary-500" : "w-1.5 sm:w-2 bg-white/40 hover:bg-white/70"
+                }`}
             />
           </button>
         ))}
       </div>
 
       {/* Bottom Stats Bar */}
-      <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-6 sm:right-6 z-20">
-        <div className="bg-neutral-900/80 backdrop-blur-md border border-neutral-800 rounded-lg px-4 py-2.5 sm:py-3 flex items-center justify-between gap-4 overflow-x-auto no-scrollbar">
-          {statItems.map(({ icon: Icon, title, subtitle }) => (
-            <div key={title} className="flex-shrink-0 flex items-center gap-2.5">
-              <Icon className="w-4 h-4 text-primary-500 flex-shrink-0" strokeWidth={2} />
+      <div className="absolute bottom-2 left-2 right-2 sm:bottom-4 sm:left-6 sm:right-6 z-20">
+        <div className="bg-neutral-900/80 backdrop-blur-md border border-neutral-800 rounded-lg px-3 py-1.5 sm:px-4 sm:py-3 flex items-center justify-between gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
+          {statItems.map(({ icon: Icon, title, subtitle }, index) => (
+            <div
+              key={title}
+              className={`flex-shrink-0 items-center gap-2 ${index >= 3 ? "hidden sm:flex" : "flex"
+                }`}
+            >
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-500 flex-shrink-0" strokeWidth={2} />
               <div className="flex flex-col leading-none">
-                <span className="text-xs font-bold text-white">{title}</span>
-                <span className="text-[10px] text-neutral-400 mt-0.5">{subtitle}</span>
+                <span className="text-[10px] sm:text-xs font-bold text-white">{title}</span>
+                <span className="text-[8px] sm:text-[10px] text-neutral-400 mt-0.5">{subtitle}</span>
               </div>
             </div>
           ))}

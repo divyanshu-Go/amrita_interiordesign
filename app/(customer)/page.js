@@ -1,7 +1,7 @@
 // app/(customer)/page.js
 export const revalidate = 1800;
 
-import PopularCategoriesSection from "@/components/HomePage/PopularCategoriesSection";
+import PopularCategoriesSection from "@/components/HomePage/ShopByCategorySection";
 import HeroSection from "@/components/HomePage/HeroSection";
 import WhyChooseUsSection from "@/components/HomePage/WhyChooseUsSection";
 
