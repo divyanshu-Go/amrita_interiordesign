@@ -1,3 +1,4 @@
+// models/category.js
 import mongoose, { Schema } from "mongoose";
 
 const FaqSchema = new Schema(
@@ -14,6 +15,7 @@ const CategorySchema = new Schema(
     slug: { type: String, unique: true, required: true, trim: true, index: true },
     description: { type: String, default: "" },
     image: { type: String, default: "" },
+    startingPrice: { type: Number, default: 0 },
     isTrending: { type: Boolean, default: false },
     trendingTagline: { type: String, default: "" },
 
