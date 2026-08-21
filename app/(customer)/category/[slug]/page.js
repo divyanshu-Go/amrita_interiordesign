@@ -1,10 +1,8 @@
 // app/(customer)/category/[slug]/page.jsx
 
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import {
-  getCategoryPageData,
-} from "@/lib/serversideFetchers/categoryPage";
+import { getCategoryPageData } from "@/lib/serversideFetchers/categoryPage";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 import Breadcrumb from "@/components/customer/Breadcrumb";
 import NewFilterSidebar from "@/components/CategoryPage/NewFilterSidebar";
 import NewProductGrid from "@/components/CategoryPage/NewProductGrid";
@@ -13,17 +11,15 @@ import Section from "@/components/ui/Section";
 
 export const revalidate = 1800;
 
-// TODO (SEO): generateStaticParams, generateMetadata, and JSON-LD
-
-
-
 function SeoIntro({ text }) {
   if (!text?.trim()) return null;
   const paragraphs = text.split(/\n\n+/).filter(Boolean);
   return (
     <div className="prose prose-sm max-w-none text-gray-600 mb-6">
       {paragraphs.map((para, i) => (
-        <p key={i} className="mb-3 leading-relaxed">{para.trim()}</p>
+        <p key={i} className="mb-3 leading-relaxed">
+          {para.trim()}
+        </p>
       ))}
     </div>
   );
@@ -42,20 +38,31 @@ function SeoFooter({ category }) {
             Buying Guide: {category.name}
           </h2>
           <div className="prose prose-sm max-w-none text-gray-600">
-            {category.buyingGuide.split(/\n\n+/).filter(Boolean).map((para, i) => (
-              <p key={i} className="mb-3 leading-relaxed">{para.trim()}</p>
-            ))}
+            {category.buyingGuide
+              .split(/\n\n+/)
+              .filter(Boolean)
+              .map((para, i) => (
+                <p key={i} className="mb-3 leading-relaxed">
+                  {para.trim()}
+                </p>
+              ))}
           </div>
         </section>
       )}
       {hasFaqs && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Frequently Asked Questions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-4">
             {category.faqs.map((faq, i) => (
               <div key={i} className="border border-gray-100 rounded-md p-4">
-                <h3 className="text-sm font-semibold text-gray-900 mb-1">{faq.question}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{faq.answer}</p>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                  {faq.question}
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {faq.answer}
+                </p>
               </div>
             ))}
           </div>
@@ -71,21 +78,26 @@ export default async function CategoryPage({ params, searchParams }) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
 
-  const headersList = await headers();
-  const userRole = headersList.get("x-user-role") || "user";
-  const enterpriseStatus = headersList.get("x-user-enterprise-status") || "unverified";
+  // 🔹 Get structured user object
+  const user = await getCurrentUser();
+  const userRole = user?.role || "user";
 
-  const data = await getCategoryPageData({ slug, searchParams: resolvedSearchParams, userRole });
+  const data = await getCategoryPageData({
+    slug,
+    searchParams: resolvedSearchParams,
+    userRole,
+  });
   if (!data) notFound();
 
   const { category, filterOptions, products, pagination } = data;
 
   const priceRange =
-    userRole === "enterprise" ? filterOptions.enterprisePriceRange : filterOptions.retailPriceRange;
+    userRole === "enterprise"
+      ? filterOptions.enterprisePriceRange
+      : filterOptions.retailPriceRange;
 
   return (
     <>
-
       <Breadcrumb items={[{ label: category.name }]} />
 
       <Section className="py-6 lg:py-8">
@@ -107,9 +119,13 @@ export default async function CategoryPage({ params, searchParams }) {
                   />
                 )}
                 <div className="flex-1">
-                  <h1 className="text-lg font-semibold text-gray-900">{category.name}</h1>
+                  <h1 className="text-lg font-semibold text-gray-900">
+                    {category.name}
+                  </h1>
                   {category.description && (
-                    <p className="text-xs text-gray-600 line-clamp-1">{category.description}</p>
+                    <p className="text-xs text-gray-600 line-clamp-1">
+                      {category.description}
+                    </p>
                   )}
                   <div className="mt-1 flex items-center gap-2 text-xs">
                     <span className="px-2 py-0.5 rounded-xs bg-gray-100 text-gray-600">
@@ -125,15 +141,26 @@ export default async function CategoryPage({ params, searchParams }) {
                 Showing{" "}
                 <span className="font-semibold text-gray-900">
                   {(pagination.page - 1) * pagination.limit + 1}–
-                  {Math.min(pagination.page * pagination.limit, pagination.totalCount)}
+                  {Math.min(
+                    pagination.page * pagination.limit,
+                    pagination.totalCount
+                  )}
                 </span>{" "}
-                of <span className="font-semibold text-gray-700">{pagination.totalCount}</span> products
+                of{" "}
+                <span className="font-semibold text-gray-700">
+                  {pagination.totalCount}
+                </span>{" "}
+                products
               </p>
             </div>
 
-            <NewProductGrid products={products} userRole={userRole} enterpriseStatus={enterpriseStatus} />
+            {/* 🔹 Forward structured user down to grid */}
+            <NewProductGrid products={products} user={user} />
 
-            <NewPaginationLinks pagination={pagination} searchParams={resolvedSearchParams} />
+            <NewPaginationLinks
+              pagination={pagination}
+              searchParams={resolvedSearchParams}
+            />
           </main>
         </div>
 

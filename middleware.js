@@ -80,21 +80,20 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/account", request.url));
   }
 
-  // 4. Forward decoded user to server components via request headers.
+  // 4. Forward structured user to server components via single URI-encoded JSON header
   const requestHeaders = new Headers(request.headers);
   if (user) {
-    requestHeaders.set("x-user-id", user._id ?? user.id ?? "");
-    requestHeaders.set("x-user-role", user.role ?? "user");
-    requestHeaders.set("x-user-name", user.name ?? "");
-    requestHeaders.set(
-      "x-user-enterprise-status",
-      user.enterpriseStatus ?? "unverified"
-    );
+    const userPayload = {
+      id: user.id || user._id || "",
+      name: user.name || "",
+      email: user.email || "",
+      role: user.role || "user",
+      enterpriseStatus: user.enterpriseStatus || "unverified",
+    };
+
+    requestHeaders.set("x-user", encodeURIComponent(JSON.stringify(userPayload)));
   } else {
-    requestHeaders.delete("x-user-id");
-    requestHeaders.delete("x-user-role");
-    requestHeaders.delete("x-user-name");
-    requestHeaders.delete("x-user-enterprise-status");
+    requestHeaders.delete("x-user");
   }
 
   const response = NextResponse.next({

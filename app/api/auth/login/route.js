@@ -5,11 +5,13 @@ import { verifyPassword } from "@/lib/auth/password";
 import { generateToken } from "@/lib/auth/token";
 import DbConnect from "@/lib/Db/DbConnect";
 import User from "@/models/user";
+import Cart from "@/models/cart";
+import Product from "@/models/product";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
   try {
-    const { email, password, role } = await req.json();
+    const { email, password, role, guestItems } = await req.json();
     await DbConnect();
 
     const user = await User.findOne({ email });
@@ -63,6 +65,38 @@ export async function POST(req) {
           },
           { status: 403 }
         );
+      }
+    }
+
+    // 🔹 Merge Guest Cart into DB Cart if guestItems exist
+    if (Array.isArray(guestItems) && guestItems.length > 0) {
+      try {
+        const productIds = guestItems.map((i) => i.productId);
+        const products = await Product.find({ _id: { $in: productIds } });
+        const productMap = new Map(products.map((p) => [p._id.toString(), p]));
+
+        const validItems = guestItems
+          .map((gItem) => {
+            const product = productMap.get(gItem.productId);
+            if (!product || product.stock < 1) return null;
+            return {
+              productId: product._id,
+              quantity: Math.min(gItem.quantity, product.stock),
+              sellBy: product.sellBy,
+            };
+          })
+          .filter(Boolean);
+
+        if (validItems.length > 0) {
+          await Cart.findOneAndUpdate(
+            { userId: user._id },
+            { $set: { items: validItems } },
+            { upsert: true, new: true }
+          );
+        }
+      } catch (cartErr) {
+        console.error("Guest cart merge error during login:", cartErr);
+        // Non-blocking: continue login even if merge fails
       }
     }
 

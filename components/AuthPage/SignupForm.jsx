@@ -1,4 +1,5 @@
 // components/SignupForm.jsx
+
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthButton, FormInput } from "./AuthField";
 import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
-import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
 import { toast } from "sonner";
 import { useAuth } from "@/app/providers/AuthProvider";
 
@@ -16,6 +16,7 @@ const ROLE_LINKS = [
 ];
 
 export const SignupForm = ({ defaultRole = "user" }) => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,7 +31,6 @@ export const SignupForm = ({ defaultRole = "user" }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useAuth();
-
   const isEnterprise = defaultRole === "enterprise";
 
   const validateForm = () => {
@@ -74,6 +74,11 @@ export const SignupForm = ({ defaultRole = "user" }) => {
 
     setIsLoading(true);
     try {
+      // 1. Extract guest cart items
+      const guestCart = getGuestCart();
+      const guestItems = !isEnterprise ? guestCart?.items || [] : [];
+
+      // 2. Pass guestItems in request body
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,6 +87,7 @@ export const SignupForm = ({ defaultRole = "user" }) => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          guestItems,
           ...(isEnterprise && {
             businessName: formData.businessName,
             gstNumber: formData.gstNumber,
@@ -93,31 +99,17 @@ export const SignupForm = ({ defaultRole = "user" }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Signup failed");
 
-      // ── Cart merge: runs after signup succeeds, before redirect ──────────
-      // For enterprise signups, account is pending approval — no auth_token
-      // cookie is set yet, so skip the merge (nothing to attach it to / would
-      // just throw "Not authenticated"). Regular user signups DO get logged
-      // in immediately, so merge applies there.
-      if (!isEnterprise) {
-        const guestCart = getGuestCart();
-        if (guestCart.items.length > 0) {
-          try {
-            await mergeGuestCart(guestCart.items);
-            clearGuestCart();
-          } catch (mergeErr) {
-            console.warn("Cart merge failed:", mergeErr);
-          }
-        }
+      // 3. Clear guest cart if items were merged
+      if (guestItems.length > 0) {
+        clearGuestCart();
       }
-      // ───────────────────────────────────────────────────────────────────
 
-      // 1. Regular user signups get logged in immediately.
-      // Skip login() for enterprise signups since they are pending admin approval.
+      // 4. Update Auth Context for regular users
       if (!isEnterprise && data.user) {
         login(data.user);
       }
 
-      // 2. Enterprise redirect using router.push()
+      // 5. Handle redirects
       if (isEnterprise) {
         toast.success("Account created. Awaiting admin approval.");
         router.push(
@@ -128,10 +120,8 @@ export const SignupForm = ({ defaultRole = "user" }) => {
         return;
       }
 
-      // 3. Regular user redirect
       toast.success("Account created successfully");
       router.push("/");
-
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -157,11 +147,10 @@ export const SignupForm = ({ defaultRole = "user" }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className={`flex gap-6 ${isEnterprise ? "flex-row" : "flex-col"}`}>
-
           {/* Common fields */}
           <div className="w-full space-y-3">
-            <FormInput label="Name" type="text"     {...field("name")} />
-            <FormInput label="Email" type="email"    {...field("email")} />
+            <FormInput label="Name" type="text" {...field("name")} />
+            <FormInput label="Email" type="email" {...field("email")} />
             <FormInput label="Password" type="password" {...field("password")} />
             <FormInput label="Confirm Password" type="password" {...field("confirmPassword")} />
             <p className="text-xs text-gray-500">Password must be at least 8 characters.</p>
@@ -190,7 +179,6 @@ export const SignupForm = ({ defaultRole = "user" }) => {
           <Link href="/login" className="text-orange-600 hover:underline">Log in</Link>
         </p>
 
-        {/* Other role links */}
         <div className="flex justify-center items-center gap-3 pt-3 border-t border-gray-100">
           <span className="text-xs text-gray-400">Sign up as:</span>
           {otherRoles.map(({ role, label, href }) => (

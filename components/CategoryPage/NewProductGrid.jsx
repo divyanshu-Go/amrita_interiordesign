@@ -1,14 +1,8 @@
-// components/customer/NewProductGrid.jsx
-//
-// ── WHY THIS IS A SERVER COMPONENT ──────────────────────────────────────
-// This only maps an array it already received to a grid of cards. No
-// fetching, no loading state, no error state — those belong to the page
-// (the page either has products or it doesn't, by the time this renders).
-// ─────────────────────────────────────────────────────────────────────────
+// components/CategoryPage/NewProductGrid.jsx
 
 import NewProductCard from "./NewProductCard";
 
-export default function NewProductGrid({ products, userRole, enterpriseStatus }) {
+export default function NewProductGrid({ products, user = null }) {
   if (!products || products.length === 0) {
     return (
       <div className="bg-white rounded-md border-2 border-dashed border-gray-300 p-16 text-center">
@@ -27,8 +21,7 @@ export default function NewProductGrid({ products, userRole, enterpriseStatus })
         <NewProductCard
           key={product._id || product.slug}
           product={product}
-          userRole={userRole}
-          enterpriseStatus={enterpriseStatus}
+          user={user}
         />
       ))}
     </div>

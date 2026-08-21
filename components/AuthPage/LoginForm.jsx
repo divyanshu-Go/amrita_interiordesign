@@ -1,4 +1,5 @@
 // components/LoginForm.jsx
+
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -6,9 +7,7 @@ import { AuthButton, FormInput } from "./AuthField";
 import { useState } from "react";
 import Link from "next/link";
 import { getGuestCart, clearGuestCart } from "@/lib/guestCart";
-import { mergeGuestCart } from "@/lib/actions/mergeGuestCart";
-import { useAuth } from "@/app/providers/AuthProvider"; // ADD THIS
-
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const ROLE_LINKS = [
   { role: "user", label: "User", href: "/login/user" },
@@ -40,10 +39,18 @@ export const LoginForm = ({ defaultRole = "user" }) => {
 
     setIsLoading(true);
     try {
+      // 1. Get current guest items
+      const guestCart = getGuestCart();
+      const guestItems = guestCart?.items || [];
+
+      // 2. Pass guestItems inside login payload
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          guestItems,
+        }),
       });
 
       const data = await response.json();
@@ -58,23 +65,16 @@ export const LoginForm = ({ defaultRole = "user" }) => {
         return;
       }
 
-      // ── Cart merge ──
-      const guestCart = getGuestCart();
-      if (guestCart.items?.length > 0) {
-        try {
-          await mergeGuestCart(guestCart.items);
-          clearGuestCart();
-        } catch (mergeErr) {
-          console.warn("Cart merge failed:", mergeErr);
-        }
+      // 3. Login successful → Clear local guest storage
+      if (guestItems.length > 0) {
+        clearGuestCart();
       }
 
       setMessage("Login successful! Redirecting...");
 
-      // 1. Update global AuthContext state (this calls router.refresh() inside AuthProvider)
+      // 4. Update AuthContext & navigate
       login(data.user);
 
-      // 2. Perform clean client-side navigation based on exact role
       if (data.user.role === "admin") {
         router.push("/admin");
       } else if (data.user.role === "enterprise") {
@@ -82,9 +82,6 @@ export const LoginForm = ({ defaultRole = "user" }) => {
       } else {
         router.push("/cart");
       }
-
-      // REMOVED: router.refresh() at the end was race-conditioning router.push()
-
     } catch (error) {
       setErrors({ submit: error.message || "Something went wrong" });
     } finally {
@@ -126,10 +123,11 @@ export const LoginForm = ({ defaultRole = "user" }) => {
           </div>
         )}
         {message && (
-          <div className={`text-sm px-3 py-2 rounded ${message.includes("pending") ? "bg-yellow-100 text-yellow-700" :
+          <div className={`text-sm px-3 py-2 rounded ${
+            message.includes("pending") ? "bg-yellow-100 text-yellow-700" :
             message.includes("rejected") ? "bg-red-100 text-red-700" :
-              "bg-green-100 text-green-700"
-            }`}>
+            "bg-green-100 text-green-700"
+          }`}>
             {message}
           </div>
         )}
@@ -141,7 +139,6 @@ export const LoginForm = ({ defaultRole = "user" }) => {
           <Link href="/signup" className="text-orange-600 hover:underline">Sign up</Link>
         </p>
 
-        {/* Other role links */}
         <div className="flex justify-center items-center gap-3 pt-3 border-t border-gray-100">
           <span className="text-xs text-gray-400">Login as:</span>
           {otherRoles.map(({ role, label, href }) => (
